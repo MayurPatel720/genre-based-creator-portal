@@ -67,63 +67,24 @@ const Dashboard: React.FC<DashboardProps> = ({ activeGenre, onCreatorClick }) =>
           </div>
           
           {/* Search, Filter, and Sort Controls */}
-          <div className="space-y-3 lg:space-y-0">
-            {/* Mobile Layout */}
-            <div className="lg:hidden space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search creators..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <Select value={filterBy} onValueChange={setFilterBy}>
-                  <SelectTrigger>
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Filter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Tags</SelectItem>
-                    {allTags.map(tag => (
-                      <SelectItem key={tag} value={tag.toLowerCase()}>{tag}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger>
-                    <ArrowUpDown className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Sort" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name">Name</SelectItem>
-                    <SelectItem value="followers">Followers</SelectItem>
-                    <SelectItem value="views">Views</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="space-y-3">
+            {/* Search - Full width on mobile */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search creators..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full"
+              />
             </div>
-
-            {/* Desktop Layout - Old Theme */}
-            <div className="hidden lg:flex lg:items-center lg:space-x-4">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search creators..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
+            
+            {/* Filter and Sort - Side by side */}
+            <div className="grid grid-cols-2 gap-3">
               <Select value={filterBy} onValueChange={setFilterBy}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger>
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by tag" />
+                  <SelectValue placeholder="Filter" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Tags</SelectItem>
@@ -134,9 +95,9 @@ const Dashboard: React.FC<DashboardProps> = ({ activeGenre, onCreatorClick }) =>
               </Select>
               
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger>
                   <ArrowUpDown className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="name">Name</SelectItem>
@@ -151,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeGenre, onCreatorClick }) =>
       
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 lg:p-6">
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
           {filteredCreators.map((creator) => (
             <CreatorCard
               key={creator.id}
