@@ -55,9 +55,10 @@ const Dashboard: React.FC<DashboardProps> = ({ activeGenre, onCreatorClick }) =>
   const allTags = Array.from(new Set(mockCreators.flatMap(creator => creator.details.tags)));
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+      {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 p-4 lg:p-6">
-        <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col space-y-4">
           <div>
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900">{activeGenre}</h2>
             <p className="text-gray-600 mt-1">
@@ -65,50 +66,53 @@ const Dashboard: React.FC<DashboardProps> = ({ activeGenre, onCreatorClick }) =>
             </p>
           </div>
           
-          <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-            {/* Search */}
+          {/* Search, Filter, and Sort Controls */}
+          <div className="space-y-3">
+            {/* Search - Full width on mobile */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search creators..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full sm:w-64"
+                className="pl-10 w-full"
               />
             </div>
             
-            {/* Filter */}
-            <Select value={filterBy} onValueChange={setFilterBy}>
-              <SelectTrigger className="w-full sm:w-40">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by tag" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tags</SelectItem>
-                {allTags.map(tag => (
-                  <SelectItem key={tag} value={tag.toLowerCase()}>{tag}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {/* Sort */}
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-40">
-                <ArrowUpDown className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="followers">Followers</SelectItem>
-                <SelectItem value="views">Views</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Filter and Sort - Side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              <Select value={filterBy} onValueChange={setFilterBy}>
+                <SelectTrigger>
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tags</SelectItem>
+                  {allTags.map(tag => (
+                    <SelectItem key={tag} value={tag.toLowerCase()}>{tag}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="followers">Followers</SelectItem>
+                  <SelectItem value="views">Views</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </header>
       
-      <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
           {filteredCreators.map((creator) => (
             <CreatorCard
               key={creator.id}
