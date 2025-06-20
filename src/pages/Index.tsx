@@ -1,12 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import Sidebar from '../components/Sidebar';
+import Dashboard from '../components/Dashboard';
+import CreatorModal from '../components/CreatorModal';
+import { Creator } from '../types/Creator';
 
 const Index = () => {
+  const [activeGenre, setActiveGenre] = useState('AI Creators');
+  const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="flex h-screen">
+        <Sidebar 
+          activeGenre={activeGenre} 
+          onGenreChange={setActiveGenre} 
+        />
+        <Dashboard 
+          activeGenre={activeGenre} 
+          onCreatorClick={setSelectedCreator}
+        />
       </div>
+      
+      {selectedCreator && (
+        <CreatorModal 
+          creator={selectedCreator} 
+          onClose={() => setSelectedCreator(null)} 
+        />
+      )}
     </div>
   );
 };
