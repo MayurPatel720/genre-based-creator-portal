@@ -1,6 +1,6 @@
 import React from "react";
 import { Creator } from "../types/Creator";
-import { Eye, Heart, Star } from "lucide-react";
+import { Instagram } from "lucide-react";
 
 interface CreatorCardProps {
 	creator: Creator;
@@ -9,28 +9,40 @@ interface CreatorCardProps {
 
 const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 	return (
-		<div
+		<button
 			onClick={onClick}
-			className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden border border-gray-100 hover:border-purple-200"
+			className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-full text-left border border-gray-100 hover:border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300"
+			aria-label={`View profile of ${creator.name}`}
 		>
-			<div className="relative">
-				<div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 overflow-hidden rounded-t-2xl">
-					<img
-						src={creator.avatar}
-						alt={creator.name}
-						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-					/>
-				</div>
+			<div className="relative aspect-square overflow-hidden rounded-t-xl bg-gray-100">
+				<img
+					src={creator.avatar || "/fallback-avatar.png"} // Fallback image
+					alt={`${creator.name}'s avatar`}
+					className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+				/>
 			</div>
 
 			<div className="p-4">
-				<div className="flex items-center space-x-2">
-					<h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors flex-1 truncate">
+				<div className="flex items-center justify-between gap-2">
+					<h3
+						className="text-lg font-medium text-gray-900 hover:text-purple-600 transition-colors truncate"
+						title={creator.name} // Full name on hover
+					>
 						{creator.name}
 					</h3>
+					<a
+						href={creator.socialLink || "https://www.instagram.com/saarvendra/"}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-gray-600 hover:text-purple-600 transition-colors"
+						aria-label={`${creator.name}'s Instagram profile`}
+						onClick={(e) => e.stopPropagation()} // Prevent card click from triggering
+					>
+						<Instagram size={20} />
+					</a>
 				</div>
 			</div>
-		</div>
+		</button>
 	);
 };
 

@@ -1,18 +1,20 @@
-
 export interface Creator {
-  id: string;
-  genre: string;
-  avatar: string;
-  name: string;
-  details: {
-    bio: string;
-    analytics: {
-      followers: number;
-      engagement: string;
-      totalViews: number;
-    };
-    reels: string[];
-    pricing: string;
-    tags: string[];
-  };
+	_id?: string;
+	name: string;
+	genre: string;
+	avatar: string;
+	platform: string;
+	socialLink: string;
+	details: {
+		bio: string;
+		analytics: {
+			followers: number;
+			totalViews: number;
+		};
+		reels: string[];
+		pricing: string;
+		tags: string[];
+	};
+	createdAt?: string;
+	updatedAt?: string;
 }
