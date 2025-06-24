@@ -2,7 +2,6 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const serverless = require("serverless-http");
 const { dbConnect } = require("./Configs/dbConnect");
 
 const startServer = async () => {
@@ -45,6 +44,4 @@ const startServer = async () => {
 };
 
 startServer();
-
-// If you need serverless handler:
-module.exports = serverless(app); // optional for Vercel API route
+module.exports = app;
