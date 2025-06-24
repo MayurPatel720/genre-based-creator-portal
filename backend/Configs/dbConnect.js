@@ -1,11 +1,8 @@
 const mongoose = require("mongoose");
-
 const MONGODB_URI = process.env.MONGODB_URL;
 
 if (!MONGODB_URI) {
-	throw new Error(
-		"❌ Please define the MONGODB_URL environment variable inside .env"
-	);
+	throw new Error("Missing MONGODB_URL in env");
 }
 
 let cached = global.mongoose;
@@ -20,15 +17,15 @@ async function dbConnect() {
 	if (!cached.promise) {
 		cached.promise = mongoose
 			.connect(MONGODB_URI, {
-				// No longer needed: useNewUrlParser, useUnifiedTopology
 				serverSelectionTimeoutMS: 5000,
+				bufferCommands: false,
 			})
-			.then((mongoose) => {
+			.then((mongooseInstance) => {
 				console.log("✅ MongoDB connected successfully");
-				return mongoose;
+				return mongooseInstance;
 			})
 			.catch((err) => {
-				console.error("❌ MongoDB connection error:", err);
+				console.error("❌ MongoDB connection error:", err.message);
 				throw err;
 			});
 	}
