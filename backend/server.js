@@ -1,3 +1,4 @@
+
 require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const app = express();
@@ -7,12 +8,14 @@ const { dbConnect } = require("./Configs/dbConnect");
 // Middleware setup
 const allowedOrigins = [
 	"http://localhost:8080",
-	"https://lovable.dev/projects/f9d440f6-e552-4080-9d03-1bdf75980bbe",
+	"https://lovable.dev",
+	"https://genre-based-creator-portal.vercel.app",
 	// Add your Vercel frontend URL here after deployment
 ];
 
 const corsOptions = {
 	origin: (origin, callback) => {
+		// Allow requests with no origin (like mobile apps or curl requests)
 		if (!origin || allowedOrigins.includes(origin)) {
 			callback(null, true);
 		} else {
@@ -28,9 +31,21 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Import routes
+const creatorRoutes = require("./routes/creators");
+
 // Routes
 app.get("/", (req, res) => {
 	res.send("Welcome to the Genre-Based Creator Portal!");
+});
+
+// API Routes
+app.use("/api/creators", creatorRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+	console.error(err.stack);
+	res.status(500).json({ error: "Something went wrong!" });
 });
 
 // Database connection and server start

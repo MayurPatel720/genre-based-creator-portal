@@ -2,14 +2,37 @@
 import axios from 'axios';
 import { Creator } from '../types/Creator';
 
-const API_BASE_URL = 'https://genre-based-creator-portal.vercel.app/api';
+// Use environment variable for API URL or fallback to production URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://genre-based-creator-portal.vercel.app/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use((config) => {
+  console.log('Making API request to:', config.baseURL + config.url);
+  return config;
+});
+
+// Add response interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error);
+    if (error.code === 'ERR_NETWORK') {
+      throw new Error('Network error - please check if the API server is running');
+    }
+    if (error.response?.status === 500) {
+      throw new Error('Server error - please try again later');
+    }
+    throw error;
+  }
+);
 
 export interface CreateCreatorData {
   name: string;
