@@ -4,7 +4,7 @@ import Filters from "./Filters";
 import WhatsAppButton from "./WhatsAppButton";
 import { Creator } from "../types/Creator";
 import { creatorAPI } from "../services/api";
-import { Users, Search, Filter } from "lucide-react";
+import { Users, Search, Filter, ArrowUpDown } from "lucide-react";
 import { Input } from "./ui/input";
 import { Skeleton } from "./ui/skeleton";
 import {
@@ -14,6 +14,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "./ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "./ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardProps {
@@ -30,6 +37,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [showFiltersDialog, setShowFiltersDialog] = useState(false);
+	const [sortBy, setSortBy] = useState("followers");
 	const [filters, setFilters] = useState({
 		platform: "All",
 		priceRange: [0, 5000] as [number, number],
@@ -100,6 +108,27 @@ const Dashboard: React.FC<DashboardProps> = ({
 		}
 		return true; // Include if no price found
 	});
+
+	const sortCreators = (creators: Creator[], sortBy: string) => {
+		return [...creators].sort((a, b) => {
+			switch (sortBy) {
+				case "followers":
+					return b.details.analytics.followers - a.details.analytics.followers;
+				case "views":
+					return b.details.analytics.totalViews - a.details.analytics.totalViews;
+				case "price":
+					const getPriceFromString = (pricing: string) => {
+						const match = pricing.match(/\$(\d+)/);
+						return match ? parseInt(match[1]) : 0;
+					};
+					return getPriceFromString(a.details.pricing) - getPriceFromString(b.details.pricing);
+				default:
+					return 0;
+			}
+		});
+	};
+
+	filteredCreators = sortCreators(filteredCreators, sortBy);
 
 	const handleFiltersChange = (newFilters: typeof filters) => {
 		setFilters(newFilters);
@@ -179,7 +208,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 						</p>
 					</div>
 
-					{/* Search and Filter */}
+					{/* Search, Filter and Sort */}
 					<div className="flex items-center space-x-3">
 						<div className="relative flex-1">
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -196,8 +225,8 @@ const Dashboard: React.FC<DashboardProps> = ({
 							onOpenChange={setShowFiltersDialog}
 						>
 							<DialogTrigger asChild>
-								<button className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
-									<Filter size={20} className="text-gray-600" />
+								<button className="p-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+									<Filter size={18} className="text-gray-600" />
 								</button>
 							</DialogTrigger>
 							<DialogContent className="sm:max-w-md">
@@ -211,6 +240,18 @@ const Dashboard: React.FC<DashboardProps> = ({
 								/>
 							</DialogContent>
 						</Dialog>
+
+						<Select value={sortBy} onValueChange={setSortBy}>
+							<SelectTrigger className="w-[140px]">
+								<ArrowUpDown size={16} className="mr-2" />
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="followers">Followers</SelectItem>
+								<SelectItem value="views">Views</SelectItem>
+								<SelectItem value="price">Price</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 			</header>
