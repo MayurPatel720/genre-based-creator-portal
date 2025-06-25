@@ -5,9 +5,16 @@ import Filters from "./Filters";
 import WhatsAppButton from "./WhatsAppButton";
 import { Creator } from "../types/Creator";
 import { creatorAPI } from "../services/api";
-import { Users, Search } from "lucide-react";
+import { Users, Search, Filter } from "lucide-react";
 import { Input } from "./ui/input";
 import { Skeleton } from "./ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 interface DashboardProps {
 	activeGenre: string;
@@ -22,7 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [showFilters, setShowFilters] = useState(false);
+	const [showFiltersDialog, setShowFiltersDialog] = useState(false);
 	const [filters, setFilters] = useState({
 		platform: 'All',
 		priceRange: [0, 5000] as [number, number],
@@ -116,12 +123,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 							<Skeleton className="h-8 w-48 mb-2" />
 							<Skeleton className="h-4 w-32" />
 						</div>
-						<div className="space-y-3">
-							<Skeleton className="h-10 w-full" />
-							<div className="grid grid-cols-2 gap-3">
-								<Skeleton className="h-10 w-full" />
-								<Skeleton className="h-10 w-full" />
-							</div>
+						<div className="flex items-center space-x-3">
+							<Skeleton className="h-10 flex-1" />
+							<Skeleton className="h-10 w-10" />
 						</div>
 					</div>
 				</header>
@@ -165,78 +169,74 @@ const Dashboard: React.FC<DashboardProps> = ({
 			{/* Header */}
 			<header className="bg-white shadow-sm border-b border-gray-200 p-4 lg:p-6">
 				<div className="flex flex-col space-y-4">
-					<div className="flex items-center justify-between">
-						<div>
-							<h2 className="text-xl lg:text-2xl font-bold text-gray-900">
-								{activeGenre}
-							</h2>
-							<p className="text-gray-600 mt-1">
-								{filteredCreators.length} creator
-								{filteredCreators.length !== 1 ? "s" : ""} available
-							</p>
-						</div>
-						<button
-							onClick={() => setShowFilters(!showFilters)}
-							className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-						>
-							{showFilters ? 'Hide Filters' : 'Show Filters'}
-						</button>
+					<div>
+						<h2 className="text-xl lg:text-2xl font-bold text-gray-900">
+							{activeGenre}
+						</h2>
+						<p className="text-gray-600 mt-1">
+							{filteredCreators.length} creator
+							{filteredCreators.length !== 1 ? "s" : ""} available
+						</p>
 					</div>
 
-					{/* Search */}
-					<div className="relative">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-						<Input
-							placeholder="Search creators..."
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							className="pl-10 w-full"
-						/>
+					{/* Search and Filter */}
+					<div className="flex items-center space-x-3">
+						<div className="relative flex-1">
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+							<Input
+								placeholder="Search creators..."
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+								className="pl-10 w-full"
+							/>
+						</div>
+						
+						<Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+							<DialogTrigger asChild>
+								<button className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+									<Filter size={20} className="text-gray-600" />
+								</button>
+							</DialogTrigger>
+							<DialogContent className="sm:max-w-md">
+								<DialogHeader>
+									<DialogTitle>Filter Creators</DialogTitle>
+								</DialogHeader>
+								<Filters
+									filters={filters}
+									onFiltersChange={handleFiltersChange}
+									onClearFilters={handleClearFilters}
+								/>
+							</DialogContent>
+						</Dialog>
 					</div>
 				</div>
 			</header>
 
 			{/* Content */}
-			<div className="flex-1 overflow-y-auto">
-				<div className="flex gap-6 p-4 lg:p-6">
-					{/* Filters Sidebar */}
-					{showFilters && (
-						<div className="w-80 flex-shrink-0">
-							<Filters
-								filters={filters}
-								onFiltersChange={handleFiltersChange}
-								onClearFilters={handleClearFilters}
-							/>
-						</div>
-					)}
-
-					{/* Creators Grid */}
-					<div className="flex-1">
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-							{filteredCreators.map((creator) => (
-								<CreatorCard
-									key={creator._id}
-									creator={creator}
-									onClick={() => onCreatorClick(creator)}
-								/>
-							))}
-						</div>
-
-						{filteredCreators.length === 0 && (
-							<div className="text-center py-12">
-								<div className="text-gray-400 mb-4">
-									<Users size={48} className="mx-auto" />
-								</div>
-								<h3 className="text-lg font-semibold text-gray-900 mb-2">
-									No creators found
-								</h3>
-								<p className="text-gray-600">
-									Try adjusting your search or filters
-								</p>
-							</div>
-						)}
-					</div>
+			<div className="flex-1 overflow-y-auto p-4 lg:p-6">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+					{filteredCreators.map((creator) => (
+						<CreatorCard
+							key={creator._id}
+							creator={creator}
+							onClick={() => onCreatorClick(creator)}
+						/>
+					))}
 				</div>
+
+				{filteredCreators.length === 0 && (
+					<div className="text-center py-12">
+						<div className="text-gray-400 mb-4">
+							<Users size={48} className="mx-auto" />
+						</div>
+						<h3 className="text-lg font-semibold text-gray-900 mb-2">
+							No creators found
+						</h3>
+						<p className="text-gray-600">
+							Try adjusting your search or filters
+						</p>
+					</div>
+				)}
 			</div>
 
 			{/* Mobile WhatsApp Button */}

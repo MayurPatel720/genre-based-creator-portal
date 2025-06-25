@@ -34,7 +34,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFiltersChange, onClearFilt
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Filter size={16} />
@@ -49,7 +49,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFiltersChange, onClearFilt
       </div>
 
       {/* Platform Filter */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label className="flex items-center gap-2">
           <Monitor size={14} />
           Platform
@@ -72,7 +72,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFiltersChange, onClearFilt
       </div>
 
       {/* Price Range Filter */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label className="flex items-center gap-2">
           <DollarSign size={14} />
           Price Range ($)
@@ -94,7 +94,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFiltersChange, onClearFilt
       </div>
 
       {/* Location Filter */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label className="flex items-center gap-2">
           <MapPin size={14} />
           Location
@@ -117,7 +117,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFiltersChange, onClearFilt
       </div>
 
       {/* Followers Range Filter */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label className="flex items-center gap-2">
           <Users size={14} />
           Followers Range (K)
