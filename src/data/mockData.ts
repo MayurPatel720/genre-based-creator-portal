@@ -1,12 +1,16 @@
+
 import { Creator } from "../types/Creator";
 
 export const mockCreators: Creator[] = [
 	{
-		id: "1",
+		_id: "1",
 		genre: "AI Creators",
 		avatar:
 			"https://www.baltana.com/files/wallpapers-2/Coat-Background-Wallpaper-06018.jpg",
 		name: "Sarah Chen",
+		platform: "Instagram",
+		socialLink: "https://www.instagram.com/sarahchen",
+		location: "USA",
 		details: {
 			bio: "AI researcher and content creator specializing in machine learning tutorials and tech reviews. I break down complex AI concepts into digestible content for everyone.",
 			analytics: {
@@ -26,11 +30,14 @@ export const mockCreators: Creator[] = [
 		},
 	},
 	{
-		id: "2",
+		_id: "2",
 		genre: "AI Creators",
 		avatar:
 			"https://userscontent2.emaze.com/images/1aaf7c9f-b050-4340-8a5a-da3641700cfd/59c564559f89d017b81cffff6c0b8324.jpeg",
 		name: "Marcus Thompson",
+		platform: "YouTube",
+		socialLink: "https://www.youtube.com/marcusthompson",
+		location: "Canada",
 		details: {
 			bio: "Former Google AI engineer turned content creator. I share insights about AI development, career advice, and the latest industry trends.",
 			analytics: {
@@ -50,11 +57,14 @@ export const mockCreators: Creator[] = [
 		},
 	},
 	{
-		id: "3",
+		_id: "3",
 		genre: "Video Editing/AI",
 		avatar:
 			"https://www.blackpantera.ru/upload/iblock/265/Znachenie-imeni-Darina.jpg",
 		name: "Emma Rodriguez",
+		platform: "TikTok",
+		socialLink: "https://www.tiktok.com/@emmarodriguez",
+		location: "UK",
 		details: {
 			bio: "Professional video editor using AI tools to revolutionize content creation. I teach efficient editing workflows and AI-powered techniques.",
 			analytics: {
@@ -74,10 +84,13 @@ export const mockCreators: Creator[] = [
 		},
 	},
 	{
-		id: "4",
+		_id: "4",
 		genre: "Tips & Tricks/AI",
 		avatar: "https://bouzdira.com/public/web/images/team_3.jpg",
 		name: "Alex Kim",
+		platform: "Instagram",
+		socialLink: "https://www.instagram.com/alexkim",
+		location: "Australia",
 		details: {
 			bio: "Productivity hacker and AI enthusiast. I discover and share the best AI tools and techniques to boost productivity and creativity.",
 			analytics: {
@@ -97,11 +110,14 @@ export const mockCreators: Creator[] = [
 		},
 	},
 	{
-		id: "5",
+		_id: "5",
 		genre: "Tech Products",
 		avatar:
 			"https://avatars.mds.yandex.net/get-shedevrum/11509417/img_d4595c4d23f911ef8090eaa30d96aef9/orig",
 		name: "David Park",
+		platform: "YouTube",
+		socialLink: "https://www.youtube.com/davidpark",
+		location: "India",
 		details: {
 			bio: "Tech reviewer with 8 years of experience. I provide honest, in-depth reviews of the latest gadgets, software, and tech innovations.",
 			analytics: {
@@ -121,11 +137,14 @@ export const mockCreators: Creator[] = [
 		},
 	},
 	{
-		id: "6",
+		_id: "6",
 		genre: "Lifestyle",
 		avatar:
 			"https://images.hdqwalls.com/download/lauren-budd-new-wallpaper-2880x1800.jpg",
 		name: "Isabella Martinez",
+		platform: "Instagram",
+		socialLink: "https://www.instagram.com/isabellamartinez",
+		location: "USA",
 		details: {
 			bio: "Lifestyle content creator focusing on wellness, fashion, and daily inspiration. I share authentic moments and practical lifestyle tips.",
 			analytics: {
@@ -145,11 +164,14 @@ export const mockCreators: Creator[] = [
 		},
 	},
 	{
-		id: "7",
+		_id: "7",
 		genre: "Business",
 		avatar:
 			"https://resources.learnquest.com/wp-content/uploads/2024/04/Business-Leader-with-Generative-AI-1024x538.jpg",
 		name: "Robert Johnson",
+		platform: "Twitter",
+		socialLink: "https://www.twitter.com/robertjohnson",
+		location: "Other",
 		details: {
 			bio: "Serial entrepreneur and business coach. I share startup insights, investment tips, and practical business strategies for growth.",
 			analytics: {
