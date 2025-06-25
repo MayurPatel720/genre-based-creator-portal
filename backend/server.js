@@ -7,10 +7,8 @@ const { dbConnect } = require("./Configs/dbConnect");
 // Middleware setup
 const allowedOrigins = [
 	"http://localhost:8080",
-	"https://lovable.dev",
 	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
-	// Add your Vercel frontend URL here after deployment
 ];
 
 const corsOptions = {
