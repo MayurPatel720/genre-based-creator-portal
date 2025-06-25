@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const creatorSchema = new mongoose.Schema(
@@ -21,13 +22,18 @@ const creatorSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			trim: true,
-			enum: ["Instagram", "YouTube", "TikTok", "Twitter", "Other"], // Restrict to specific platforms
+			enum: ["Instagram", "YouTube", "TikTok", "Twitter", "Other"],
 		},
 		socialLink: {
 			type: String,
 			required: true,
 			trim: true,
-			match: [/^https?:\/\/.+/i, "Please provide a valid URL"], // Basic URL validation
+			match: [/^https?:\/\/.+/i, "Please provide a valid URL"],
+		},
+		location: {
+			type: String,
+			trim: true,
+			default: "Other",
 		},
 		details: {
 			bio: {

@@ -1,3 +1,4 @@
+
 export interface Creator {
 	_id?: string;
 	name: string;
@@ -5,6 +6,7 @@ export interface Creator {
 	avatar: string;
 	platform: string;
 	socialLink: string;
+	location?: string;
 	details: {
 		bio: string;
 		analytics: {

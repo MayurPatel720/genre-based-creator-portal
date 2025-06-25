@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Users, Video, Lightbulb, Laptop, Heart, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import WhatsAppButton from './WhatsAppButton';
 
 interface SidebarProps {
   activeGenre: string;
@@ -71,6 +72,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeGenre, onGenreChange, isCollaps
           );
         })}
       </nav>
+
+      {/* WhatsApp Button - Only show in desktop sidebar when not collapsed */}
+      {!isCollapsed && (
+        <div className="p-4 border-t border-gray-200">
+          <WhatsAppButton variant="sidebar" />
+        </div>
+      )}
     </div>
   );
 };

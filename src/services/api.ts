@@ -49,6 +49,7 @@ export interface CreateCreatorData {
 	reels: string[];
 	pricing: string;
 	tags: string[];
+	location?: string;
 }
 
 export type UpdateCreatorData = Partial<CreateCreatorData>;
@@ -74,6 +75,7 @@ export const creatorAPI = {
 			avatar: data.avatar,
 			platform: data.platform,
 			socialLink: data.socialLink,
+			location: data.location || "Other",
 			details: {
 				bio: data.bio,
 				analytics: {
@@ -99,6 +101,7 @@ export const creatorAPI = {
 		if (data.avatar) updateData.avatar = data.avatar;
 		if (data.platform) updateData.platform = data.platform;
 		if (data.socialLink) updateData.socialLink = data.socialLink;
+		if (data.location) updateData.location = data.location;
 
 		if (
 			data.bio ||
