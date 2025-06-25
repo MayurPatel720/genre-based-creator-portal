@@ -44,13 +44,17 @@ const Sidebar: React.FC<SidebarProps> = ({
 			{/* Header */}
 			<div className="p-4 border-b border-gray-200 flex items-center justify-between">
 				{!isCollapsed && (
-					<div>
-						<h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+					<div className="w-full">
+						<img
+							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
+							alt="logo"
+						/>
+						{/* <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
 							Creators Dream
 						</h1>
 						<p className="text-sm text-gray-600 mt-1">
 							Discover amazing creators
-						</p>
+						</p> */}
 					</div>
 				)}
 				<button

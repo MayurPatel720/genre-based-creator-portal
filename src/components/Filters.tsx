@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Filter, DollarSign, MapPin, Users, Monitor } from "lucide-react";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "./ui/select";
 import { Slider } from "./ui/slider";
 import { Label } from "./ui/label";
+import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+
+interface Country {
+	name: string;
+	code: string;
+}
 
 interface FiltersProps {
 	filters: {
@@ -35,15 +34,51 @@ const Filters: React.FC<FiltersProps> = ({
 		"Twitter",
 		"Other",
 	];
-	const locations = [
-		"All",
-		"USA",
-		"UK",
-		"Canada",
-		"Australia",
-		"India",
-		"Other",
+
+	const countries: Country[] = [
+		{ name: "Australia", code: "AU" },
+		{ name: "Brazil", code: "BR" },
+		{ name: "China", code: "CN" },
+		{ name: "Egypt", code: "EG" },
+		{ name: "France", code: "FR" },
+		{ name: "Germany", code: "DE" },
+		{ name: "India", code: "IN" },
+		{ name: "Japan", code: "JP" },
+		{ name: "Spain", code: "ES" },
+		{ name: "United States", code: "US" },
 	];
+
+	const selectedCountryTemplate = (option: Country, props: any) => {
+		if (option) {
+			return (
+				<div className="flex align-items-center">
+					<img
+						alt={option.name}
+						src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+						className="mr-2"
+						style={{ width: "18px" }}
+					/>
+					<div>{option.name}</div>
+				</div>
+			);
+		}
+
+		return <span>{props.placeholder}</span>;
+	};
+
+	const countryOptionTemplate = (option: Country) => {
+		return (
+			<div className="flex align-items-center">
+				<img
+					alt={option.name}
+					src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+					className="mr-2"
+					style={{ width: "18px" }}
+				/>
+				<div>{option.name}</div>
+			</div>
+		);
+	};
 
 	const handleFilterChange = (key: string, value: any) => {
 		onFiltersChange({
@@ -73,21 +108,15 @@ const Filters: React.FC<FiltersProps> = ({
 					<Monitor size={14} />
 					Platform
 				</Label>
-				<Select
+				<Dropdown
 					value={filters.platform}
-					onValueChange={(value) => handleFilterChange("platform", value)}
-				>
-					<SelectTrigger>
-						<SelectValue placeholder="Select platform" />
-					</SelectTrigger>
-					<SelectContent>
-						{platforms.map((platform) => (
-							<SelectItem key={platform} value={platform}>
-								{platform}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+					onChange={(e: DropdownChangeEvent) =>
+						handleFilterChange("platform", e.value)
+					}
+					options={platforms}
+					placeholder="Select Platform"
+					className="w-full"
+				/>
 			</div>
 
 			{/* Location Filter */}
@@ -96,22 +125,20 @@ const Filters: React.FC<FiltersProps> = ({
 					<MapPin size={14} />
 					Location
 				</Label>
-				<Select
+				<Dropdown
 					value={filters.location}
-					onValueChange={(value) => handleFilterChange("location", value)}
-				>
-					<SelectTrigger>
-						<SelectValue placeholder="Select location" />
-					</SelectTrigger>
-					<SelectContent>
-						{locations.map((location) => (
-							<SelectItem key={location} value={location}>
-								{location}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+					onChange={(e: DropdownChangeEvent) =>
+						handleFilterChange("location", e.value)
+					}
+					options={countries}
+					optionLabel="name"
+					placeholder="Select a Country"
+					valueTemplate={selectedCountryTemplate}
+					itemTemplate={countryOptionTemplate}
+					className="w-full"
+				/>
 			</div>
+
 			{/* Price Range Filter */}
 			<div className="space-y-3">
 				<Label className="flex items-center gap-2">
@@ -133,6 +160,7 @@ const Filters: React.FC<FiltersProps> = ({
 					</div>
 				</div>
 			</div>
+
 			{/* Followers Range Filter */}
 			<div className="space-y-3">
 				<Label className="flex items-center gap-2">
