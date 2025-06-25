@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import CreatorCard from "./CreatorCard";
 import Filters from "./Filters";
@@ -91,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 			}
 			return true; // Include if no price found
 		}
-	};
+	);
 
 	const handleFiltersChange = (newFilters: typeof filters) => {
 		setFilters(newFilters);
