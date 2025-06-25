@@ -1,86 +1,109 @@
-
-import React from 'react';
-import { Users, Video, Lightbulb, Laptop, Heart, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
-import WhatsAppButton from './WhatsAppButton';
+import React from "react";
+import {
+	Users,
+	Video,
+	Lightbulb,
+	Laptop,
+	Heart,
+	Building2,
+	ChevronLeft,
+	ChevronRight,
+	Icon,
+	MessageCircleMore,
+} from "lucide-react";
+import WhatsAppButton from "./WhatsAppButton";
 
 interface SidebarProps {
-  activeGenre: string;
-  onGenreChange: (genre: string) => void;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
+	activeGenre: string;
+	onGenreChange: (genre: string) => void;
+	isCollapsed: boolean;
+	onToggleCollapse: () => void;
 }
 
 const genres = [
-  { name: 'All Creators', icon: Users },
-  { name: 'Video Editing/AI', icon: Video },
-  { name: 'Tips & Tricks/AI', icon: Lightbulb },
-  { name: 'Tech Products', icon: Laptop },
-  { name: 'Lifestyle', icon: Heart },
-  { name: 'Business', icon: Building2 },
+	{ name: "All Creators", icon: Users },
+	{ name: "Video Editing/AI", icon: Video },
+	{ name: "Tips & Tricks/AI", icon: Lightbulb },
+	{ name: "Tech Products", icon: Laptop },
+	{ name: "Lifestyle", icon: Heart },
+	{ name: "Business", icon: Building2 },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ activeGenre, onGenreChange, isCollapsed, onToggleCollapse }) => {
-  return (
-    <div className={`fixed left-0 top-0 h-full bg-white shadow-xl border-r border-gray-200 transition-all duration-300 z-30 ${
-      isCollapsed ? 'w-16' : 'w-64'
-    }`}>
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        {!isCollapsed && (
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              CreatorHub
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">Discover amazing creators</p>
-          </div>
-        )}
-        <button
-          onClick={onToggleCollapse}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-        >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
-      </div>
-      
-      {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-1">
-        {genres.map((genre) => {
-          const Icon = genre.icon;
-          const isActive = activeGenre === genre.name;
-          
-          return (
-            <button
-              key={genre.name}
-              onClick={() => onGenreChange(genre.name)}
-              className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left relative group ${
-                isActive
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-purple-600'
-              }`}
-              title={isCollapsed ? genre.name : undefined}
-            >
-              <Icon size={20} className="flex-shrink-0" />
-              {!isCollapsed && <span className="font-medium">{genre.name}</span>}
-              
-              {/* Tooltip for collapsed state */}
-              {isCollapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                  {genre.name}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </nav>
+const Sidebar: React.FC<SidebarProps> = ({
+	activeGenre,
+	onGenreChange,
+	isCollapsed,
+	onToggleCollapse,
+}) => {
+	return (
+		<div
+			className={`fixed left-0 top-0 h-full bg-white shadow-xl border-r border-gray-200 transition-all duration-300 z-30 ${
+				isCollapsed ? "w-16" : "w-64"
+			} flex flex-col`}
+		>
+			{/* Header */}
+			<div className="p-4 border-b border-gray-200 flex items-center justify-between">
+				{!isCollapsed && (
+					<div>
+						<h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+							CreatorHub
+						</h1>
+						<p className="text-sm text-gray-600 mt-1">
+							Discover amazing creators
+						</p>
+					</div>
+				)}
+				<button
+					onClick={onToggleCollapse}
+					className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+				>
+					{isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+				</button>
+			</div>
 
-      {/* WhatsApp Button - Only show in desktop sidebar when not collapsed */}
-      {!isCollapsed && (
-        <div className="p-4 border-t border-gray-200">
-          <WhatsAppButton variant="sidebar" />
-        </div>
-      )}
-    </div>
-  );
+			{/* Navigation */}
+			<nav className="flex-1 p-2 space-y-1">
+				{genres.map((genre) => {
+					const Icon = genre.icon;
+					const isActive = activeGenre === genre.name;
+
+					return (
+						<button
+							key={genre.name}
+							onClick={() => onGenreChange(genre.name)}
+							className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left relative group ${
+								isActive
+									? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
+									: "text-gray-700 hover:bg-gray-100 hover:text-purple-600"
+							}`}
+							title={isCollapsed ? genre.name : undefined}
+						>
+							<Icon size={20} className="flex-shrink-0" />
+							{!isCollapsed && (
+								<span className="font-medium">{genre.name}</span>
+							)}
+
+							{/* Tooltip */}
+							{isCollapsed && (
+								<div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+									{genre.name}
+								</div>
+							)}
+						</button>
+					);
+				})}
+			</nav>
+
+			{/* WhatsApp Button at Bottom */}
+			<div className="p-4 border-t border-gray-200 mt-auto">
+				{isCollapsed ? (
+					<MessageCircleMore className="ml-1" />
+				) : (
+					<WhatsAppButton variant="sidebar" />
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default Sidebar;

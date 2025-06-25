@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import CreatorCard from "./CreatorCard";
 import Filters from "./Filters";
@@ -9,12 +8,13 @@ import { Users, Search, Filter } from "lucide-react";
 import { Input } from "./ui/input";
 import { Skeleton } from "./ui/skeleton";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
 } from "./ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardProps {
 	activeGenre: string;
@@ -31,11 +31,12 @@ const Dashboard: React.FC<DashboardProps> = ({
 	const [searchTerm, setSearchTerm] = useState("");
 	const [showFiltersDialog, setShowFiltersDialog] = useState(false);
 	const [filters, setFilters] = useState({
-		platform: 'All',
+		platform: "All",
 		priceRange: [0, 5000] as [number, number],
-		location: 'All',
+		location: "All",
 		followersRange: [0, 1000] as [number, number],
 	});
+	const isMobile = useIsMobile();
 
 	// Fetch creators from API
 	useEffect(() => {
@@ -74,32 +75,31 @@ const Dashboard: React.FC<DashboardProps> = ({
 	}
 
 	// Apply advanced filters
-	if (filters.platform !== 'All') {
+	if (filters.platform !== "All") {
 		filteredCreators = filteredCreators.filter(
 			(creator) => creator.platform === filters.platform
 		);
 	}
 
 	// Filter by followers range (convert K to actual numbers)
-	filteredCreators = filteredCreators.filter(
-		(creator) => {
-			const followers = creator.details.analytics.followers / 1000; // Convert to K
-			return followers >= filters.followersRange[0] && followers <= filters.followersRange[1];
-		}
-	);
+	filteredCreators = filteredCreators.filter((creator) => {
+		const followers = creator.details.analytics.followers / 1000; // Convert to K
+		return (
+			followers >= filters.followersRange[0] &&
+			followers <= filters.followersRange[1]
+		);
+	});
 
 	// Filter by price range (extract price from pricing string)
-	filteredCreators = filteredCreators.filter(
-		(creator) => {
-			const pricingText = creator.details.pricing.toLowerCase();
-			const priceMatch = pricingText.match(/\$(\d+)/);
-			if (priceMatch) {
-				const price = parseInt(priceMatch[1]);
-				return price >= filters.priceRange[0] && price <= filters.priceRange[1];
-			}
-			return true; // Include if no price found
+	filteredCreators = filteredCreators.filter((creator) => {
+		const pricingText = creator.details.pricing.toLowerCase();
+		const priceMatch = pricingText.match(/\$(\d+)/);
+		if (priceMatch) {
+			const price = parseInt(priceMatch[1]);
+			return price >= filters.priceRange[0] && price <= filters.priceRange[1];
 		}
-	);
+		return true; // Include if no price found
+	});
 
 	const handleFiltersChange = (newFilters: typeof filters) => {
 		setFilters(newFilters);
@@ -107,9 +107,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 	const handleClearFilters = () => {
 		setFilters({
-			platform: 'All',
+			platform: "All",
 			priceRange: [0, 5000],
-			location: 'All',
+			location: "All",
 			followersRange: [0, 1000],
 		});
 	};
@@ -152,8 +152,8 @@ const Dashboard: React.FC<DashboardProps> = ({
 							Failed to load creators
 						</h3>
 						<p className="text-gray-600">{error}</p>
-						<button 
-							onClick={() => window.location.reload()} 
+						<button
+							onClick={() => window.location.reload()}
 							className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
 						>
 							Retry
@@ -190,8 +190,11 @@ const Dashboard: React.FC<DashboardProps> = ({
 								className="pl-10 w-full"
 							/>
 						</div>
-						
-						<Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+
+						<Dialog
+							open={showFiltersDialog}
+							onOpenChange={setShowFiltersDialog}
+						>
 							<DialogTrigger asChild>
 								<button className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
 									<Filter size={20} className="text-gray-600" />
@@ -214,7 +217,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 			{/* Content */}
 			<div className="flex-1 overflow-y-auto p-4 lg:p-6">
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+				<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
 					{filteredCreators.map((creator) => (
 						<CreatorCard
 							key={creator._id}
@@ -238,9 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 					</div>
 				)}
 			</div>
-
-			{/* Mobile WhatsApp Button */}
-			<WhatsAppButton variant="floating" />
+			{isMobile && <WhatsAppButton variant="floating" />}
 		</div>
 	);
 };
