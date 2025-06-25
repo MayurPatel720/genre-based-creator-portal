@@ -1,4 +1,5 @@
 
+
 const mongoose = require("mongoose");
 
 const creatorSchema = new mongoose.Schema(
@@ -52,6 +53,10 @@ const creatorSchema = new mongoose.Schema(
 					required: true,
 					min: 0,
 				},
+				engagement: {
+					type: String,
+					trim: true,
+				},
 			},
 			reels: [
 				{
@@ -78,3 +83,4 @@ const creatorSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Creator", creatorSchema);
+

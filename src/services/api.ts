@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
@@ -46,6 +47,7 @@ export interface CreateCreatorData {
 	bio: string;
 	followers: number;
 	totalViews: number;
+	engagement?: string;
 	reels: string[];
 	pricing: string;
 	tags: string[];
@@ -81,6 +83,7 @@ export const creatorAPI = {
 				analytics: {
 					followers: data.followers,
 					totalViews: data.totalViews,
+					engagement: data.engagement,
 				},
 				reels: data.reels,
 				pricing: data.pricing,
@@ -107,18 +110,21 @@ export const creatorAPI = {
 			data.bio ||
 			data.followers ||
 			data.totalViews ||
+			data.engagement ||
 			data.reels ||
 			data.pricing ||
 			data.tags
 		) {
 			updateData.details = {};
 			if (data.bio) updateData.details.bio = data.bio;
-			if (data.followers || data.totalViews) {
+			if (data.followers || data.totalViews || data.engagement) {
 				updateData.details.analytics = {};
 				if (data.followers)
 					updateData.details.analytics.followers = data.followers;
 				if (data.totalViews)
 					updateData.details.analytics.totalViews = data.totalViews;
+				if (data.engagement)
+					updateData.details.analytics.engagement = data.engagement;
 			}
 			if (data.reels) updateData.details.reels = data.reels;
 			if (data.pricing) updateData.details.pricing = data.pricing;
@@ -149,3 +155,4 @@ export const creatorAPI = {
 };
 
 export default api;
+
