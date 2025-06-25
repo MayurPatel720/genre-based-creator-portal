@@ -8,6 +8,7 @@ const { dbConnect } = require("./Configs/dbConnect");
 const allowedOrigins = [
 	"http://localhost:8080",
 	"https://lovable.dev",
+	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
 	// Add your Vercel frontend URL here after deployment
 ];
@@ -28,8 +29,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Import routes
 const creatorRoutes = require("./routes/creators");
