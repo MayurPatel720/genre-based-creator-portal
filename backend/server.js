@@ -1,4 +1,3 @@
-
 require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const app = express();
@@ -35,6 +34,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Import routes
 const creatorRoutes = require("./routes/creators");
 const uploadRoutes = require("./routes/upload");
+const instagramRoutes = require("./routes/instagram");
 
 // Routes
 app.get("/", (req, res) => {
@@ -44,6 +44,7 @@ app.get("/", (req, res) => {
 // API Routes
 app.use("/api/creators", creatorRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/instagram", instagramRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

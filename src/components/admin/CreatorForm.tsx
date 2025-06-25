@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CreateCreatorData } from "../../services/api"; // Import CreateCreatorData
+import { CreateCreatorData } from "../../services/api";
 import { useCreators } from "../../hooks/useCreators";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -13,6 +13,8 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Creator } from "@/types/Creator";
+import ImageUpload from "../ImageUpload";
+import { imageUploadAPI } from "../../services/imageUpload";
 
 interface CreatorFormProps {
 	creator?: Creator | null;
@@ -41,6 +43,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 		pricing: "",
 		tags: [],
 	});
+	const [currentPublicId, setCurrentPublicId] = useState<string | null>(null);
 
 	// Populate form with creator data when editing
 	useEffect(() => {
@@ -60,6 +63,22 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 			});
 		}
 	}, [creator]);
+
+	const handleImageUpload = (imageUrl: string) => {
+		setFormData(prev => ({ ...prev, avatar: imageUrl }));
+	};
+
+	const handleImageDelete = async () => {
+		if (currentPublicId) {
+			try {
+				await imageUploadAPI.deleteImage(currentPublicId);
+				setFormData(prev => ({ ...prev, avatar: "" }));
+				setCurrentPublicId(null);
+			} catch (error) {
+				console.error('Failed to delete image:', error);
+			}
+		}
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -188,13 +207,12 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 						</div>
 
 						<div>
-							<Label htmlFor="avatar">Avatar URL</Label>
-							<Input
-								id="avatar"
-								value={formData.avatar}
-								onChange={(e) => handleInputChange("avatar", e.target.value)}
-								placeholder="https://example.com/avatar.jpg"
-								required
+							<Label>Avatar Image</Label>
+							<ImageUpload
+								currentImage={formData.avatar}
+								onImageUpload={handleImageUpload}
+								onImageDelete={handleImageDelete}
+								className="mt-2"
 							/>
 						</div>
 

@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Creator } from '../types/Creator';
-import { X, Users, Eye, Star, DollarSign, Play } from 'lucide-react';
+import { X, Users, Eye, Star, DollarSign, Play, Instagram } from 'lucide-react';
+import { useInstagramData } from '../hooks/useInstagramData';
 
 interface CreatorModalProps {
   creator: Creator;
@@ -9,6 +9,10 @@ interface CreatorModalProps {
 }
 
 const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
+  const { media: instagramMedia, loading: instagramLoading } = useInstagramData(
+    creator.platform === 'Instagram' ? creator.socialLink : ''
+  );
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-background rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -88,8 +92,61 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
                 <p className="text-muted-foreground leading-relaxed">{creator.details.bio}</p>
               </div>
               
+              {/* Instagram Media Section */}
+              {creator.platform === 'Instagram' && (
+                <div>
+                  <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Instagram size={20} className="text-pink-500" />
+                    Instagram Content
+                  </h4>
+                  
+                  {instagramLoading ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="bg-accent rounded-lg aspect-square animate-pulse" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {instagramMedia.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-accent rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:shadow-md transition-all duration-200 group relative overflow-hidden"
+                        >
+                          {item.media_type === 'IMAGE' ? (
+                            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 flex items-center justify-center">
+                              <span className="text-sm text-muted-foreground">Image Post</span>
+                            </div>
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
+                              <Play size={24} className="text-muted-foreground group-hover:text-purple-500 transition-colors" />
+                            </div>
+                          )}
+                          
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                          
+                          {item.caption && (
+                            <div className="absolute bottom-2 left-2 right-2 text-xs text-white bg-black/50 rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {item.caption.length > 50 
+                                ? `${item.caption.substring(0, 50)}...` 
+                                : item.caption
+                              }
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="text-sm text-muted-foreground mt-2">
+                    * Instagram content is displayed for demonstration. Full integration requires Instagram API setup.
+                  </p>
+                </div>
+              )}
+              
+              {/* Original Reels Section */}
               <div>
-                <h4 className="text-lg font-semibold text-foreground mb-3">Recent Content</h4>
+                <h4 className="text-lg font-semibold text-foreground mb-3">Portfolio Content</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {creator.details.reels.map((reel, index) => (
                     <div
