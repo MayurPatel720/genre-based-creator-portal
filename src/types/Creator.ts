@@ -1,10 +1,10 @@
 
-
 export interface Creator {
 	_id?: string;
 	name: string;
 	genre: string;
 	avatar: string;
+	cloudinary_public_id?: string;
 	platform: string;
 	socialLink: string;
 	location?: string;
@@ -22,4 +22,3 @@ export interface Creator {
 	createdAt?: string;
 	updatedAt?: string;
 }
-

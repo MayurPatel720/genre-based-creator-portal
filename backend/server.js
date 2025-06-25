@@ -29,10 +29,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Import routes
 const creatorRoutes = require("./routes/creators");
+const uploadRoutes = require("./routes/upload");
 
 // Routes
 app.get("/", (req, res) => {
@@ -41,6 +43,7 @@ app.get("/", (req, res) => {
 
 // API Routes
 app.use("/api/creators", creatorRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

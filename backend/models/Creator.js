@@ -1,5 +1,4 @@
 
-
 const mongoose = require("mongoose");
 
 const creatorSchema = new mongoose.Schema(
@@ -17,6 +16,10 @@ const creatorSchema = new mongoose.Schema(
 		avatar: {
 			type: String,
 			required: true,
+			trim: true,
+		},
+		cloudinary_public_id: {
+			type: String,
 			trim: true,
 		},
 		platform: {
@@ -83,4 +86,3 @@ const creatorSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Creator", creatorSchema);
-
