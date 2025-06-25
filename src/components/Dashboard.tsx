@@ -40,8 +40,8 @@ const Dashboard: React.FC<DashboardProps> = ({
 	const [sortBy, setSortBy] = useState("followers");
 	const [filters, setFilters] = useState({
 		platform: "All",
-		priceRange: [0, 5000] as [number, number],
 		location: "All",
+		priceRange: [0, 5000] as [number, number],
 		followersRange: [0, 1000] as [number, number],
 	});
 	const isMobile = useIsMobile();
@@ -115,13 +115,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 				case "followers":
 					return b.details.analytics.followers - a.details.analytics.followers;
 				case "views":
-					return b.details.analytics.totalViews - a.details.analytics.totalViews;
-				case "price":
+					return (
+						b.details.analytics.totalViews - a.details.analytics.totalViews
+					);
+				case "price": {
 					const getPriceFromString = (pricing: string) => {
 						const match = pricing.match(/\$(\d+)/);
 						return match ? parseInt(match[1]) : 0;
 					};
-					return getPriceFromString(a.details.pricing) - getPriceFromString(b.details.pricing);
+					return (
+						getPriceFromString(a.details.pricing) -
+						getPriceFromString(b.details.pricing)
+					);
+				}
 				default:
 					return 0;
 			}

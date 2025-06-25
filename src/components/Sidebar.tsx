@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 				{!isCollapsed && (
 					<div>
 						<h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-							CreatorHub
+							Creators Dream
 						</h1>
 						<p className="text-sm text-gray-600 mt-1">
 							Discover amazing creators

@@ -1,10 +1,12 @@
-
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
 // Use environment variable for API URL or fallback to local URL
+// const API_BASE_URL =
+// 	import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 const API_BASE_URL =
-	import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+	import.meta.env.VITE_API_URL ||
+	"https://genre-based-creator-portal.vercel.app/api";
 
 const api = axios.create({
 	baseURL: API_BASE_URL,
@@ -155,4 +157,3 @@ export const creatorAPI = {
 };
 
 export default api;
-

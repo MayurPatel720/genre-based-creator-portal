@@ -1,6 +1,6 @@
 import React from "react";
 import { Creator } from "../types/Creator";
-import { Instagram } from "lucide-react";
+import { Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 
 interface CreatorCardProps {
 	creator: Creator;
@@ -8,6 +8,20 @@ interface CreatorCardProps {
 }
 
 const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
+	const renderPlatformIcon = () => {
+		switch (creator.platform?.toLowerCase()) {
+			case "instagram":
+				return <Instagram size={20} />;
+			case "youtube":
+				return <Youtube size={20} />;
+			case "linkedin":
+				return <Linkedin size={20} />;
+			case "twitter":
+				return <Twitter size={20} />;
+			default:
+				return <Instagram size={20} />; // Default icon if not matched
+		}
+	};
 	return (
 		<button
 			onClick={onClick}
@@ -36,9 +50,9 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 						rel="noopener noreferrer"
 						className="text-gray-600 hover:text-purple-600 transition-colors"
 						aria-label={`${creator.name}'s Instagram profile`}
-						onClick={(e) => e.stopPropagation()} // Prevent card click from triggering
+						onClick={(e) => e.stopPropagation()}
 					>
-						<Instagram size={20} />
+						{renderPlatformIcon()}
 					</a>
 				</div>
 			</div>
