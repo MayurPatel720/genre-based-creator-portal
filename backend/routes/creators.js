@@ -22,6 +22,7 @@ router.get("/", async (req, res) => {
 			avatar: creator.avatar,
 			platform: creator.platform,
 			socialLink: creator.socialLink,
+			location: creator.location,
 			details: {
 				bio: creator.details.bio,
 				analytics: {
@@ -106,11 +107,9 @@ router.post("/", async (req, res) => {
 		}
 
 		if (missingFields.length > 0) {
-			return res
-				.status(400)
-				.json({
-					error: `Missing required fields: ${missingFields.join(", ")}`,
-				});
+			return res.status(400).json({
+				error: `Missing required fields: ${missingFields.join(", ")}`,
+			});
 		}
 
 		// Validate platform
@@ -122,13 +121,9 @@ router.post("/", async (req, res) => {
 			"Other",
 		];
 		if (!validPlatforms.includes(platform)) {
-			return res
-				.status(400)
-				.json({
-					error: `Invalid platform. Must be one of: ${validPlatforms.join(
-						", "
-					)}`,
-				});
+			return res.status(400).json({
+				error: `Invalid platform. Must be one of: ${validPlatforms.join(", ")}`,
+			});
 		}
 
 		// Validate socialLink format
@@ -206,11 +201,9 @@ router.put("/:id", async (req, res) => {
 		}
 
 		if (missingFields.length > 0) {
-			return res
-				.status(400)
-				.json({
-					error: `Missing required fields: ${missingFields.join(", ")}`,
-				});
+			return res.status(400).json({
+				error: `Missing required fields: ${missingFields.join(", ")}`,
+			});
 		}
 
 		// Validate platform
@@ -222,13 +215,9 @@ router.put("/:id", async (req, res) => {
 			"Other",
 		];
 		if (!validPlatforms.includes(platform)) {
-			return res
-				.status(400)
-				.json({
-					error: `Invalid platform. Must be one of: ${validPlatforms.join(
-						", "
-					)}`,
-				});
+			return res.status(400).json({
+				error: `Invalid platform. Must be one of: ${validPlatforms.join(", ")}`,
+			});
 		}
 
 		// Validate socialLink format
