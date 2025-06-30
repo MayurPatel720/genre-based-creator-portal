@@ -151,23 +151,23 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 	if (loading) {
 		return (
-			<div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
-				<header className="bg-white shadow-sm border-b border-gray-200 p-4 lg:p-6">
+			<div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-aureolin/5 via-white to-safety-orange/5">
+				<header className="bg-white shadow-lg border-b-2 border-aureolin p-4 lg:p-6">
 					<div className="flex flex-col space-y-4">
 						<div>
-							<Skeleton className="h-8 w-48 mb-2" />
-							<Skeleton className="h-4 w-32" />
+							<Skeleton className="h-8 w-48 mb-2 bg-aureolin/20" />
+							<Skeleton className="h-4 w-32 bg-safety-orange/20" />
 						</div>
 						<div className="flex items-center space-x-3">
-							<Skeleton className="h-10 flex-1" />
-							<Skeleton className="h-10 w-10" />
+							<Skeleton className="h-12 flex-1 bg-aureolin/10" />
+							<Skeleton className="h-12 w-12 bg-safety-orange/20" />
 						</div>
 					</div>
 				</header>
 				<div className="flex-1 overflow-y-auto p-4 lg:p-6">
 					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
 						{[...Array(8)].map((_, i) => (
-							<Skeleton key={i} className="h-64 w-full rounded-lg" />
+							<Skeleton key={i} className="h-64 w-full rounded-2xl bg-gradient-to-br from-aureolin/10 to-safety-orange/10" />
 						))}
 					</div>
 				</div>
@@ -177,19 +177,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 	if (error) {
 		return (
-			<div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+			<div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-aureolin/5 via-white to-safety-orange/5">
 				<div className="flex-1 flex items-center justify-center">
-					<div className="text-center">
-						<div className="text-red-400 mb-4">
+					<div className="text-center p-8 bg-white rounded-2xl shadow-xl border-2 border-safety-orange">
+						<div className="text-safety-orange mb-4">
 							<Users size={48} className="mx-auto" />
 						</div>
-						<h3 className="text-lg font-semibold text-gray-900 mb-2">
+						<h3 className="text-xl font-quinn font-bold text-gray-900 mb-2">
 							Failed to load creators
 						</h3>
-						<p className="text-gray-600">{error}</p>
+						<p className="text-gray-600 mb-4">{error}</p>
 						<button
 							onClick={() => window.location.reload()}
-							className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+							className="px-6 py-3 gradient-aureolin-orange text-black font-quinn font-semibold rounded-xl hover:gradient-orange-purple hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
 						>
 							Retry
 						</button>
@@ -200,15 +200,15 @@ const Dashboard: React.FC<DashboardProps> = ({
 	}
 
 	return (
-		<div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+		<div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-aureolin/5 via-white to-safety-orange/5">
 			{/* Header */}
-			<header className="bg-white shadow-sm border-b border-gray-200 p-4 lg:p-6">
+			<header className="bg-white shadow-xl border-b-2 border-aureolin p-4 lg:p-6">
 				<div className="flex flex-col space-y-4">
 					<div>
-						<h2 className="text-xl lg:text-2xl font-bold text-gray-900">
+						<h2 className="text-2xl lg:text-3xl font-quinn font-bold bg-gradient-to-r from-purpleureus via-safety-orange to-aureolin bg-clip-text text-transparent">
 							{activeGenre}
 						</h2>
-						<p className="text-gray-600 mt-1">
+						<p className="text-gray-700 mt-1 font-medium">
 							{filteredCreators.length} creator
 							{filteredCreators.length !== 1 ? "s" : ""} available
 						</p>
@@ -217,12 +217,12 @@ const Dashboard: React.FC<DashboardProps> = ({
 					{/* Search, Filter and Sort */}
 					<div className="flex items-center space-x-3">
 						<div className="relative flex-1">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+							<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purpleureus h-5 w-5" />
 							<Input
 								placeholder="Search creators..."
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-10 w-full"
+								className="pl-12 h-12 border-2 border-aureolin/30 focus:border-aureolin rounded-xl font-medium placeholder:text-gray-500 bg-white/80 backdrop-blur-sm"
 							/>
 						</div>
 
@@ -231,13 +231,13 @@ const Dashboard: React.FC<DashboardProps> = ({
 							onOpenChange={setShowFiltersDialog}
 						>
 							<DialogTrigger asChild>
-								<button className="p-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
-									<Filter size={18} className="text-gray-600" />
+								<button className="p-3 rounded-xl border-2 border-aureolin/30 hover:border-aureolin bg-white/80 backdrop-blur-sm hover:gradient-aureolin-orange transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+									<Filter size={20} className="text-purpleureus" />
 								</button>
 							</DialogTrigger>
-							<DialogContent className="sm:max-w-md">
+							<DialogContent className="sm:max-w-md border-2 border-aureolin rounded-2xl">
 								<DialogHeader>
-									<DialogTitle>Filter Creators</DialogTitle>
+									<DialogTitle className="font-quinn font-bold text-purpleureus">Filter Creators</DialogTitle>
 								</DialogHeader>
 								<Filters
 									filters={filters}
@@ -248,14 +248,14 @@ const Dashboard: React.FC<DashboardProps> = ({
 						</Dialog>
 
 						<Select value={sortBy} onValueChange={setSortBy}>
-							<SelectTrigger className="w-[140px]">
-								<ArrowUpDown size={16} className="mr-2" />
+							<SelectTrigger className="w-[160px] h-12 border-2 border-aureolin/30 focus:border-aureolin rounded-xl bg-white/80 backdrop-blur-sm font-medium">
+								<ArrowUpDown size={16} className="mr-2 text-purpleureus" />
 								<SelectValue />
 							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="followers">Followers</SelectItem>
-								<SelectItem value="views">Views</SelectItem>
-								<SelectItem value="price">Price</SelectItem>
+							<SelectContent className="border-2 border-aureolin rounded-xl bg-white">
+								<SelectItem value="followers" className="font-medium">Followers</SelectItem>
+								<SelectItem value="views" className="font-medium">Views</SelectItem>
+								<SelectItem value="price" className="font-medium">Price</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -264,7 +264,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 			{/* Content */}
 			<div className="flex-1 overflow-y-auto p-4 lg:p-6">
-				<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
 					{filteredCreators.map((creator) => (
 						<CreatorCard
 							key={creator._id}
@@ -275,16 +275,18 @@ const Dashboard: React.FC<DashboardProps> = ({
 				</div>
 
 				{filteredCreators.length === 0 && (
-					<div className="text-center py-12">
-						<div className="text-gray-400 mb-4">
-							<Users size={48} className="mx-auto" />
+					<div className="text-center py-16">
+						<div className="bg-white rounded-2xl shadow-xl border-2 border-aureolin p-8 max-w-md mx-auto">
+							<div className="text-safety-orange mb-6">
+								<Users size={64} className="mx-auto" />
+							</div>
+							<h3 className="text-xl font-quinn font-bold text-gray-900 mb-2">
+								No creators found
+							</h3>
+							<p className="text-gray-600 font-medium">
+								Try adjusting your search or filters
+							</p>
 						</div>
-						<h3 className="text-lg font-semibold text-gray-900 mb-2">
-							No creators found
-						</h3>
-						<p className="text-gray-600">
-							Try adjusting your search or filters
-						</p>
 					</div>
 				)}
 			</div>
