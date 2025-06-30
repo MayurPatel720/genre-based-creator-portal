@@ -67,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 	// Filter creators by genre
 	let filteredCreators =
-		activeGenre === "All Creators"
+		activeGenre === "AI Creators"
 			? creators
 			: creators.filter((creator) => creator.genre === activeGenre);
 
@@ -165,9 +165,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 					</div>
 				</header>
 				<div className="flex-1 overflow-y-auto p-4 lg:p-6">
-					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-						{[...Array(8)].map((_, i) => (
-							<Skeleton key={i} className="h-64 w-full rounded-lg" />
+					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
+						{[...Array(10)].map((_, i) => (
+							<Skeleton key={i} className="h-48 w-full rounded-lg" />
 						))}
 					</div>
 				</div>
@@ -189,7 +189,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 						<p className="text-gray-600">{error}</p>
 						<button
 							onClick={() => window.location.reload()}
-							className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+							className="mt-4 px-4 py-2 bg-safety-orange text-white rounded hover:bg-safety-orange/90"
 						>
 							Retry
 						</button>
@@ -264,7 +264,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 			{/* Content */}
 			<div className="flex-1 overflow-y-auto p-4 lg:p-6">
-				<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+				<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
 					{filteredCreators.map((creator) => (
 						<CreatorCard
 							key={creator._id}

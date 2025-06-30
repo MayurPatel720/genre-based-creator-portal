@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Dashboard from "../components/Dashboard";
@@ -6,7 +7,7 @@ import { Creator } from "../types/Creator";
 import { Menu, X } from "lucide-react";
 
 const Index = () => {
-	const [activeGenre, setActiveGenre] = useState("All Creators");
+	const [activeGenre, setActiveGenre] = useState("AI Creators");
 	const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -39,12 +40,11 @@ const Index = () => {
 						<div className="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 md:hidden">
 							<div className="p-4 border-b border-gray-200 flex items-center justify-between">
 								<div>
-									<h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-										CreatorHub
-									</h1>
-									<p className="text-sm text-gray-600 mt-1">
-										Discover amazing creators
-									</p>
+									<img
+										src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
+										alt="logo"
+										className="h-12 w-auto"
+									/>
 								</div>
 								<button
 									onClick={() => setIsMobileMenuOpen(false)}
@@ -55,12 +55,11 @@ const Index = () => {
 							</div>
 							<nav className="flex-1 p-2 space-y-1">
 								{[
-									{ name: "All Creators", icon: "Users" },
-									{ name: "Video Editing/AI", icon: "Video" },
-									{ name: "Tips & Tricks/AI", icon: "Lightbulb" },
-									{ name: "Tech Products", icon: "Laptop" },
-									{ name: "Lifestyle", icon: "Heart" },
-									{ name: "Business", icon: "Building2" },
+									{ name: "AI Creators" },
+									{ name: "Video Editing" },
+									{ name: "Tech Products" },
+									{ name: "Business" },
+									{ name: "Lifestyle" },
 								].map((genre) => {
 									const isActive = activeGenre === genre.name;
 
@@ -70,8 +69,8 @@ const Index = () => {
 											onClick={() => handleGenreChange(genre.name)}
 											className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left ${
 												isActive
-													? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
-													: "text-gray-700 hover:bg-gray-100 hover:text-purple-600"
+													? "bg-gradient-to-r from-aureolin to-safety-orange text-black shadow-lg"
+													: "text-gray-700 hover:bg-gray-100 hover:text-safety-orange"
 											}`}
 										>
 											<span className="font-medium">{genre.name}</span>
@@ -97,9 +96,11 @@ const Index = () => {
 						>
 							<Menu size={24} />
 						</button>
-						<h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-							CreatorHub
-						</h1>
+						<img
+							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
+							alt="logo"
+							className="h-8 w-auto"
+						/>
 						<div className="w-10" />
 					</div>
 

@@ -1,14 +1,13 @@
+
 import React from "react";
 import {
 	Users,
 	Video,
-	Lightbulb,
 	Laptop,
-	Heart,
 	Building2,
+	Heart,
 	ChevronLeft,
 	ChevronRight,
-	Icon,
 	MessageCircleMore,
 } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
@@ -21,12 +20,11 @@ interface SidebarProps {
 }
 
 const genres = [
-	{ name: "All Creators", icon: Users },
-	{ name: "Video Editing/AI", icon: Video },
-	{ name: "Tips & Tricks/AI", icon: Lightbulb },
+	{ name: "AI Creators", icon: Users },
+	{ name: "Video Editing", icon: Video },
 	{ name: "Tech Products", icon: Laptop },
-	{ name: "Lifestyle", icon: Heart },
 	{ name: "Business", icon: Building2 },
+	{ name: "Lifestyle", icon: Heart },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -48,13 +46,17 @@ const Sidebar: React.FC<SidebarProps> = ({
 						<img
 							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
 							alt="logo"
+							className="h-12 w-auto object-contain"
 						/>
-						{/* <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-							Creators Dream
-						</h1>
-						<p className="text-sm text-gray-600 mt-1">
-							Discover amazing creators
-						</p> */}
+					</div>
+				)}
+				{isCollapsed && (
+					<div className="w-full flex justify-center">
+						<img
+							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
+							alt="logo"
+							className="h-8 w-auto object-contain"
+						/>
 					</div>
 				)}
 				<button
@@ -77,8 +79,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 							onClick={() => onGenreChange(genre.name)}
 							className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left relative group ${
 								isActive
-									? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
-									: "text-gray-700 hover:bg-gray-100 hover:text-purple-600"
+									? "bg-gradient-to-r from-aureolin to-safety-orange text-black shadow-lg"
+									: "text-gray-700 hover:bg-gray-100 hover:text-safety-orange"
 							}`}
 							title={isCollapsed ? genre.name : undefined}
 						>
