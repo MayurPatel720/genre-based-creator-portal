@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Creator } from "../types/Creator";
 import { Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
@@ -12,73 +11,68 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 	const renderPlatformIcon = () => {
 		switch (creator.platform?.toLowerCase()) {
 			case "instagram":
-				return <Instagram size={20} className="text-safety-orange" />;
+				return <Instagram size={20} className="text-pink-500" />;
 			case "youtube":
 				return <Youtube size={20} className="text-red-500" />;
 			case "linkedin":
-				return <Linkedin size={20} className="text-purpleureus" />;
+				return <Linkedin size={20} className="text-blue-500" />;
 			case "twitter":
 				return <Twitter size={20} className="text-sky-400" />;
 			default:
-				return <Instagram size={20} className="text-safety-orange" />;
+				return <Instagram size={20} className="text-gray-500" />; // Default with neutral color
 		}
 	};
 
 	return (
 		<button
 			onClick={onClick}
-			className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 w-full text-left border-2 border-transparent hover:border-aureolin focus:outline-none focus:ring-4 focus:ring-aureolin/30 relative overflow-hidden group transform hover:scale-105"
+			className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 w-full text-left border border-gray-100 hover:border-gradient focus:outline-none focus:ring-2 focus:ring-purple-300 relative overflow-hidden group"
 			aria-label={`View profile of ${creator.name}, ${
 				creator.details?.analytics.followers || 0
 			}K followers on ${creator.platform || "unknown platform"}`}
 		>
 			{/* Gradient Border Effect */}
-			<div className="absolute inset-0 gradient-aureolin-orange opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-2xl p-0.5">
-				<div className="bg-white rounded-2xl h-full w-full" />
+			<div className="absolute inset-0 border-2 border-transparent rounded-xl pointer-events-none  group-hover:from-purple-500 group-hover:to-pink-500 transition-all duration-300" />
+
+			<div className="relative aspect-square overflow-hidden rounded-t-xl bg-gray-100">
+				<img
+					src={creator.avatar || "/fallback-avatar.png"} // Fallback image
+					alt={`${creator.name}'s avatar`}
+					className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+					loading="lazy" // Lazy load for performance
+					onError={(e) => {
+						(e.target as HTMLImageElement).src = "/fallback-avatar.png"; // Fallback on error
+					}}
+				/>
+				{/* Overlay for premium feel */}
+				<div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 			</div>
 
-			<div className="relative">
-				<div className="aspect-square overflow-hidden rounded-t-2xl bg-gradient-to-br from-aureolin/20 to-safety-orange/20">
-					<img
-						src={creator.avatar || "/fallback-avatar.png"}
-						alt={`${creator.name}'s avatar`}
-						className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-						loading="lazy"
-						onError={(e) => {
-							(e.target as HTMLImageElement).src = "/fallback-avatar.png";
-						}}
-					/>
-					{/* Overlay for premium feel */}
-					<div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-aureolin/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-				</div>
-
-				<div className="p-4 relative z-10 bg-white rounded-b-2xl">
-					<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-						<div className="flex-1">
-							<h3
-								className="text-lg font-quinn font-bold text-gray-900 hover:text-purpleureus transition-colors truncate"
-								title={creator.name}
-							>
-								{creator.name}
-							</h3>
-							{creator.location && (
-								<p className="text-sm text-gray-600 font-medium">{creator.location}</p>
-							)}
-						</div>
-						<a
-							href={creator.socialLink || "https://www.instagram.com/saarvendra/"}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="flex items-center gap-2 gradient-aureolin-orange hover:gradient-orange-purple text-black hover:text-white px-4 py-2 rounded-full text-sm font-quinn font-semibold transition-all duration-300 whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-white"
-							aria-label={`Visit ${creator.name}'s ${
-								creator.platform || "Instagram"
-							} profile`}
-							onClick={(e) => e.stopPropagation()}
+			<div className="p-4">
+				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+					<div>
+						<h3
+							className="text-lg font-medium text-gray-900 hover:text-purple-600 transition-colors truncate max-w-[80%] sm:max-w-full"
+							title={creator.name} // Full name on hover
 						>
-							{renderPlatformIcon()} 
-							<span>Visit</span>
-						</a>
+							{creator.name}
+						</h3>
+						{creator.details?.analytics.followers && (
+							<p className="text-sm text-gray-500">{creator.location}</p>
+						)}
 					</div>
+					<a
+						href={creator.socialLink || "https://www.instagram.com/saarvendra/"}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="flex items-center gap-2 bg-gray-100 hover:bg-purple-100 text-gray-700 hover:text-purple-700 px-3 py-1 rounded-full text-sm transition-colors whitespace-nowrap"
+						aria-label={`Visit ${creator.name}'s ${
+							creator.platform || "Instagram"
+						} profile`}
+						onClick={(e) => e.stopPropagation()}
+					>
+						{renderPlatformIcon()} Visit
+					</a>
 				</div>
 			</div>
 		</button>

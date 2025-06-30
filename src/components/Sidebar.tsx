@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
 	Users,
@@ -9,6 +8,7 @@ import {
 	Building2,
 	ChevronLeft,
 	ChevronRight,
+	Icon,
 	MessageCircleMore,
 } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
@@ -37,35 +37,36 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
 	return (
 		<div
-			className={`fixed left-0 top-0 h-full bg-white shadow-2xl border-r-2 border-aureolin transition-all duration-300 z-30 ${
+			className={`fixed left-0 top-0 h-full bg-white shadow-xl border-r border-gray-200 transition-all duration-300 z-30 ${
 				isCollapsed ? "w-16" : "w-64"
 			} flex flex-col`}
 		>
 			{/* Header */}
-			<div className="p-4 border-b-2 border-aureolin flex items-center justify-between bg-gradient-to-r from-aureolin/10 to-safety-orange/10">
+			<div className="p-4 border-b border-gray-200 flex items-center justify-between">
 				{!isCollapsed && (
 					<div className="w-full">
 						<img
 							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
 							alt="logo"
-							className="max-w-full h-auto"
 						/>
+						{/* <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+							Creators Dream
+						</h1>
+						<p className="text-sm text-gray-600 mt-1">
+							Discover amazing creators
+						</p> */}
 					</div>
 				)}
 				<button
 					onClick={onToggleCollapse}
-					className="p-2 rounded-xl hover:bg-aureolin/20 transition-all duration-200 border-2 border-transparent hover:border-aureolin"
+					className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
 				>
-					{isCollapsed ? (
-						<ChevronRight size={20} className="text-purpleureus" />
-					) : (
-						<ChevronLeft size={20} className="text-purpleureus" />
-					)}
+					{isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
 				</button>
 			</div>
 
 			{/* Navigation */}
-			<nav className="flex-1 p-3 space-y-2">
+			<nav className="flex-1 p-2 space-y-1">
 				{genres.map((genre) => {
 					const Icon = genre.icon;
 					const isActive = activeGenre === genre.name;
@@ -74,21 +75,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 						<button
 							key={genre.name}
 							onClick={() => onGenreChange(genre.name)}
-							className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 text-left relative group font-medium ${
+							className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left relative group ${
 								isActive
-									? "gradient-aureolin-orange text-black shadow-lg transform scale-105 border-2 border-safety-orange"
-									: "text-gray-800 hover:bg-gradient-to-r hover:from-aureolin/20 hover:to-safety-orange/20 hover:text-purpleureus border-2 border-transparent hover:border-aureolin/50"
+									? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
+									: "text-gray-700 hover:bg-gray-100 hover:text-purple-600"
 							}`}
 							title={isCollapsed ? genre.name : undefined}
 						>
 							<Icon size={20} className="flex-shrink-0" />
 							{!isCollapsed && (
-								<span className="font-quinn font-semibold">{genre.name}</span>
+								<span className="font-medium">{genre.name}</span>
 							)}
 
 							{/* Tooltip */}
 							{isCollapsed && (
-								<div className="absolute left-full ml-3 px-3 py-2 bg-black text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-aureolin">
+								<div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
 									{genre.name}
 								</div>
 							)}
@@ -98,11 +99,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 			</nav>
 
 			{/* WhatsApp Button at Bottom */}
-			<div className="p-4 border-t-2 border-aureolin mt-auto bg-gradient-to-r from-aureolin/5 to-safety-orange/5">
+			<div className="p-4 border-t border-gray-200 mt-auto">
 				{isCollapsed ? (
-					<div className="flex justify-center">
-						<MessageCircleMore className="text-purpleureus" size={24} />
-					</div>
+					<MessageCircleMore className="ml-1" />
 				) : (
 					<WhatsAppButton variant="sidebar" />
 				)}
