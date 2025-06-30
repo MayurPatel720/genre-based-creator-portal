@@ -1,5 +1,4 @@
 
-
 import { Creator } from "../types/Creator";
 
 export const mockCreators: Creator[] = [
@@ -13,7 +12,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.instagram.com/sarahchen",
 		location: "USA",
 		details: {
-			location: "USA",
 			bio: "AI researcher and content creator specializing in machine learning tutorials and tech reviews. I break down complex AI concepts into digestible content for everyone.",
 			analytics: {
 				followers: 45000,
@@ -41,7 +39,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.youtube.com/marcusthompson",
 		location: "Canada",
 		details: {
-			location: "Canada",
 			bio: "Former Google AI engineer turned content creator. I share insights about AI development, career advice, and the latest industry trends.",
 			analytics: {
 				followers: 67000,
@@ -69,7 +66,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.tiktok.com/@emmarodriguez",
 		location: "UK",
 		details: {
-			location: "UK",
 			bio: "Professional video editor using AI tools to revolutionize content creation. I teach efficient editing workflows and AI-powered techniques.",
 			analytics: {
 				followers: 38000,
@@ -96,7 +92,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.instagram.com/alexkim",
 		location: "Australia",
 		details: {
-			location: "Australia",
 			bio: "Productivity hacker and AI enthusiast. I discover and share the best AI tools and techniques to boost productivity and creativity.",
 			analytics: {
 				followers: 52000,
@@ -124,7 +119,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.youtube.com/davidpark",
 		location: "India",
 		details: {
-			location: "India",
 			bio: "Tech reviewer with 8 years of experience. I provide honest, in-depth reviews of the latest gadgets, software, and tech innovations.",
 			analytics: {
 				followers: 89000,
@@ -152,7 +146,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.instagram.com/isabellamartinez",
 		location: "USA",
 		details: {
-			location: "USA",
 			bio: "Lifestyle content creator focusing on wellness, fashion, and daily inspiration. I share authentic moments and practical lifestyle tips.",
 			analytics: {
 				followers: 125000,
@@ -180,7 +173,6 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.twitter.com/robertjohnson",
 		location: "Other",
 		details: {
-			location: "Other",
 			bio: "Serial entrepreneur and business coach. I share startup insights, investment tips, and practical business strategies for growth.",
 			analytics: {
 				followers: 78000,
@@ -199,4 +191,3 @@ export const mockCreators: Creator[] = [
 		},
 	},
 ];
-
