@@ -20,11 +20,20 @@ interface CreatorModalProps {
 const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	const [selectedMedia, setSelectedMedia] = useState<any>(null);
 
-	const formatNumber = (num: number | undefined | null) => {
-		if (!num || isNaN(num)) return "0";
-		if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
-		if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+	const formatNumber = (num: number) => {
+		if (num >= 1000000) {
+			return `${(num / 1000000).toFixed(1)}M`;
+		} else if (num >= 1000) {
+			return `${(num / 1000).toFixed(1)}K`;
+		}
 		return num.toString();
+	};
+
+	const calculateAverageViews = () => {
+		const followers = creator.details?.analytics?.followers || 0;
+		const totalViews = creator.details?.analytics?.totalViews || 0;
+		if (followers === 0) return 0;
+		return Math.round((totalViews / followers) * 100) / 100;
 	};
 
 	return (
