@@ -1,4 +1,5 @@
 
+
 import { Creator } from '../types/Creator';
 
 export const mockCreators: Creator[] = [
@@ -11,6 +12,7 @@ export const mockCreators: Creator[] = [
     socialLink: "https://youtube.com/@alexchen",
     location: "San Francisco",
     details: {
+      pricing: { rate: 500, currency: "USD", type: "per_video" },
       location: "San Francisco",
       bio: "AI researcher and content creator sharing insights about machine learning and artificial intelligence.",
       analytics: {
@@ -36,6 +38,7 @@ export const mockCreators: Creator[] = [
     socialLink: "https://instagram.com/sarahvideo",
     location: "Los Angeles",
     details: {
+      pricing: { rate: 750, currency: "USD", type: "per_project" },
       location: "Los Angeles",
       bio: "Professional video editor and filmmaker creating stunning visual content.",
       analytics: {
@@ -61,6 +64,7 @@ export const mockCreators: Creator[] = [
     socialLink: "https://tiktok.com/@mikejohnson",
     location: "Austin",
     details: {
+      pricing: { rate: 1000, currency: "USD", type: "per_campaign" },
       location: "Austin",
       bio: "Tech product reviewer and gadget enthusiast showcasing the latest innovations.",
       analytics: {
@@ -86,6 +90,7 @@ export const mockCreators: Creator[] = [
     socialLink: "https://linkedin.com/in/emmadavis",
     location: "New York",
     details: {
+      pricing: { rate: 800, currency: "USD", type: "per_post" },
       location: "New York",
       bio: "Business strategist and entrepreneur sharing insights on growth and leadership.",
       analytics: {
@@ -111,6 +116,7 @@ export const mockCreators: Creator[] = [
     socialLink: "https://instagram.com/jameswilson",
     location: "Miami",
     details: {
+      pricing: { rate: 600, currency: "USD", type: "per_collaboration" },
       location: "Miami",
       bio: "Lifestyle influencer focused on fitness, travel, and wellness content.",
       analytics: {
@@ -128,3 +134,4 @@ export const mockCreators: Creator[] = [
     }
   }
 ];
+
