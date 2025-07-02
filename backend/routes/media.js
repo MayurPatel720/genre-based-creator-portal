@@ -24,6 +24,9 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
     const { creatorId } = req.params;
     const { caption } = req.body;
 
+    console.log('Upload request received for creator:', creatorId);
+    console.log('File info:', req.file);
+
     if (!req.file) {
       return res.status(400).json({ error: 'Media file is required' });
     }
@@ -33,15 +36,18 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
       return res.status(404).json({ error: 'Creator not found' });
     }
 
+    // Create media object with proper structure
     const mediaFile = {
-      id: req.file.public_id,
+      id: req.file.public_id || `media_${Date.now()}`, // Ensure id is always present
       type: req.file.resource_type === 'video' ? 'video' : 'image',
-      url: req.file.secure_url,
+      url: req.file.secure_url || req.file.url, // Ensure url is always present
       thumbnail: req.file.resource_type === 'video' ? 
-        req.file.secure_url.replace(/\.[^/.]+$/, '.jpg') : req.file.secure_url,
+        req.file.secure_url.replace(/\.[^/.]+$/, '.jpg') : (req.file.secure_url || req.file.url),
       caption: caption || '',
       createdAt: new Date(),
     };
+
+    console.log('Created media object:', mediaFile);
 
     // Initialize media array if it doesn't exist
     if (!creator.details.media) {
@@ -52,10 +58,11 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
     
     await creator.save();
 
+    console.log('Media added successfully');
     res.status(201).json(mediaFile);
   } catch (error) {
     console.error('Error adding media:', error);
-    res.status(500).json({ error: 'Failed to add media' });
+    res.status(500).json({ error: 'Failed to add media', details: error.message });
   }
 });
 

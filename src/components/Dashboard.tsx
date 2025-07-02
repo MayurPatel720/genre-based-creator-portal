@@ -48,60 +48,61 @@ const Dashboard: React.FC<DashboardProps> = ({
 		},
 	});
 
+	// Use mock data if API fails or returns empty array
 	const allCreators: Creator[] =
 		Array.isArray(creators) && creators.length > 0 ? creators : mockCreators;
 
-	const filteredCreators = useMemo(() => {
-		return allCreators.filter((creator) => {
-			// Genre filter - Fixed to match exact genre
-			if (activeGenre !== "All Creators") {
-				// Check if creator.genre matches the activeGenre exactly
-				if (creator.genre !== activeGenre) {
-					return false;
-				}
-			}
+	console.log('Active genre:', activeGenre);
+	console.log('All creators:', allCreators);
 
-			// Search filter
-			if (searchTerm.trim()) {
-				const searchLower = searchTerm.toLowerCase();
+	const filteredCreators = useMemo(() => {
+		let filtered = allCreators;
+
+		// Genre filter - Fixed logic
+		if (activeGenre !== "All Creators") {
+			filtered = filtered.filter((creator) => {
+				console.log(`Comparing creator genre "${creator.genre}" with activeGenre "${activeGenre}"`);
+				return creator.genre === activeGenre;
+			});
+			console.log(`Found ${filtered.length} creators for genre: ${activeGenre}`);
+		}
+
+		// Search filter
+		if (searchTerm.trim()) {
+			const searchLower = searchTerm.toLowerCase();
+			filtered = filtered.filter((creator) => {
 				const nameMatch = creator.name.toLowerCase().includes(searchLower);
 				const tagsMatch = creator.details?.tags?.some((tag) =>
 					tag.toLowerCase().includes(searchLower)
 				);
 				const genreMatch = creator.genre.toLowerCase().includes(searchLower);
-				if (!nameMatch && !tagsMatch && !genreMatch) return false;
-			}
+				return nameMatch || tagsMatch || genreMatch;
+			});
+		}
 
-			// Platform filter
-			if (filters.platform !== "All") {
-				if (
-					creator.platform?.toLowerCase() !== filters.platform.toLowerCase()
-				) {
-					return false;
-				}
-			}
+		// Platform filter
+		if (filters.platform !== "All") {
+			filtered = filtered.filter((creator) => 
+				creator.platform?.toLowerCase() === filters.platform.toLowerCase()
+			);
+		}
 
-			// Location filter
-			if (filters.locations.length > 0) {
-				const creatorLocation =
-					creator.location || creator.details?.location || "";
-				if (!filters.locations.includes(creatorLocation)) {
-					return false;
-				}
-			}
+		// Location filter
+		if (filters.locations.length > 0) {
+			filtered = filtered.filter((creator) => {
+				const creatorLocation = creator.location || creator.details?.location || "";
+				return filters.locations.includes(creatorLocation);
+			});
+		}
 
-			// Followers range filter
+		// Followers range filter
+		const followersInRange = filtered.filter((creator) => {
 			const followers = creator.details?.analytics?.followers || 0;
 			const followersInK = followers / 1000;
-			if (
-				followersInK < filters.followersRange[0] ||
-				followersInK > filters.followersRange[1]
-			) {
-				return false;
-			}
-
-			return true;
+			return followersInK >= filters.followersRange[0] && followersInK <= filters.followersRange[1];
 		});
+
+		return followersInRange;
 	}, [allCreators, activeGenre, searchTerm, filters]);
 
 	const handleClearFilters = () => {
@@ -192,7 +193,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto">
-					<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
 						{filteredCreators.map((creator) => (
 							<CreatorCard
 								key={creator._id || creator.name}

@@ -1,193 +1,130 @@
 
-import { Creator } from "../types/Creator";
+import { Creator } from '../types/Creator';
 
 export const mockCreators: Creator[] = [
-	{
-		_id: "1",
-		genre: "AI Creators",
-		avatar:
-			"https://www.baltana.com/files/wallpapers-2/Coat-Background-Wallpaper-06018.jpg",
-		name: "Sarah Chen",
-		platform: "Instagram",
-		socialLink: "https://www.instagram.com/sarahchen",
-		location: "USA",
-		details: {
-			location: "USA",
-			bio: "AI researcher and content creator specializing in machine learning tutorials and tech reviews. I break down complex AI concepts into digestible content for everyone.",
-			analytics: {
-				followers: 45000,
-				engagement: "8.5%",
-				totalViews: 2100000,
-				averageViews: 15000,
-			},
-			reels: [
-				"AI Basics Explained",
-				"ChatGPT Tips & Tricks",
-				"Future of AI",
-				"Machine Learning 101",
-			],
-			tags: ["AI", "Machine Learning", "Tech Reviews"],
-		},
-	},
-	{
-		_id: "2",
-		genre: "AI Creators",
-		avatar:
-			"https://userscontent2.emaze.com/images/1aaf7c9f-b050-4340-8a5a-da3641700cfd/59c564559f89d017b81cffff6c0b8324.jpeg",
-		name: "Marcus Thompson",
-		platform: "YouTube",
-		socialLink: "https://www.youtube.com/marcusthompson",
-		location: "Canada",
-		details: {
-			location: "Canada",
-			bio: "Former Google AI engineer turned content creator. I share insights about AI development, career advice, and the latest industry trends.",
-			analytics: {
-				followers: 67000,
-				engagement: "12.1%",
-				totalViews: 3400000,
-				averageViews: 25000,
-			},
-			reels: [
-				"AI Career Path",
-				"Google AI Secrets",
-				"Coding with AI",
-				"Industry Insights",
-			],
-			tags: ["AI Development", "Career Advice", "Industry Insights"],
-		},
-	},
-	{
-		_id: "3",
-		genre: "Video Editing",
-		avatar:
-			"https://www.blackpantera.ru/upload/iblock/265/Znachenie-imeni-Darina.jpg",
-		name: "Emma Rodriguez",
-		platform: "TikTok",
-		socialLink: "https://www.tiktok.com/@emmarodriguez",
-		location: "UK",
-		details: {
-			location: "UK",
-			bio: "Professional video editor using AI tools to revolutionize content creation. I teach efficient editing workflows and AI-powered techniques.",
-			analytics: {
-				followers: 38000,
-				engagement: "9.7%",
-				totalViews: 1800000,
-				averageViews: 12000,
-			},
-			reels: [
-				"AI Video Magic",
-				"Editing Shortcuts",
-				"Color Grading AI",
-				"Speed Editing",
-			],
-			tags: ["Video Editing", "AI Tools", "Workflow Optimization"],
-		},
-	},
-	{
-		_id: "4",
-		genre: "Tech Product",
-		avatar: "https://bouzdira.com/public/web/images/team_3.jpg",
-		name: "Alex Kim",
-		platform: "Instagram",
-		socialLink: "https://www.instagram.com/alexkim",
-		location: "Australia",
-		details: {
-			location: "Australia",
-			bio: "Productivity hacker and AI enthusiast. I discover and share the best AI tools and techniques to boost productivity and creativity.",
-			analytics: {
-				followers: 52000,
-				engagement: "11.3%",
-				totalViews: 2500000,
-				averageViews: 18000,
-			},
-			reels: [
-				"AI Productivity Hacks",
-				"Hidden AI Features",
-				"Automation Tips",
-				"Life Hacks with AI",
-			],
-			tags: ["Productivity", "AI Tools", "Life Hacks"],
-		},
-	},
-	{
-		_id: "5",
-		genre: "Tech Product",
-		avatar:
-			"https://avatars.mds.yandex.net/get-shedevrum/11509417/img_d4595c4d23f911ef8090eaa30d96aef9/orig",
-		name: "David Park",
-		platform: "YouTube",
-		socialLink: "https://www.youtube.com/davidpark",
-		location: "India",
-		details: {
-			location: "India",
-			bio: "Tech reviewer with 8 years of experience. I provide honest, in-depth reviews of the latest gadgets, software, and tech innovations.",
-			analytics: {
-				followers: 89000,
-				engagement: "7.8%",
-				totalViews: 5200000,
-				averageViews: 35000,
-			},
-			reels: [
-				"iPhone 15 Review",
-				"Best Tech 2024",
-				"Gadget Unboxing",
-				"Tech Comparisons",
-			],
-			tags: ["Tech Reviews", "Gadgets", "Product Testing"],
-		},
-	},
-	{
-		_id: "6",
-		genre: "Lifestyle",
-		avatar:
-			"https://images.hdqwalls.com/download/lauren-budd-new-wallpaper-2880x1800.jpg",
-		name: "Isabella Martinez",
-		platform: "Instagram",
-		socialLink: "https://www.instagram.com/isabellamartinez",
-		location: "USA",
-		details: {
-			location: "USA",
-			bio: "Lifestyle content creator focusing on wellness, fashion, and daily inspiration. I share authentic moments and practical lifestyle tips.",
-			analytics: {
-				followers: 125000,
-				engagement: "15.2%",
-				totalViews: 6800000,
-				averageViews: 45000,
-			},
-			reels: [
-				"Morning Routines",
-				"Fashion Hauls",
-				"Wellness Tips",
-				"Daily Vlogs",
-			],
-			tags: ["Lifestyle", "Fashion", "Wellness"],
-		},
-	},
-	{
-		_id: "7",
-		genre: "Business",
-		avatar:
-			"https://resources.learnquest.com/wp-content/uploads/2024/04/Business-Leader-with-Generative-AI-1024x538.jpg",
-		name: "Robert Johnson",
-		platform: "Twitter",
-		socialLink: "https://www.twitter.com/robertjohnson",
-		location: "Other",
-		details: {
-			location: "Other",
-			bio: "Serial entrepreneur and business coach. I share startup insights, investment tips, and practical business strategies for growth.",
-			analytics: {
-				followers: 78000,
-				engagement: "10.5%",
-				totalViews: 4100000,
-				averageViews: 28000,
-			},
-			reels: [
-				"Startup Secrets",
-				"Investment Tips",
-				"Business Growth",
-				"Entrepreneur Life",
-			],
-			tags: ["Entrepreneurship", "Business Strategy", "Investment"],
-		},
-	},
+  {
+    _id: "1",
+    name: "Alex Chen",
+    genre: "AI Creators",
+    avatar: "https://res.cloudinary.com/ds7bybp6g/image/upload/v1750434659761/alex-chen_avatar.jpg",
+    platform: "YouTube",
+    socialLink: "https://youtube.com/@alexchen",
+    location: "San Francisco",
+    details: {
+      location: "San Francisco",
+      bio: "AI researcher and content creator sharing insights about machine learning and artificial intelligence.",
+      analytics: {
+        followers: 250000,
+        totalViews: 5200000,
+        averageViews: 45000,
+        engagement: "4.2%"
+      },
+      reels: [
+        "https://youtube.com/watch?v=ai-tutorial-1",
+        "https://youtube.com/watch?v=ai-tutorial-2"
+      ],
+      tags: ["AI", "Machine Learning", "Tech", "Education"],
+      media: []
+    }
+  },
+  {
+    _id: "2", 
+    name: "Sarah Rodriguez",
+    genre: "Video Editing",
+    avatar: "https://res.cloudinary.com/ds7bybp6g/image/upload/v1750434659761/sarah-rodriguez_avatar.jpg",
+    platform: "Instagram",
+    socialLink: "https://instagram.com/sarahvideo",
+    location: "Los Angeles",
+    details: {
+      location: "Los Angeles",
+      bio: "Professional video editor and filmmaker creating stunning visual content.",
+      analytics: {
+        followers: 180000,
+        totalViews: 3800000,
+        averageViews: 32000,
+        engagement: "5.1%"
+      },
+      reels: [
+        "https://instagram.com/reel/video-edit-1",
+        "https://instagram.com/reel/video-edit-2"
+      ],
+      tags: ["Video Editing", "Filmmaking", "Creative", "Adobe"],
+      media: []
+    }
+  },
+  {
+    _id: "3",
+    name: "Mike Johnson",
+    genre: "Tech Product",
+    avatar: "https://res.cloudinary.com/ds7bybp6g/image/upload/v1750434659761/mike-johnson_avatar.jpg",
+    platform: "TikTok",
+    socialLink: "https://tiktok.com/@mikejohnson",
+    location: "Austin",
+    details: {
+      location: "Austin",
+      bio: "Tech product reviewer and gadget enthusiast showcasing the latest innovations.",
+      analytics: {
+        followers: 420000,
+        totalViews: 8900000,
+        averageViews: 67000,
+        engagement: "6.3%"
+      },
+      reels: [
+        "https://tiktok.com/@mikejohnson/video1",
+        "https://tiktok.com/@mikejohnson/video2"
+      ],
+      tags: ["Tech Reviews", "Gadgets", "Innovation", "Unboxing"],
+      media: []
+    }
+  },
+  {
+    _id: "4",
+    name: "Emma Davis",
+    genre: "Business",
+    avatar: "https://res.cloudinary.com/ds7bybp6g/image/upload/v1750434659761/emma-davis_avatar.jpg",
+    platform: "LinkedIn",
+    socialLink: "https://linkedin.com/in/emmadavis",
+    location: "New York",
+    details: {
+      location: "New York",
+      bio: "Business strategist and entrepreneur sharing insights on growth and leadership.",
+      analytics: {
+        followers: 95000,
+        totalViews: 1200000,
+        averageViews: 18000,
+        engagement: "3.8%"
+      },
+      reels: [
+        "https://linkedin.com/posts/emmadavis-video1",
+        "https://linkedin.com/posts/emmadavis-video2"
+      ],
+      tags: ["Business", "Entrepreneurship", "Leadership", "Strategy"],
+      media: []
+    }
+  },
+  {
+    _id: "5",
+    name: "James Wilson",
+    genre: "Lifestyle",
+    avatar: "https://res.cloudinary.com/ds7bybp6g/image/upload/v1750434659761/james-wilson_avatar.jpg",
+    platform: "Instagram",
+    socialLink: "https://instagram.com/jameswilson",
+    location: "Miami",
+    details: {
+      location: "Miami",
+      bio: "Lifestyle influencer focused on fitness, travel, and wellness content.",
+      analytics: {
+        followers: 320000,
+        totalViews: 6700000,
+        averageViews: 52000,
+        engagement: "7.2%"
+      },
+      reels: [
+        "https://instagram.com/reel/lifestyle1",
+        "https://instagram.com/reel/lifestyle2"
+      ],
+      tags: ["Lifestyle", "Fitness", "Travel", "Wellness"],
+      media: []
+    }
+  }
 ];
