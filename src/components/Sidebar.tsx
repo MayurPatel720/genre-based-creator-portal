@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
 	Users,
@@ -46,16 +47,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 					<div className="w-full">
 						<img
 							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
-							alt="logo"
-							className="h-10 w-auto object-contain"
+							alt="CreatorDream Logo"
+							className="h-8 w-auto object-contain"
 						/>
 					</div>
 				) : (
 					<div className="w-full flex items-center justify-center">
 						<img
-							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png" // Use a smaller version or crop if available
-							alt="logo"
-							className="h-8 w-auto object-contain"
+							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
+							alt="CreatorDream Logo"
+							className="h-6 w-auto object-contain"
 						/>
 					</div>
 				)}

@@ -58,11 +58,25 @@ const Dashboard: React.FC<DashboardProps> = ({
 	const filteredCreators = useMemo(() => {
 		let filtered = allCreators;
 
-		// Genre filter - Fixed logic
+		// Genre filter - Fixed logic with exact matching
 		if (activeGenre !== "All Creators") {
 			filtered = filtered.filter((creator) => {
 				console.log(`Comparing creator genre "${creator.genre}" with activeGenre "${activeGenre}"`);
-				return creator.genre === activeGenre;
+				// Handle exact matching and common variations
+				const creatorGenre = creator.genre.trim();
+				const targetGenre = activeGenre.trim();
+				
+				// Direct match
+				if (creatorGenre === targetGenre) return true;
+				
+				// Handle plural/singular variations
+				if (targetGenre === "AI Creators" && creatorGenre === "AI Creators") return true;
+				if (targetGenre === "Video Editing" && creatorGenre === "Video Editing") return true;
+				if (targetGenre === "Tech Product" && (creatorGenre === "Tech Product" || creatorGenre === "Tech Products")) return true;
+				if (targetGenre === "Business" && creatorGenre === "Business") return true;
+				if (targetGenre === "Lifestyle" && creatorGenre === "Lifestyle") return true;
+				
+				return false;
 			});
 			console.log(`Found ${filtered.length} creators for genre: ${activeGenre}`);
 		}
@@ -193,7 +207,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto">
-					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 						{filteredCreators.map((creator) => (
 							<CreatorCard
 								key={creator._id || creator.name}

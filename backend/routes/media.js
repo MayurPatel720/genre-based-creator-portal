@@ -36,13 +36,13 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
       return res.status(404).json({ error: 'Creator not found' });
     }
 
-    // Create media object with proper structure
+    // Create media object with proper structure - FIX: Use req.file.path instead of secure_url
     const mediaFile = {
-      id: req.file.public_id || `media_${Date.now()}`, // Ensure id is always present
+      id: req.file.public_id || req.file.filename || `media_${Date.now()}`,
       type: req.file.resource_type === 'video' ? 'video' : 'image',
-      url: req.file.secure_url || req.file.url, // Ensure url is always present
+      url: req.file.path || req.file.secure_url, // Use path which contains the full URL
       thumbnail: req.file.resource_type === 'video' ? 
-        req.file.secure_url.replace(/\.[^/.]+$/, '.jpg') : (req.file.secure_url || req.file.url),
+        (req.file.path || req.file.secure_url).replace(/\.[^/.]+$/, '.jpg') : (req.file.path || req.file.secure_url),
       caption: caption || '',
       createdAt: new Date(),
     };
