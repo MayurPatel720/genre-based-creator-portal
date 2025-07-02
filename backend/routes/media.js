@@ -36,13 +36,24 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
       return res.status(404).json({ error: 'Creator not found' });
     }
 
-    // Create media object with proper structure - FIX: Use req.file.path instead of secure_url
+    // Determine media type based on mimetype and URL
+    let mediaType = 'image';
+    if (req.file.mimetype && req.file.mimetype.startsWith('video/')) {
+      mediaType = 'video';
+    } else if (req.file.path && req.file.path.includes('/video/upload/')) {
+      mediaType = 'video';
+    }
+
+    console.log('Detected media type:', mediaType, 'from mimetype:', req.file.mimetype);
+
+    // Create media object with proper structure
     const mediaFile = {
       id: req.file.public_id || req.file.filename || `media_${Date.now()}`,
-      type: req.file.resource_type === 'video' ? 'video' : 'image',
-      url: req.file.path || req.file.secure_url, // Use path which contains the full URL
-      thumbnail: req.file.resource_type === 'video' ? 
-        (req.file.path || req.file.secure_url).replace(/\.[^/.]+$/, '.jpg') : (req.file.path || req.file.secure_url),
+      type: mediaType,
+      url: req.file.path || req.file.secure_url,
+      thumbnail: mediaType === 'video' ? 
+        (req.file.path || req.file.secure_url).replace(/\.[^/.]+$/, '.jpg') : 
+        (req.file.path || req.file.secure_url),
       caption: caption || '',
       createdAt: new Date(),
     };
