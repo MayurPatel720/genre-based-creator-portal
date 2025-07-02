@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Slider } from './ui/slider';
 import { Checkbox } from './ui/checkbox';
-import { X } from 'lucide-react';
+import { Input } from './ui/input';
+import { X, Search } from 'lucide-react';
 
 interface FilterState {
   platform: string;
@@ -28,8 +29,20 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   onFiltersChange,
   onClearFilters,
 }) => {
+  const [locationSearch, setLocationSearch] = useState('');
+  
   const platforms = ['All', 'Instagram', 'YouTube', 'TikTok', 'Twitter', 'LinkedIn'];
-  const locations = ['San Francisco', 'Los Angeles', 'New York', 'Austin', 'Miami', 'Seattle'];
+  
+  const allLocations = [
+    // Countries
+    'USA', 'Canada', 'UK', 'Australia',
+    // Major Indian Cities
+    'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara', 'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivli', 'Vasai-Virar', 'Varanasi', 'Srinagar', 'Aurangabad', 'Dhanbad', 'Amritsar', 'Navi Mumbai', 'Allahabad', 'Ranchi', 'Howrah', 'Coimbatore', 'Jabalpur', 'Gwalior', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur', 'Kota', 'Gurgaon', 'Chandigarh', 'Solapur', 'Hubli-Dharwad', 'Tiruchirappalli', 'Bareilly', 'Mysore', 'Tiruppur', 'Guwahati', 'Moradabad', 'Warangal', 'Guntur', 'Bhiwandi', 'Saharanpur', 'Gorakhpur', 'Bikaner', 'Amravati', 'Noida', 'Jamshedpur', 'Bhilai', 'Cuttack', 'Firozabad', 'Kochi', 'Nellore', 'Bhavnagar', 'Dehradun', 'Durgapur', 'Asansol', 'Rourkela', 'Nanded', 'Kolhapur', 'Ajmer', 'Akola', 'Gulbarga', 'Jamnagar', 'Ujjain', 'Loni', 'Siliguri', 'Jhansi', 'Ulhasnagar', 'Jammu', 'Sangli-Miraj & Kupwad', 'Mangalore', 'Erode', 'Belgaum', 'Ambattur', 'Tirunelveli', 'Malegaon', 'Gaya', 'Jalgaon', 'Udaipur', 'Maheshtala'
+  ];
+
+  const filteredLocations = allLocations.filter(location =>
+    location.toLowerCase().includes(locationSearch.toLowerCase())
+  );
 
   const handlePlatformChange = (platform: string) => {
     onFiltersChange({ ...filters, platform });
@@ -58,7 +71,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             Filters
@@ -97,8 +110,17 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
           {/* Location Filter */}
           <div>
             <h3 className="text-sm font-medium mb-3">Location</h3>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {locations.map((location) => (
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search locations..."
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-2">
+              {filteredLocations.map((location) => (
                 <div key={location} className="flex items-center space-x-2">
                   <Checkbox
                     id={location}
@@ -109,13 +131,39 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
                   />
                   <label
                     htmlFor={location}
-                    className="text-sm text-gray-700 cursor-pointer"
+                    className="text-sm text-gray-700 cursor-pointer flex-1"
                   >
                     {location}
                   </label>
                 </div>
               ))}
+              {filteredLocations.length === 0 && (
+                <div className="text-sm text-gray-500 text-center py-2">
+                  No locations found
+                </div>
+              )}
             </div>
+            {filters.locations.length > 0 && (
+              <div className="mt-2">
+                <div className="text-xs text-gray-500 mb-1">Selected locations:</div>
+                <div className="flex flex-wrap gap-1">
+                  {filters.locations.map((location) => (
+                    <span
+                      key={location}
+                      className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs flex items-center gap-1"
+                    >
+                      {location}
+                      <button
+                        onClick={() => handleLocationChange(location, false)}
+                        className="hover:text-purple-900"
+                      >
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Followers Range */}

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Creator } from "../types/Creator";
-import { X, ExternalLink, MapPin, Users, Eye, TrendingUp, Play, Image as ImageIcon } from "lucide-react";
+import { X, ExternalLink, MapPin, Users, Eye, TrendingUp, Play, Image as ImageIcon, MessageCircle } from "lucide-react";
 import MediaViewer from "./MediaViewer";
 
 interface CreatorModalProps {
@@ -26,6 +26,13 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
     const totalViews = creator.details?.analytics?.totalViews || 0;
     if (followers === 0) return 0;
     return Math.round(totalViews / followers * 100) / 100;
+  };
+
+  const handleContactCreator = () => {
+    // Open WhatsApp or email based on availability
+    const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -69,15 +76,25 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
                 </div>
               </div>
               
-              <a
-                href={creator.socialLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-              >
-                <ExternalLink size={16} />
-                <span>Visit {creator.platform}</span>
-              </a>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleContactCreator}
+                  className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  <MessageCircle size={16} />
+                  <span>Contact Creator</span>
+                </button>
+                
+                <a
+                  href={creator.socialLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  <ExternalLink size={16} />
+                  <span>Visit {creator.platform}</span>
+                </a>
+              </div>
             </div>
 
             {/* Quick Stats */}
