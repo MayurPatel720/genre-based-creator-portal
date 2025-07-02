@@ -8,7 +8,6 @@ import {
 	Building2,
 	ChevronLeft,
 	ChevronRight,
-	Icon,
 	MessageCircleMore,
 } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
@@ -22,11 +21,11 @@ interface SidebarProps {
 
 const genres = [
 	{ name: "All Creators", icon: Users },
-	{ name: "Video Editing/AI", icon: Video },
-	{ name: "Tips & Tricks/AI", icon: Lightbulb },
-	{ name: "Tech Products", icon: Laptop },
-	{ name: "Lifestyle", icon: Heart },
+	{ name: "AI Creators", icon: Lightbulb },
+	{ name: "Video Editing", icon: Video },
+	{ name: "Tech Product", icon: Laptop },
 	{ name: "Business", icon: Building2 },
+	{ name: "Lifestyle", icon: Heart },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -43,23 +42,26 @@ const Sidebar: React.FC<SidebarProps> = ({
 		>
 			{/* Header */}
 			<div className="p-4 border-b border-gray-200 flex items-center justify-between">
-				{!isCollapsed && (
+				{!isCollapsed ? (
 					<div className="w-full">
 						<img
 							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
 							alt="logo"
+							className="h-10 w-auto object-contain"
 						/>
-						{/* <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-							Creators Dream
-						</h1>
-						<p className="text-sm text-gray-600 mt-1">
-							Discover amazing creators
-						</p> */}
+					</div>
+				) : (
+					<div className="w-full flex items-center justify-center">
+						<img
+							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png" // Use a smaller version or crop if available
+							alt="logo"
+							className="h-8 w-auto object-contain"
+						/>
 					</div>
 				)}
 				<button
 					onClick={onToggleCollapse}
-					className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+					className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
 				>
 					{isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
 				</button>

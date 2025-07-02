@@ -12,11 +12,13 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.instagram.com/sarahchen",
 		location: "USA",
 		details: {
+			location: "USA",
 			bio: "AI researcher and content creator specializing in machine learning tutorials and tech reviews. I break down complex AI concepts into digestible content for everyone.",
 			analytics: {
 				followers: 45000,
 				engagement: "8.5%",
 				totalViews: 2100000,
+				averageViews: 15000,
 			},
 			reels: [
 				"AI Basics Explained",
@@ -24,8 +26,6 @@ export const mockCreators: Creator[] = [
 				"Future of AI",
 				"Machine Learning 101",
 			],
-			pricing:
-				"Starting from $500 for sponsored content, $200 for product reviews. Custom packages available for long-term partnerships.",
 			tags: ["AI", "Machine Learning", "Tech Reviews"],
 		},
 	},
@@ -39,11 +39,13 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.youtube.com/marcusthompson",
 		location: "Canada",
 		details: {
+			location: "Canada",
 			bio: "Former Google AI engineer turned content creator. I share insights about AI development, career advice, and the latest industry trends.",
 			analytics: {
 				followers: 67000,
 				engagement: "12.1%",
 				totalViews: 3400000,
+				averageViews: 25000,
 			},
 			reels: [
 				"AI Career Path",
@@ -51,14 +53,12 @@ export const mockCreators: Creator[] = [
 				"Coding with AI",
 				"Industry Insights",
 			],
-			pricing:
-				"Premium creator - $1000+ for collaborations. Exclusive partnership opportunities available.",
 			tags: ["AI Development", "Career Advice", "Industry Insights"],
 		},
 	},
 	{
 		_id: "3",
-		genre: "Video Editing/AI",
+		genre: "Video Editing",
 		avatar:
 			"https://www.blackpantera.ru/upload/iblock/265/Znachenie-imeni-Darina.jpg",
 		name: "Emma Rodriguez",
@@ -66,11 +66,13 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.tiktok.com/@emmarodriguez",
 		location: "UK",
 		details: {
+			location: "UK",
 			bio: "Professional video editor using AI tools to revolutionize content creation. I teach efficient editing workflows and AI-powered techniques.",
 			analytics: {
 				followers: 38000,
 				engagement: "9.7%",
 				totalViews: 1800000,
+				averageViews: 12000,
 			},
 			reels: [
 				"AI Video Magic",
@@ -78,25 +80,25 @@ export const mockCreators: Creator[] = [
 				"Color Grading AI",
 				"Speed Editing",
 			],
-			pricing:
-				"Video editing services from $300, AI workflow consulting $150/hour. Educational content partnerships welcome.",
 			tags: ["Video Editing", "AI Tools", "Workflow Optimization"],
 		},
 	},
 	{
 		_id: "4",
-		genre: "Tips & Tricks/AI",
+		genre: "Tech Product",
 		avatar: "https://bouzdira.com/public/web/images/team_3.jpg",
 		name: "Alex Kim",
 		platform: "Instagram",
 		socialLink: "https://www.instagram.com/alexkim",
 		location: "Australia",
 		details: {
+			location: "Australia",
 			bio: "Productivity hacker and AI enthusiast. I discover and share the best AI tools and techniques to boost productivity and creativity.",
 			analytics: {
 				followers: 52000,
 				engagement: "11.3%",
 				totalViews: 2500000,
+				averageViews: 18000,
 			},
 			reels: [
 				"AI Productivity Hacks",
@@ -104,14 +106,12 @@ export const mockCreators: Creator[] = [
 				"Automation Tips",
 				"Life Hacks with AI",
 			],
-			pricing:
-				"Content collaboration from $400, AI tool reviews $250. Bulk content packages available with discounts.",
 			tags: ["Productivity", "AI Tools", "Life Hacks"],
 		},
 	},
 	{
 		_id: "5",
-		genre: "Tech Products",
+		genre: "Tech Product",
 		avatar:
 			"https://avatars.mds.yandex.net/get-shedevrum/11509417/img_d4595c4d23f911ef8090eaa30d96aef9/orig",
 		name: "David Park",
@@ -119,11 +119,13 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.youtube.com/davidpark",
 		location: "India",
 		details: {
+			location: "India",
 			bio: "Tech reviewer with 8 years of experience. I provide honest, in-depth reviews of the latest gadgets, software, and tech innovations.",
 			analytics: {
 				followers: 89000,
 				engagement: "7.8%",
 				totalViews: 5200000,
+				averageViews: 35000,
 			},
 			reels: [
 				"iPhone 15 Review",
@@ -131,8 +133,6 @@ export const mockCreators: Creator[] = [
 				"Gadget Unboxing",
 				"Tech Comparisons",
 			],
-			pricing:
-				"Product reviews from $800, unboxing videos $500. Long-term brand partnerships preferred with custom rates.",
 			tags: ["Tech Reviews", "Gadgets", "Product Testing"],
 		},
 	},
@@ -146,11 +146,13 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.instagram.com/isabellamartinez",
 		location: "USA",
 		details: {
+			location: "USA",
 			bio: "Lifestyle content creator focusing on wellness, fashion, and daily inspiration. I share authentic moments and practical lifestyle tips.",
 			analytics: {
 				followers: 125000,
 				engagement: "15.2%",
 				totalViews: 6800000,
+				averageViews: 45000,
 			},
 			reels: [
 				"Morning Routines",
@@ -158,8 +160,6 @@ export const mockCreators: Creator[] = [
 				"Wellness Tips",
 				"Daily Vlogs",
 			],
-			pricing:
-				"Lifestyle brand collaborations from $600, fashion partnerships $800+. Story posts and reels packages available.",
 			tags: ["Lifestyle", "Fashion", "Wellness"],
 		},
 	},
@@ -173,11 +173,13 @@ export const mockCreators: Creator[] = [
 		socialLink: "https://www.twitter.com/robertjohnson",
 		location: "Other",
 		details: {
+			location: "Other",
 			bio: "Serial entrepreneur and business coach. I share startup insights, investment tips, and practical business strategies for growth.",
 			analytics: {
 				followers: 78000,
 				engagement: "10.5%",
 				totalViews: 4100000,
+				averageViews: 28000,
 			},
 			reels: [
 				"Startup Secrets",
@@ -185,8 +187,6 @@ export const mockCreators: Creator[] = [
 				"Business Growth",
 				"Entrepreneur Life",
 			],
-			pricing:
-				"Business content from $700, coaching collaborations $1200+. Speaking engagements and masterclass partnerships available.",
 			tags: ["Entrepreneurship", "Business Strategy", "Investment"],
 		},
 	},

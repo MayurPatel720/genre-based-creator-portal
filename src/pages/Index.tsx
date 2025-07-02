@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Dashboard from "../components/Dashboard";
@@ -36,15 +37,14 @@ const Index = () => {
 							className="fixed inset-0 bg-black/50 z-40 md:hidden"
 							onClick={() => setIsMobileMenuOpen(false)}
 						/>
-						<div className="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 md:hidden">
+						<div className="fixed right-0 top-0 h-full w-64 bg-white shadow-xl z-50 md:hidden">
 							<div className="p-4 border-b border-gray-200 flex items-center justify-between">
 								<div>
-									<h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-										CreatorHub
-									</h1>
-									<p className="text-sm text-gray-600 mt-1">
-										Discover amazing creators
-									</p>
+									<img
+										src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
+										alt="logo"
+										className="w-32 h-8 object-contain"
+									/>
 								</div>
 								<button
 									onClick={() => setIsMobileMenuOpen(false)}
@@ -56,11 +56,11 @@ const Index = () => {
 							<nav className="flex-1 p-2 space-y-1">
 								{[
 									{ name: "All Creators", icon: "Users" },
-									{ name: "Video Editing/AI", icon: "Video" },
-									{ name: "Tips & Tricks/AI", icon: "Lightbulb" },
-									{ name: "Tech Products", icon: "Laptop" },
-									{ name: "Lifestyle", icon: "Heart" },
+									{ name: "AI Creators", icon: "Lightbulb" },
+									{ name: "Video Editing", icon: "Video" },
+									{ name: "Tech Product", icon: "Laptop" },
 									{ name: "Business", icon: "Building2" },
+									{ name: "Lifestyle", icon: "Heart" },
 								].map((genre) => {
 									const isActive = activeGenre === genre.name;
 
@@ -91,16 +91,15 @@ const Index = () => {
 				>
 					{/* Mobile header */}
 					<div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+						<h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+							CreatorHub
+						</h1>
 						<button
 							onClick={() => setIsMobileMenuOpen(true)}
 							className="p-2 rounded-lg hover:bg-gray-100"
 						>
 							<Menu size={24} />
 						</button>
-						<h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-							CreatorHub
-						</h1>
-						<div className="w-10" />
 					</div>
 
 					<Dashboard

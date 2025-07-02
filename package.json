@@ -51,6 +51,8 @@
 		"express": "^5.1.0",
 		"input-otp": "^1.2.4",
 		"lucide-react": "^0.462.0",
+		"multer": "^2.0.1",
+		"multer-storage-cloudinary": "^4.0.0",
 		"next-themes": "^0.3.0",
 		"primeicons": "^7.0.0",
 		"primereact": "^10.9.6",

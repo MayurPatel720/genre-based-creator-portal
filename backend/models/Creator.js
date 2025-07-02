@@ -1,6 +1,35 @@
 
 const mongoose = require("mongoose");
 
+const mediaSchema = new mongoose.Schema({
+	id: {
+		type: String,
+		required: true,
+	},
+	type: {
+		type: String,
+		required: true,
+		enum: ["image", "video"],
+	},
+	url: {
+		type: String,
+		required: true,
+		trim: true,
+	},
+	thumbnail: {
+		type: String,
+		trim: true,
+	},
+	caption: {
+		type: String,
+		trim: true,
+	},
+	createdAt: {
+		type: Date,
+		default: Date.now,
+	},
+});
+
 const creatorSchema = new mongoose.Schema(
 	{
 		name: {
@@ -56,6 +85,10 @@ const creatorSchema = new mongoose.Schema(
 					required: true,
 					min: 0,
 				},
+				averageViews: {
+					type: Number,
+					min: 0,
+				},
 				engagement: {
 					type: String,
 					trim: true,
@@ -67,17 +100,13 @@ const creatorSchema = new mongoose.Schema(
 					trim: true,
 				},
 			],
-			pricing: {
-				type: String,
-				required: true,
-				trim: true,
-			},
 			tags: [
 				{
 					type: String,
 					trim: true,
 				},
 			],
+			media: [mediaSchema],
 		},
 	},
 	{
