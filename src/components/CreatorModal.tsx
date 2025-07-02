@@ -51,7 +51,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleVideoPlay = () => {
-		const video = document.getElementById('modal-video') as HTMLVideoElement;
+		const video = document.getElementById("modal-video") as HTMLVideoElement;
 		if (video) {
 			if (isPlaying) {
 				video.pause();
@@ -63,7 +63,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleMute = () => {
-		const video = document.getElementById('modal-video') as HTMLVideoElement;
+		const video = document.getElementById("modal-video") as HTMLVideoElement;
 		if (video) {
 			video.muted = !isMuted;
 			setIsMuted(!isMuted);
@@ -71,7 +71,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleTimeUpdate = () => {
-		const video = document.getElementById('modal-video') as HTMLVideoElement;
+		const video = document.getElementById("modal-video") as HTMLVideoElement;
 		if (video) {
 			setCurrentTime(video.currentTime);
 			setDuration(video.duration);
@@ -79,7 +79,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const video = document.getElementById('modal-video') as HTMLVideoElement;
+		const video = document.getElementById("modal-video") as HTMLVideoElement;
 		if (video) {
 			video.currentTime = parseFloat(e.target.value);
 			setCurrentTime(video.currentTime);
@@ -89,19 +89,19 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	const formatTime = (time: number) => {
 		const minutes = Math.floor(time / 60);
 		const seconds = Math.floor(time % 60);
-		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 	};
 
 	const handleZoomIn = () => {
-		setZoomLevel(prev => Math.min(prev + 0.5, 3));
+		setZoomLevel((prev) => Math.min(prev + 0.5, 3));
 	};
 
 	const handleZoomOut = () => {
-		setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
+		setZoomLevel((prev) => Math.max(prev - 0.5, 0.5));
 	};
 
 	const handleFullscreen = () => {
-		const element = document.getElementById('media-viewer');
+		const element = document.getElementById("media-viewer");
 		if (element) {
 			element.requestFullscreen();
 		}
@@ -137,7 +137,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 								<h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
 									{creator.name}
 								</h3>
-								
+
 								{/* Genre Display */}
 								<div className="mb-4">
 									<span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 text-sm font-medium rounded-full">
@@ -227,7 +227,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 												className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-300 group relative overflow-hidden"
 												onClick={() => handleMediaClick(item)}
 											>
-												{item.type === 'video' ? (
+												{item.type === "video" ? (
 													<div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
 														<Play
 															size={32}
@@ -358,7 +358,10 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 			{/* Enhanced Media Viewer Modal */}
 			{selectedMedia && (
 				<div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-60">
-					<div id="media-viewer" className="relative max-w-5xl max-h-full w-full">
+					<div
+						id="media-viewer"
+						className="relative max-w-5xl max-h-full w-full"
+					>
 						<div className="absolute top-4 right-4 flex gap-2 z-10">
 							<button
 								onClick={() => setSelectedMedia(null)}
@@ -368,7 +371,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 							</button>
 						</div>
 
-						{selectedMedia.type === 'video' ? (
+						{selectedMedia.type === "video" ? (
 							<div className="relative rounded-lg overflow-hidden bg-black">
 								<video
 									id="modal-video"
@@ -378,7 +381,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 									onLoadedMetadata={handleTimeUpdate}
 									poster={selectedMedia.thumbnail}
 								/>
-								
+
 								{/* Modern Video Controls */}
 								<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
 									{/* Progress Bar */}
@@ -396,13 +399,19 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 											<span>{formatTime(duration)}</span>
 										</div>
 									</div>
-									
+
 									{/* Control Buttons */}
 									<div className="flex items-center justify-center gap-4">
 										<button
 											onClick={() => {
-												const video = document.getElementById('modal-video') as HTMLVideoElement;
-												if (video) video.currentTime = Math.max(0, video.currentTime - 10);
+												const video = document.getElementById(
+													"modal-video"
+												) as HTMLVideoElement;
+												if (video)
+													video.currentTime = Math.max(
+														0,
+														video.currentTime - 10
+													);
 											}}
 											className="p-2 text-white hover:text-blue-400 transition-colors"
 										>
@@ -416,8 +425,14 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 										</button>
 										<button
 											onClick={() => {
-												const video = document.getElementById('modal-video') as HTMLVideoElement;
-												if (video) video.currentTime = Math.min(duration, video.currentTime + 10);
+												const video = document.getElementById(
+													"modal-video"
+												) as HTMLVideoElement;
+												if (video)
+													video.currentTime = Math.min(
+														duration,
+														video.currentTime + 10
+													);
 											}}
 											className="p-2 text-white hover:text-blue-400 transition-colors"
 										>
@@ -442,13 +457,17 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 								/>
 								<div className="absolute bottom-4 left-4 flex gap-2">
 									<button
-										onClick={() => setZoomLevel(prev => Math.min(prev + 0.5, 3))}
+										onClick={() =>
+											setZoomLevel((prev) => Math.min(prev + 0.5, 3))
+										}
 										className="p-3 bg-black/70 text-white rounded-full hover:bg-black/90 transition-colors backdrop-blur-sm"
 									>
 										<ZoomIn size={20} />
 									</button>
 									<button
-										onClick={() => setZoomLevel(prev => Math.max(prev - 0.5, 0.5))}
+										onClick={() =>
+											setZoomLevel((prev) => Math.max(prev - 0.5, 0.5))
+										}
 										className="p-3 bg-black/70 text-white rounded-full hover:bg-black/90 transition-colors backdrop-blur-sm"
 									>
 										<ZoomOut size={20} />

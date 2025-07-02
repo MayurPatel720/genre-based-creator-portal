@@ -1,4 +1,3 @@
-
 export interface Creator {
 	_id?: string;
 	name: string;
@@ -9,6 +8,7 @@ export interface Creator {
 	socialLink: string;
 	location?: string;
 	details: {
+		pricing: any;
 		location: string;
 		bio: string;
 		analytics: {
@@ -27,7 +27,7 @@ export interface Creator {
 
 export interface MediaFile {
 	id: string;
-	type: 'image' | 'video';
+	type: "image" | "video";
 	url: string;
 	thumbnail?: string;
 	caption?: string;

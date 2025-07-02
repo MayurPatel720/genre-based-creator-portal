@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import { Creator } from "../types/Creator";
 

@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CreatorCard from "./CreatorCard";
@@ -48,75 +48,58 @@ const Dashboard: React.FC<DashboardProps> = ({
 		},
 	});
 
-	// Use mock data if API fails or returns empty array
 	const allCreators: Creator[] =
 		Array.isArray(creators) && creators.length > 0 ? creators : mockCreators;
 
-	console.log('Active genre:', activeGenre);
-	console.log('All creators:', allCreators);
-
 	const filteredCreators = useMemo(() => {
-		let filtered = allCreators;
+		return allCreators.filter((creator) => {
+			// Genre filter
+			if (activeGenre !== "All Creators") {
+				const creatorGenre = creator.genre?.toLowerCase().trim() || "";
+				const activeGenreNormalized = activeGenre.toLowerCase().trim();
+				if (creatorGenre !== activeGenreNormalized) return false;
+			}
 
-		// Genre filter - Fixed logic with exact matching
-		if (activeGenre !== "All Creators") {
-			filtered = filtered.filter((creator) => {
-				console.log(`Comparing creator genre "${creator.genre}" with activeGenre "${activeGenre}"`);
-				// Handle exact matching and common variations
-				const creatorGenre = creator.genre.trim();
-				const targetGenre = activeGenre.trim();
-				
-				// Direct match
-				if (creatorGenre === targetGenre) return true;
-				
-				// Handle plural/singular variations
-				if (targetGenre === "AI Creators" && creatorGenre === "AI Creators") return true;
-				if (targetGenre === "Video Editing" && creatorGenre === "Video Editing") return true;
-				if (targetGenre === "Tech Product" && (creatorGenre === "Tech Product" || creatorGenre === "Tech Products")) return true;
-				if (targetGenre === "Business" && creatorGenre === "Business") return true;
-				if (targetGenre === "Lifestyle" && creatorGenre === "Lifestyle") return true;
-				
-				return false;
-			});
-			console.log(`Found ${filtered.length} creators for genre: ${activeGenre}`);
-		}
-
-		// Search filter
-		if (searchTerm.trim()) {
-			const searchLower = searchTerm.toLowerCase();
-			filtered = filtered.filter((creator) => {
+			// Search filter
+			if (searchTerm.trim()) {
+				const searchLower = searchTerm.toLowerCase();
 				const nameMatch = creator.name.toLowerCase().includes(searchLower);
 				const tagsMatch = creator.details?.tags?.some((tag) =>
 					tag.toLowerCase().includes(searchLower)
 				);
-				const genreMatch = creator.genre.toLowerCase().includes(searchLower);
-				return nameMatch || tagsMatch || genreMatch;
-			});
-		}
+				if (!nameMatch && !tagsMatch) return false;
+			}
 
-		// Platform filter
-		if (filters.platform !== "All") {
-			filtered = filtered.filter((creator) => 
-				creator.platform?.toLowerCase() === filters.platform.toLowerCase()
-			);
-		}
+			// Platform filter
+			if (filters.platform !== "All") {
+				if (
+					creator.platform?.toLowerCase() !== filters.platform.toLowerCase()
+				) {
+					return false;
+				}
+			}
 
-		// Location filter
-		if (filters.locations.length > 0) {
-			filtered = filtered.filter((creator) => {
-				const creatorLocation = creator.location || creator.details?.location || "";
-				return filters.locations.includes(creatorLocation);
-			});
-		}
+			// Location filter
+			if (filters.locations.length > 0) {
+				const creatorLocation =
+					creator.location || creator.details?.location || "";
+				if (!filters.locations.includes(creatorLocation)) {
+					return false;
+				}
+			}
 
-		// Followers range filter
-		const followersInRange = filtered.filter((creator) => {
+			// Followers range filter
 			const followers = creator.details?.analytics?.followers || 0;
 			const followersInK = followers / 1000;
-			return followersInK >= filters.followersRange[0] && followersInK <= filters.followersRange[1];
-		});
+			if (
+				followersInK < filters.followersRange[0] ||
+				followersInK > filters.followersRange[1]
+			) {
+				return false;
+			}
 
-		return followersInRange;
+			return true;
+		});
 	}, [allCreators, activeGenre, searchTerm, filters]);
 
 	const handleClearFilters = () => {
@@ -151,7 +134,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 		<div className="flex-1 overflow-auto">
 			<div className="max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-3">
 				{/* Header */}
-				<div className="mb-3">
+				<div className="mb-4">
 					<h1 className="text-xl font-bold text-gray-900 mb-1">
 						{activeGenre}
 					</h1>
@@ -161,19 +144,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 				</div>
 
 				{/* Search and Filter Bar */}
-				<div className="mb-3 flex flex-col sm:flex-row gap-2">
+				<div className="mb-4 flex flex-col sm:flex-row gap-2">
 					<div className="relative flex-1">
 						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
 						<Input
 							placeholder="Search creators by name or tags..."
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
-							className="pl-9 pr-4 py-2 w-full h-8"
+							className="pl-9 pr-4 py-2 w-full h-9"
 						/>
 					</div>
 					<button
 						onClick={() => setIsFilterOpen(true)}
-						className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-colors text-sm ${
+						className={`flex items-center gap-2 px-3 py-1.5 rounded-md border transition-colors text-sm ${
 							hasActiveFilters
 								? "bg-purple-100 border-purple-300 text-purple-700"
 								: "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -197,7 +180,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 				</div>
 
 				{/* Results count */}
-				<div className="mb-2">
+				<div className="mb-4">
 					<p className="text-xs text-gray-600">
 						{filteredCreators.length} creator
 						{filteredCreators.length !== 1 ? "s" : ""} found
@@ -207,7 +190,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto">
-					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+					<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
 						{filteredCreators.map((creator) => (
 							<CreatorCard
 								key={creator._id || creator.name}
@@ -217,7 +200,6 @@ const Dashboard: React.FC<DashboardProps> = ({
 						))}
 					</div>
 
-					{/* No results */}
 					{filteredCreators.length === 0 && (
 						<div className="text-center py-8">
 							<div className="text-gray-400 mb-3">
