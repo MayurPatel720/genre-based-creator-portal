@@ -79,14 +79,14 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 									{formatNumber(creator.details?.analytics.totalViews || 0)}
 								</span>
 							</div>
-							{creator.details?.analytics.averageViews && (
+							{/* {creator.details?.analytics.averageViews && (
 								<div className="flex items-center gap-2 text-sm">
 									<Eye size={14} />
 									<span>
 										Avg: {formatNumber(creator.details.analytics.averageViews)}
 									</span>
 								</div>
-							)}
+							)} */}
 						</div>
 					</div>
 
