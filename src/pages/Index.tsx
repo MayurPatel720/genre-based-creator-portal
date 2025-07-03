@@ -91,7 +91,7 @@ const Index = () => {
 					{/* Mobile header */}
 					<div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
 						<h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-							CreatorHub
+							Creators Dream
 						</h1>
 						<button
 							onClick={() => setIsMobileMenuOpen(true)}

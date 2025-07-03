@@ -8,6 +8,7 @@ import { mockCreators } from "../data/mockData";
 import { Loader2, Search, Filter } from "lucide-react";
 import { Input } from "./ui/input";
 import FilterDialog from "./FilterDialog";
+import WhatsAppButton from "./WhatsAppButton";
 
 interface DashboardProps {
 	activeGenre: string;
@@ -119,9 +120,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-64">
-				<Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-				<span className="ml-2 text-gray-600">Loading creators...</span>
+			<div className="flex flex-col items-center justify-center h-full space-y-4">
+				<div className="loader" />
+				<p className="text-sm text-gray-600">Loading creators...</p>
 			</div>
 		);
 	}
@@ -138,7 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 					<h1 className="text-xl font-bold text-gray-900 mb-1">
 						{activeGenre}
 					</h1>
-					<p className="text-gray-600 text-sm">
+					<p className="text-gray-600 text-xs lg:text-base">
 						Discover amazing content creators and collaborate with them
 					</p>
 				</div>
@@ -232,6 +233,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 					onClearFilters={handleClearFilters}
 				/>
 			</div>
+			<WhatsAppButton variant="floating" />
 		</div>
 	);
 };
