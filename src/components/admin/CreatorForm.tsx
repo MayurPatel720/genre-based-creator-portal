@@ -1,23 +1,14 @@
+
 import React, { useState, useEffect } from "react";
-import { CreateCreatorData } from "../../services/api";
+import { Creator } from "../../types/Creator";
 import { useCreators } from "../../hooks/useCreators";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../ui/select";
-import { Creator } from "@/types/Creator";
-import ImageUpload from "../ImageUpload";
-import MediaManager from "./MediaManager";
-import { imageUploadAPI } from "../../services/imageUpload";
-import { mediaService } from "../../services/mediaAPI";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { X, Plus } from "lucide-react";
 
 interface CreatorFormProps {
 	creator?: Creator | null;
@@ -30,39 +21,42 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 	onSuccess,
 	onCancel,
 }) => {
-	const { createCreator, updateCreator } = useCreators();
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [formData, setFormData] = useState<CreateCreatorData & { location: string }>({
+	const { createCreator, updateCreator, loading } = useCreators();
+	const [formData, setFormData] = useState({
 		name: "",
 		genre: "",
 		avatar: "",
-		platform: "",
+		platform: "Instagram",
 		socialLink: "",
+		mediaKitUrl: "",
+		contactNumber: "",
 		location: "",
 		bio: "",
 		followers: 0,
 		totalViews: 0,
+		averageViews: 0,
 		engagement: "",
-		reels: [],
-		tags: [],
+		reels: [] as string[],
+		tags: [] as string[],
 	});
-	const [currentPublicId, setCurrentPublicId] = useState<string | null>(null);
-	const [media, setMedia] = useState(creator?.details?.media || []);
+	const [newReel, setNewReel] = useState("");
+	const [newTag, setNewTag] = useState("");
 
-	// Populate form with creator data when editing
 	useEffect(() => {
 		if (creator) {
 			setFormData({
 				name: creator.name || "",
 				genre: creator.genre || "",
 				avatar: creator.avatar || "",
-				platform: creator.platform || "",
+				platform: creator.platform || "Instagram",
 				socialLink: creator.socialLink || "",
-				location: creator.location || creator.details?.location || "",
+				mediaKitUrl: creator.mediaKitUrl || "",
+				contactNumber: creator.contactNumber || "",
+				location: creator.location || "",
 				bio: creator.details?.bio || "",
 				followers: creator.details?.analytics?.followers || 0,
 				totalViews: creator.details?.analytics?.totalViews || 0,
+				averageViews: creator.details?.analytics?.averageViews || 0,
 				engagement: creator.details?.analytics?.engagement || "",
 				reels: creator.details?.reels || [],
 				tags: creator.details?.tags || [],
@@ -70,355 +64,307 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 		}
 	}, [creator]);
 
-	const handleImageUpload = (imageUrl: string) => {
-		setFormData(prev => ({ ...prev, avatar: imageUrl }));
-	};
-
-	const handleImageDelete = async () => {
-		if (currentPublicId) {
-			try {
-				await imageUploadAPI.deleteImage(currentPublicId);
-				setFormData(prev => ({ ...prev, avatar: "" }));
-				setCurrentPublicId(null);
-			} catch (error) {
-				console.error('Failed to delete image:', error);
-			}
-		}
-	};
-
-	const handleMediaAdd = async (file: File, caption: string) => {
-		if (!creator?._id) return;
-		
-		try {
-			const newMedia = await mediaService.addMedia(creator._id, file, caption);
-			setMedia(prev => [...prev, newMedia]);
-		} catch (error) {
-			console.error('Failed to add media:', error);
-		}
-	};
-
-	const handleMediaDelete = async (mediaId: string) => {
-		if (!creator?._id) return;
-		
-		try {
-			await mediaService.deleteMedia(creator._id, mediaId);
-			setMedia(prev => prev.filter(item => item.id !== mediaId));
-		} catch (error) {
-			console.error('Failed to delete media:', error);
-		}
-	};
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setLoading(true);
-		setError(null);
-
-		// Client-side validation
-		const missingFields = [];
-		if (!formData.name) missingFields.push("name");
-		if (!formData.genre) missingFields.push("genre");
-		if (!formData.avatar) missingFields.push("avatar");
-		if (!formData.platform) missingFields.push("platform");
-		if (!formData.socialLink) missingFields.push("socialLink");
-		if (!formData.bio) missingFields.push("bio");
-		if (formData.followers === undefined || formData.followers < 0)
-			missingFields.push("followers");
-		if (formData.totalViews === undefined || formData.totalViews < 0)
-			missingFields.push("totalViews");
-
-		if (missingFields.length > 0) {
-			setError(
-				`Please fill in the following fields: ${missingFields.join(", ")}`
-			);
-			setLoading(false);
-			return;
-		}
-
-		// Validate socialLink format
-		if (!/^https?:\/\/.+/.test(formData.socialLink)) {
-			setError("Please provide a valid URL for socialLink");
-			setLoading(false);
-			return;
-		}
-
 		try {
-			// Construct payload matching CreateCreatorData
-			const payload: CreateCreatorData = {
-				name: formData.name,
-				genre: formData.genre,
-				avatar: formData.avatar,
-				platform: formData.platform,
-				socialLink: formData.socialLink,
-				location: formData.location || "Other",
-				bio: formData.bio,
-				followers: parseFloat(formData.followers.toString()) || 0,
-				totalViews: parseInt(formData.totalViews.toString()) || 0,
-				engagement: formData.engagement,
-				reels: formData.reels || [],
-				tags: formData.tags || [],
-			};
-
-			if (creator) {
-				await updateCreator(creator._id!, payload);
+			if (creator?._id) {
+				await updateCreator(creator._id, formData);
 			} else {
-				await createCreator(payload);
+				await createCreator(formData);
 			}
 			onSuccess();
-		} catch (error: any) {
-			console.error("Failed to save creator:", error);
-			setError(error.message || "Failed to save creator");
-		} finally {
-			setLoading(false);
+		} catch (error) {
+			console.error("Error saving creator:", error);
 		}
 	};
 
-	const handleInputChange = (
-		field: keyof (CreateCreatorData & { location: string }),
-		value: unknown
-	) => {
-		setFormData((prev) => ({ ...prev, [field]: value }));
+	const addReel = () => {
+		if (newReel.trim()) {
+			setFormData(prev => ({
+				...prev,
+				reels: [...prev.reels, newReel.trim()]
+			}));
+			setNewReel("");
+		}
 	};
 
-	const handleArrayChange = (field: "reels" | "tags", value: string) => {
-		const items = value
-			.split(",")
-			.map((item) => item.trim())
-			.filter(Boolean);
-		setFormData((prev) => ({ ...prev, [field]: items }));
+	const removeReel = (index: number) => {
+		setFormData(prev => ({
+			...prev,
+			reels: prev.reels.filter((_, i) => i !== index)
+		}));
+	};
+
+	const addTag = () => {
+		if (newTag.trim()) {
+			setFormData(prev => ({
+				...prev,
+				tags: [...prev.tags, newTag.trim()]
+			}));
+			setNewTag("");
+		}
+	};
+
+	const removeTag = (index: number) => {
+		setFormData(prev => ({
+			...prev,
+			tags: prev.tags.filter((_, i) => i !== index)
+		}));
 	};
 
 	return (
-		<div className="p-6 max-w-6xl mx-auto">
-			<h2 className="text-2xl font-bold mb-6">
-				{creator ? "Edit Creator" : "Add New Creator"}
-			</h2>
-
-			{error && (
-				<div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded">
-					{error}
-				</div>
-			)}
-
-			<Tabs defaultValue="basic" className="w-full">
-				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="basic">Basic Information</TabsTrigger>
-					<TabsTrigger value="media" disabled={!creator}>Media Gallery</TabsTrigger>
-				</TabsList>
-
-				<TabsContent value="basic" className="space-y-6">
+		<div className="p-6">
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						{creator ? "Edit Creator" : "Add New Creator"}
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-6">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							{/* Left Column - Basic Information */}
-							<div className="space-y-4">
-								<div>
-									<Label htmlFor="name">Name *</Label>
-									<Input
-										id="name"
-										value={formData.name}
-										onChange={(e) => handleInputChange("name", e.target.value)}
-										required
-										placeholder="Enter creator's name"
-									/>
-								</div>
-
-								<div>
-									<Label htmlFor="genre">Genre *</Label>
-									<Select
-										value={formData.genre}
-										onValueChange={(value) => handleInputChange("genre", value)}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Select a genre" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="AI Creators">AI Creators</SelectItem>
-											<SelectItem value="Video Editing">Video Editing</SelectItem>
-											<SelectItem value="Tech Product">Tech Product</SelectItem>
-											<SelectItem value="Lifestyle">Lifestyle</SelectItem>
-											<SelectItem value="Business">Business</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-
-								<div>
-									<Label>Avatar Image *</Label>
-									<ImageUpload
-										currentImage={formData.avatar}
-										onImageUpload={handleImageUpload}
-										onImageDelete={handleImageDelete}
-										className="mt-2"
-									/>
-								</div>
-
-								<div>
-									<Label htmlFor="platform">Platform *</Label>
-									<Select
-										value={formData.platform}
-										onValueChange={(value) => handleInputChange("platform", value)}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Select a platform" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="Instagram">Instagram</SelectItem>
-											<SelectItem value="YouTube">YouTube</SelectItem>
-											<SelectItem value="TikTok">TikTok</SelectItem>
-											<SelectItem value="Twitter">Twitter</SelectItem>
-											<SelectItem value="Other">Other</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-
-								<div>
-									<Label htmlFor="socialLink">Social Profile URL *</Label>
-									<Input
-										id="socialLink"
-										value={formData.socialLink}
-										onChange={(e) => handleInputChange("socialLink", e.target.value)}
-										placeholder="https://instagram.com/username"
-										type="url"
-										required
-									/>
-								</div>
-
-								<div>
-									<Label htmlFor="location">Location</Label>
-									<Select
-										value={formData.location}
-										onValueChange={(value) => handleInputChange("location", value)}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Select location" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="USA">USA</SelectItem>
-											<SelectItem value="Canada">Canada</SelectItem>
-											<SelectItem value="UK">UK</SelectItem>
-											<SelectItem value="Australia">Australia</SelectItem>
-											<SelectItem value="Germany">Germany</SelectItem>
-											<SelectItem value="France">France</SelectItem>
-											<SelectItem value="India">India</SelectItem>
-											<SelectItem value="Japan">Japan</SelectItem>
-											<SelectItem value="Brazil">Brazil</SelectItem>
-											<SelectItem value="Spain">Spain</SelectItem>
-											<SelectItem value="Other">Other</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
+						{/* Basic Information */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<Label htmlFor="name">Name *</Label>
+								<Input
+									id="name"
+									value={formData.name}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, name: e.target.value }))
+									}
+									required
+								/>
 							</div>
 
-							{/* Right Column - Analytics and Other Fields */}
-							<div className="space-y-4">
-								<div>
-									<Label htmlFor="followers">Followers *</Label>
-									<Input
-										id="followers"
-										type="number"
-										step="0.1"
-										value={formData.followers}
-										onChange={(e) =>
-											handleInputChange("followers", parseFloat(e.target.value) || 0)
-										}
-										placeholder="e.g., 1000.5"
-										min="0"
-										required
-									/>
-								</div>
+							<div>
+								<Label htmlFor="genre">Genre *</Label>
+								<Input
+									id="genre"
+									value={formData.genre}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, genre: e.target.value }))
+									}
+									required
+								/>
+							</div>
 
-								<div>
-									<Label htmlFor="totalViews">Total Views *</Label>
-									<Input
-										id="totalViews"
-										type="number"
-										value={formData.totalViews}
-										onChange={(e) =>
-											handleInputChange("totalViews", parseInt(e.target.value) || 0)
-										}
-										placeholder="e.g., 50000"
-										min="0"
-										required
-									/>
-								</div>
+							<div>
+								<Label htmlFor="avatar">Avatar URL *</Label>
+								<Input
+									id="avatar"
+									value={formData.avatar}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, avatar: e.target.value }))
+									}
+									required
+								/>
+							</div>
 
-								<div>
-									<Label htmlFor="engagement">Engagement Rate</Label>
-									<Input
-										id="engagement"
-										value={formData.engagement}
-										onChange={(e) => handleInputChange("engagement", e.target.value)}
-										placeholder="e.g., 3.2% or High"
-									/>
-								</div>
+							<div>
+								<Label htmlFor="platform">Platform *</Label>
+								<Select
+									value={formData.platform}
+									onValueChange={(value) =>
+										setFormData(prev => ({ ...prev, platform: value }))
+									}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="Instagram">Instagram</SelectItem>
+										<SelectItem value="YouTube">YouTube</SelectItem>
+										<SelectItem value="TikTok">TikTok</SelectItem>
+										<SelectItem value="Twitter">Twitter</SelectItem>
+										<SelectItem value="Other">Other</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
 
-								<div>
-									<Label htmlFor="tags">Tags (comma-separated)</Label>
-									<Input
-										id="tags"
-										value={formData.tags.join(", ")}
-										onChange={(e) => handleArrayChange("tags", e.target.value)}
-										placeholder="tech, AI, editing"
-									/>
-								</div>
+							<div>
+								<Label htmlFor="socialLink">Social Link *</Label>
+								<Input
+									id="socialLink"
+									value={formData.socialLink}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, socialLink: e.target.value }))
+									}
+									required
+								/>
+							</div>
+
+							<div>
+								<Label htmlFor="mediaKitUrl">MediaKit URL</Label>
+								<Input
+									id="mediaKitUrl"
+									value={formData.mediaKitUrl}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, mediaKitUrl: e.target.value }))
+									}
+								/>
+							</div>
+
+							<div>
+								<Label htmlFor="contactNumber">Contact Number (with country code)</Label>
+								<Input
+									id="contactNumber"
+									placeholder="+91XXXXXXXXXX"
+									value={formData.contactNumber}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, contactNumber: e.target.value }))
+									}
+								/>
+							</div>
+
+							<div>
+								<Label htmlFor="location">Location</Label>
+								<Input
+									id="location"
+									value={formData.location}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, location: e.target.value }))
+									}
+								/>
 							</div>
 						</div>
 
-						{/* Full width fields */}
+						{/* Bio */}
 						<div>
 							<Label htmlFor="bio">Bio *</Label>
 							<Textarea
 								id="bio"
 								value={formData.bio}
-								onChange={(e) => handleInputChange("bio", e.target.value)}
-								rows={4}
-								placeholder="Creator biography..."
+								onChange={(e) =>
+									setFormData(prev => ({ ...prev, bio: e.target.value }))
+								}
 								required
-								className="min-h-[100px]"
-							/>
-						</div>
-
-						<div>
-							<Label htmlFor="reels">Reel URLs (comma-separated)</Label>
-							<Textarea
-								id="reels"
-								value={formData.reels.join(", ")}
-								onChange={(e) => handleArrayChange("reels", e.target.value)}
 								rows={3}
-								placeholder="https://example.com/reel1, https://example.com/reel2"
-								className="min-h-[80px]"
 							/>
 						</div>
 
-						{/* Form Actions */}
-						<div className="flex justify-end space-x-4 pt-6 border-t">
+						{/* Analytics */}
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+							<div>
+								<Label htmlFor="followers">Followers *</Label>
+								<Input
+									id="followers"
+									type="number"
+									value={formData.followers}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, followers: parseInt(e.target.value) || 0 }))
+									}
+									required
+								/>
+							</div>
+
+							<div>
+								<Label htmlFor="totalViews">Total Views *</Label>
+								<Input
+									id="totalViews"
+									type="number"
+									value={formData.totalViews}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, totalViews: parseInt(e.target.value) || 0 }))
+									}
+									required
+								/>
+							</div>
+
+							<div>
+								<Label htmlFor="averageViews">Average Views</Label>
+								<Input
+									id="averageViews"
+									type="number"
+									value={formData.averageViews}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, averageViews: parseInt(e.target.value) || 0 }))
+									}
+								/>
+							</div>
+
+							<div>
+								<Label htmlFor="engagement">Engagement Rate</Label>
+								<Input
+									id="engagement"
+									placeholder="e.g., 5.2%"
+									value={formData.engagement}
+									onChange={(e) =>
+										setFormData(prev => ({ ...prev, engagement: e.target.value }))
+									}
+								/>
+							</div>
+						</div>
+
+						{/* Reels */}
+						<div>
+							<Label>Reels</Label>
+							<div className="flex gap-2 mb-2">
+								<Input
+									placeholder="Add reel URL"
+									value={newReel}
+									onChange={(e) => setNewReel(e.target.value)}
+								/>
+								<Button type="button" onClick={addReel}>
+									<Plus size={16} />
+								</Button>
+							</div>
+							<div className="flex flex-wrap gap-2">
+								{formData.reels.map((reel, index) => (
+									<div key={index} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
+										<span className="text-sm">{reel}</span>
+										<button
+											type="button"
+											onClick={() => removeReel(index)}
+											className="text-red-500 hover:text-red-700"
+										>
+											<X size={14} />
+										</button>
+									</div>
+								))}
+							</div>
+						</div>
+
+						{/* Tags */}
+						<div>
+							<Label>Tags</Label>
+							<div className="flex gap-2 mb-2">
+								<Input
+									placeholder="Add tag"
+									value={newTag}
+									onChange={(e) => setNewTag(e.target.value)}
+								/>
+								<Button type="button" onClick={addTag}>
+									<Plus size={16} />
+								</Button>
+							</div>
+							<div className="flex flex-wrap gap-2">
+								{formData.tags.map((tag, index) => (
+									<div key={index} className="flex items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded">
+										<span className="text-sm">#{tag}</span>
+										<button
+											type="button"
+											onClick={() => removeTag(index)}
+											className="text-red-500 hover:text-red-700"
+										>
+											<X size={14} />
+										</button>
+									</div>
+								))}
+							</div>
+						</div>
+
+						{/* Actions */}
+						<div className="flex gap-4 pt-4">
+							<Button type="submit" disabled={loading}>
+								{loading ? "Saving..." : creator ? "Update Creator" : "Create Creator"}
+							</Button>
 							<Button type="button" variant="outline" onClick={onCancel}>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={loading}>
-								{loading
-									? "Saving..."
-									: creator
-									? "Update Creator"
-									: "Create Creator"}
-							</Button>
 						</div>
 					</form>
-				</TabsContent>
-
-				<TabsContent value="media">
-					{creator?._id ? (
-						<MediaManager
-							creatorId={creator._id}
-							media={media}
-							onMediaAdd={handleMediaAdd}
-							onMediaDelete={handleMediaDelete}
-						/>
-					) : (
-						<div className="text-center py-8 text-gray-500">
-							Save the creator first to manage media files
-						</div>
-					)}
-				</TabsContent>
-			</Tabs>
+				</CardContent>
+			</Card>
 		</div>
 	);
 };

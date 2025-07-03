@@ -10,6 +10,7 @@ export interface Creator {
 	socialLink: string;
 	mediaKitUrl?: string;
 	location?: string;
+	contactNumber?: string;
 	details: {
 		pricing: any;
 		location: string;
