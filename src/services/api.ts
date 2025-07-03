@@ -48,12 +48,10 @@ export interface CreateCreatorData {
 	platform: string;
 	socialLink: string;
 	mediaKitUrl?: string;
-	contactNumber?: string;
 	location?: string;
 	bio: string;
 	followers: number;
 	totalViews: number;
-	averageViews?: number;
 	engagement?: string;
 	reels: string[];
 	tags: string[];
@@ -83,7 +81,6 @@ export const creatorAPI = {
 			platform: data.platform,
 			socialLink: data.socialLink,
 			mediaKitUrl: data.mediaKitUrl,
-			contactNumber: data.contactNumber,
 			location: data.location || "Other",
 			details: {
 				location: data.location || "Other",
@@ -91,7 +88,6 @@ export const creatorAPI = {
 				analytics: {
 					followers: data.followers,
 					totalViews: data.totalViews,
-					averageViews: data.averageViews,
 					engagement: data.engagement,
 				},
 				reels: data.reels,
@@ -113,14 +109,12 @@ export const creatorAPI = {
 		if (data.platform) updateData.platform = data.platform;
 		if (data.socialLink) updateData.socialLink = data.socialLink;
 		if (data.mediaKitUrl) updateData.mediaKitUrl = data.mediaKitUrl;
-		if (data.contactNumber) updateData.contactNumber = data.contactNumber;
 		if (data.location) updateData.location = data.location;
 
 		if (
 			data.bio ||
 			data.followers ||
 			data.totalViews ||
-			data.averageViews ||
 			data.engagement ||
 			data.reels ||
 			data.tags
@@ -128,14 +122,12 @@ export const creatorAPI = {
 			updateData.details = {};
 			if (data.bio) updateData.details.bio = data.bio;
 			if (data.location) updateData.details.location = data.location;
-			if (data.followers || data.totalViews || data.averageViews || data.engagement) {
+			if (data.followers || data.totalViews || data.engagement) {
 				updateData.details.analytics = {};
 				if (data.followers)
 					updateData.details.analytics.followers = data.followers;
 				if (data.totalViews)
 					updateData.details.analytics.totalViews = data.totalViews;
-				if (data.averageViews)
-					updateData.details.analytics.averageViews = data.averageViews;
 				if (data.engagement)
 					updateData.details.analytics.engagement = data.engagement;
 			}

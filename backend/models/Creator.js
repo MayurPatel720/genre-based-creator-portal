@@ -68,10 +68,6 @@ const creatorSchema = new mongoose.Schema(
 			trim: true,
 			match: [/^https?:\/\/.+/i, "Please provide a valid URL"],
 		},
-		contactNumber: {
-			type: String,
-			trim: true,
-		},
 		location: {
 			type: String,
 			trim: true,

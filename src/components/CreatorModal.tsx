@@ -31,11 +31,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleContactCreator = () => {
-		// Use creator's specific contact number if available, otherwise fallback
-		const phoneNumber = creator.contactNumber || "+918003277763";
+		// Open WhatsApp or email based on availability
 		const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
-		const encodedMessage = encodeURIComponent(message);
-		const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+		const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
 		window.open(whatsappUrl, "_blank");
 	};
 
