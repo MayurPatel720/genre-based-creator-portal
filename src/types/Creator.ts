@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Creator {
 	_id?: string;
@@ -8,10 +7,7 @@ export interface Creator {
 	cloudinary_public_id?: string;
 	platform: string;
 	socialLink: string;
-	mediaKitUrl?: string;
 	location?: string;
-	contactNumber?: string;
-	countryPrefix?: string;
 	details: {
 		pricing: any;
 		location: string;

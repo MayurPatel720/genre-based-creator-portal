@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { CreateCreatorData, UpdateCreatorData } from "../services/api";
@@ -90,10 +89,6 @@ export const useCreators = () => {
 		}
 	};
 
-	const refetch = async () => {
-		await fetchCreators();
-	};
-
 	const fetchCreatorById = async (id: string) => {
 		setLoading(true);
 		setError(null);
@@ -128,7 +123,6 @@ export const useCreators = () => {
 		updateCreator,
 		deleteCreator,
 		fetchCreators,
-		refetch,
 		fetchCreatorById,
 		fetchCreatorReels,
 		loading,

@@ -63,25 +63,10 @@ const creatorSchema = new mongoose.Schema(
 			trim: true,
 			match: [/^https?:\/\/.+/i, "Please provide a valid URL"],
 		},
-		mediaKitUrl: {
-			type: String,
-			trim: true,
-			default: "",
-		},
 		location: {
 			type: String,
 			trim: true,
 			default: "Other",
-		},
-		contactNumber: {
-			type: String,
-			trim: true,
-			default: "",
-		},
-		countryPrefix: {
-			type: String,
-			trim: true,
-			default: "+91",
 		},
 		details: {
 			bio: {
@@ -103,12 +88,10 @@ const creatorSchema = new mongoose.Schema(
 				averageViews: {
 					type: Number,
 					min: 0,
-					default: 0,
 				},
 				engagement: {
 					type: String,
 					trim: true,
-					default: "",
 				},
 			},
 			reels: [

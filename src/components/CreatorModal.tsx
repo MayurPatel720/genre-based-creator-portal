@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Creator } from "../types/Creator";
@@ -12,7 +11,6 @@ import {
 	Play,
 	Image as ImageIcon,
 	MessageCircle,
-	FileText,
 } from "lucide-react";
 import MediaViewer from "./MediaViewer";
 
@@ -31,21 +29,10 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleContactCreator = () => {
-		if (creator.contactNumber && creator.countryPrefix) {
-			const phoneNumber = `${creator.countryPrefix}${creator.contactNumber}`;
-			const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
-			const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-			window.open(whatsappUrl, "_blank");
-		} else {
-			// Fallback - show alert if no contact number
-			alert(`Contact information not available for ${creator.name}`);
-		}
-	};
-
-	const handleVisitMediaKit = () => {
-		if (creator.mediaKitUrl) {
-			window.open(creator.mediaKitUrl, "_blank");
-		}
+		// Open WhatsApp or email based on availability
+		const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
+		const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+		window.open(whatsappUrl, "_blank");
 	};
 
 	return (
@@ -91,7 +78,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 								</div>
 							</div>
 
-							<div className="flex flex-wrap gap-3">
+							<div className="flex gap-3">
 								<button
 									onClick={handleContactCreator}
 									className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
@@ -99,16 +86,6 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 									<MessageCircle size={16} />
 									<span>Contact Creator</span>
 								</button>
-
-								{creator.mediaKitUrl && (
-									<button
-										onClick={handleVisitMediaKit}
-										className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-									>
-										<FileText size={16} />
-										<span>Visit MediaKit</span>
-									</button>
-								)}
 
 								<a
 									href={creator.socialLink}
