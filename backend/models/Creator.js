@@ -73,6 +73,15 @@ const creatorSchema = new mongoose.Schema(
 			trim: true,
 			default: "Other",
 		},
+		contactNumber: {
+			type: String,
+			trim: true,
+		},
+		countryPrefix: {
+			type: String,
+			trim: true,
+			default: "+91",
+		},
 		details: {
 			bio: {
 				type: String,

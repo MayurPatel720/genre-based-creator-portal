@@ -31,10 +31,17 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	};
 
 	const handleContactCreator = () => {
-		// Open WhatsApp or email based on availability
-		const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
-		const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-		window.open(whatsappUrl, "_blank");
+		if (creator.contactNumber && creator.countryPrefix) {
+			const phoneNumber = `${creator.countryPrefix}${creator.contactNumber}`;
+			const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
+			const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+			window.open(whatsappUrl, "_blank");
+		} else {
+			// Fallback to generic WhatsApp
+			const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
+			const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+			window.open(whatsappUrl, "_blank");
+		}
 	};
 
 	const handleVisitMediaKit = () => {

@@ -49,9 +49,12 @@ const CSVImport: React.FC<CSVImportProps> = ({ onImportComplete }) => {
 					socialLink: values[headers.indexOf('socialLink')] || '',
 					mediaKitUrl: values[headers.indexOf('mediaKitUrl')] || '',
 					location: values[headers.indexOf('location')] || 'Other',
+					contactNumber: values[headers.indexOf('contactNumber')] || '',
+					countryPrefix: values[headers.indexOf('countryPrefix')] || '+91',
 					bio: values[headers.indexOf('bio')] || '',
 					followers: parseInt(values[headers.indexOf('followers')]) || 0,
 					totalViews: parseInt(values[headers.indexOf('totalViews')]) || 0,
+					averageViews: parseInt(values[headers.indexOf('averageViews')]) || 0,
 					engagement: values[headers.indexOf('engagement')] || '',
 					reels: [],
 					tags: values[headers.indexOf('tags')] ? values[headers.indexOf('tags')].split(';') : []
@@ -95,9 +98,9 @@ const CSVImport: React.FC<CSVImportProps> = ({ onImportComplete }) => {
 
 	const downloadSampleCSV = () => {
 		const sampleData = [
-			'name,genre,avatar,platform,socialLink,mediaKitUrl,location,bio,followers,totalViews,engagement,tags',
-			'"John Doe","AI Creators","https://example.com/avatar.jpg","Instagram","https://instagram.com/johndoe","https://drive.google.com/mediakit","Mumbai","Tech content creator",10000,500000,"5.2%","tech;ai;content"',
-			'"Jane Smith","Lifestyle","https://example.com/avatar2.jpg","YouTube","https://youtube.com/janesmith","","Delhi","Lifestyle blogger",25000,1000000,"4.8%","lifestyle;fashion"'
+			'name,genre,avatar,platform,socialLink,mediaKitUrl,location,contactNumber,countryPrefix,bio,followers,totalViews,averageViews,engagement,tags',
+			'"John Doe","AI Creators","https://example.com/avatar.jpg","Instagram","https://instagram.com/johndoe","https://drive.google.com/mediakit","Mumbai","1234567890","+91","Tech content creator",10000,500000,25000,"5.2%","tech;ai;content"',
+			'"Jane Smith","Lifestyle","https://example.com/avatar2.jpg","YouTube","https://youtube.com/janesmith","","Delhi","9876543210","+91","Lifestyle blogger",25000,1000000,40000,"4.8%","lifestyle;fashion"'
 		].join('\n');
 
 		const blob = new Blob([sampleData], { type: 'text/csv' });
@@ -141,7 +144,7 @@ const CSVImport: React.FC<CSVImportProps> = ({ onImportComplete }) => {
 						className="mb-2"
 					/>
 					<div className="text-xs text-gray-500">
-						Required columns: name, genre, avatar, platform, socialLink, location, bio, followers, totalViews, engagement, tags
+						Required columns: name, genre, avatar, platform, socialLink, location, contactNumber, countryPrefix, bio, followers, totalViews, averageViews, engagement, tags
 					</div>
 				</div>
 
