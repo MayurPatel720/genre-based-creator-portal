@@ -7,7 +7,10 @@ import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Creator } from "../../types/Creator";
 import { useCreators } from "../../hooks/useCreators";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X, Play, Image as ImageIcon } from "lucide-react";
+import ImageUpload from "../ImageUpload";
+import MediaManager from "./MediaManager";
+import api from "../../services/api";
 
 interface CreatorFormProps {
 	creator?: Creator | null;
@@ -39,6 +42,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 
 	const [tagsInput, setTagsInput] = useState("");
 	const [reelsInput, setReelsInput] = useState("");
+	const [mediaFiles, setMediaFiles] = useState<any[]>([]);
 
 	useEffect(() => {
 		if (creator) {
@@ -63,6 +67,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 			});
 			setTagsInput(creator.details?.tags?.join(", ") || "");
 			setReelsInput(creator.details?.reels?.join(", ") || "");
+			setMediaFiles(creator.details?.media || []);
 		}
 	}, [creator]);
 
@@ -86,6 +91,50 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 			onSuccess();
 		} catch (error) {
 			console.error("Form submission error:", error);
+		}
+	};
+
+	const handleImageUpload = (imageUrl: string) => {
+		setFormData({ ...formData, avatar: imageUrl });
+	};
+
+	const handleMediaAdd = async (file: File, caption: string) => {
+		if (!creator?._id) {
+			console.error("Cannot add media without creator ID");
+			return;
+		}
+
+		try {
+			const formData = new FormData();
+			formData.append('media', file);
+			formData.append('caption', caption);
+
+			const response = await api.post(`/media/${creator._id}`, formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			});
+
+			const newMedia = response.data;
+			setMediaFiles(prev => [...prev, newMedia]);
+		} catch (error) {
+			console.error('Error uploading media:', error);
+			throw error;
+		}
+	};
+
+	const handleMediaDelete = async (mediaId: string) => {
+		if (!creator?._id) {
+			console.error("Cannot delete media without creator ID");
+			return;
+		}
+
+		try {
+			await api.delete(`/media/${creator._id}/${mediaId}`);
+			setMediaFiles(prev => prev.filter(media => media.id !== mediaId));
+		} catch (error) {
+			console.error('Error deleting media:', error);
+			throw error;
 		}
 	};
 
@@ -117,13 +166,12 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 						/>
 					</div>
 
-					<div>
-						<Label htmlFor="avatar">Avatar URL *</Label>
-						<Input
-							id="avatar"
-							value={formData.avatar}
-							onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-							required
+					<div className="md:col-span-2">
+						<Label>Avatar *</Label>
+						<ImageUpload
+							currentImage={formData.avatar}
+							onImageUpload={handleImageUpload}
+							className="mt-2"
 						/>
 					</div>
 
@@ -267,6 +315,17 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 						rows={3}
 					/>
 				</div>
+
+				{creator?._id && (
+					<div className="border-t pt-6">
+						<MediaManager
+							creatorId={creator._id}
+							media={mediaFiles}
+							onMediaAdd={handleMediaAdd}
+							onMediaDelete={handleMediaDelete}
+						/>
+					</div>
+				)}
 
 				<div className="flex gap-4 pt-4">
 					<Button type="submit" disabled={loading}>

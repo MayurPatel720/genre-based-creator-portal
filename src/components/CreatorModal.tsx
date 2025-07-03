@@ -37,10 +37,8 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 			const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
 			window.open(whatsappUrl, "_blank");
 		} else {
-			// Fallback to generic WhatsApp
-			const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
-			const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-			window.open(whatsappUrl, "_blank");
+			// Fallback - show alert if no contact number
+			alert(`Contact information not available for ${creator.name}`);
 		}
 	};
 
@@ -108,7 +106,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 										className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
 									>
 										<FileText size={16} />
-										<span>Visit More On MediaKit</span>
+										<span>Visit MediaKit</span>
 									</button>
 								)}
 
@@ -235,17 +233,6 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 						)}
 					</div>
 				</div>
-
-				{/* Visit MediaKit Button - Bottom Right Hover */}
-				{creator.mediaKitUrl && (
-					<button
-						onClick={handleVisitMediaKit}
-						className="fixed bottom-4 left-4 z-50 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"
-						title="Visit More On MediaKit"
-					>
-						<FileText size={20} />
-					</button>
-				)}
 			</div>
 
 			{/* Media Viewer */}
