@@ -42,6 +42,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 
 	useEffect(() => {
 		if (creator) {
+			console.log("Loading creator data:", creator);
 			setFormData({
 				name: creator.name || "",
 				genre: creator.genre || "",
@@ -73,6 +74,8 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 			tags: tagsInput.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0),
 			reels: reelsInput.split(",").map(reel => reel.trim()).filter(reel => reel.length > 0),
 		};
+
+		console.log("Submitting data:", submitData);
 
 		try {
 			if (creator?._id) {
@@ -156,6 +159,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 							id="mediaKitUrl"
 							value={formData.mediaKitUrl}
 							onChange={(e) => setFormData({ ...formData, mediaKitUrl: e.target.value })}
+							placeholder="https://drive.google.com/your-media-kit"
 						/>
 					</div>
 

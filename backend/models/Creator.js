@@ -66,7 +66,7 @@ const creatorSchema = new mongoose.Schema(
 		mediaKitUrl: {
 			type: String,
 			trim: true,
-			match: [/^https?:\/\/.+/i, "Please provide a valid URL"],
+			default: "",
 		},
 		location: {
 			type: String,
@@ -76,6 +76,7 @@ const creatorSchema = new mongoose.Schema(
 		contactNumber: {
 			type: String,
 			trim: true,
+			default: "",
 		},
 		countryPrefix: {
 			type: String,
@@ -102,10 +103,12 @@ const creatorSchema = new mongoose.Schema(
 				averageViews: {
 					type: Number,
 					min: 0,
+					default: 0,
 				},
 				engagement: {
 					type: String,
 					trim: true,
+					default: "",
 				},
 			},
 			reels: [
