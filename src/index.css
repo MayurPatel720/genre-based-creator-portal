@@ -84,6 +84,26 @@
   animation: l18 1.5s infinite;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #7d7287, #c8c8e8);
+  border-radius: 100px;
+  border: 0px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #9333ea, #4f46e5);
+}
+
+
 @keyframes l18 {
   0%   {background-position:50% 50%,50% 50%,50%  50% ,50% 50%,50% 50%}
   25%  {background-position:0  100%,100%  0,50%  50% ,50% 50%,50% 50%}

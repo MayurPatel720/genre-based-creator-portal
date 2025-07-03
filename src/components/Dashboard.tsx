@@ -9,6 +9,7 @@ import { Loader2, Search, Filter } from "lucide-react";
 import { Input } from "./ui/input";
 import FilterDialog from "./FilterDialog";
 import WhatsAppButton from "./WhatsAppButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardProps {
 	activeGenre: string;
@@ -28,6 +29,8 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const isMobile = useIsMobile();
+
 	const [filters, setFilters] = useState<FilterState>({
 		platform: "All",
 		locations: [],
@@ -233,7 +236,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 					onClearFilters={handleClearFilters}
 				/>
 			</div>
-			<WhatsAppButton variant="floating" />
+			{isMobile && <WhatsAppButton variant="floating" />}
 		</div>
 	);
 };
