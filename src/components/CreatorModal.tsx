@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Creator } from "../types/Creator";
@@ -11,6 +12,7 @@ import {
 	Play,
 	Image as ImageIcon,
 	MessageCircle,
+	FileText,
 } from "lucide-react";
 import MediaViewer from "./MediaViewer";
 
@@ -33,6 +35,12 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 		const message = `Hi ${creator.name}, I'm interested in collaborating with you!`;
 		const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
 		window.open(whatsappUrl, "_blank");
+	};
+
+	const handleVisitMediaKit = () => {
+		if (creator.mediaKitUrl) {
+			window.open(creator.mediaKitUrl, "_blank");
+		}
 	};
 
 	return (
@@ -78,7 +86,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 								</div>
 							</div>
 
-							<div className="flex gap-3">
+							<div className="flex flex-wrap gap-3">
 								<button
 									onClick={handleContactCreator}
 									className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
@@ -86,6 +94,16 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 									<MessageCircle size={16} />
 									<span>Contact Creator</span>
 								</button>
+
+								{creator.mediaKitUrl && (
+									<button
+										onClick={handleVisitMediaKit}
+										className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+									>
+										<FileText size={16} />
+										<span>Visit More On MediaKit</span>
+									</button>
+								)}
 
 								<a
 									href={creator.socialLink}
@@ -210,6 +228,17 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 						)}
 					</div>
 				</div>
+
+				{/* Visit MediaKit Button - Bottom Right Hover */}
+				{creator.mediaKitUrl && (
+					<button
+						onClick={handleVisitMediaKit}
+						className="fixed bottom-4 left-4 z-50 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"
+						title="Visit More On MediaKit"
+					>
+						<FileText size={20} />
+					</button>
+				)}
 			</div>
 
 			{/* Media Viewer */}

@@ -63,6 +63,11 @@ const creatorSchema = new mongoose.Schema(
 			trim: true,
 			match: [/^https?:\/\/.+/i, "Please provide a valid URL"],
 		},
+		mediaKitUrl: {
+			type: String,
+			trim: true,
+			match: [/^https?:\/\/.+/i, "Please provide a valid URL"],
+		},
 		location: {
 			type: String,
 			trim: true,

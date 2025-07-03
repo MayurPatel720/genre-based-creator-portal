@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
@@ -46,6 +47,7 @@ export interface CreateCreatorData {
 	avatar: string;
 	platform: string;
 	socialLink: string;
+	mediaKitUrl?: string;
 	location?: string;
 	bio: string;
 	followers: number;
@@ -78,6 +80,7 @@ export const creatorAPI = {
 			avatar: data.avatar,
 			platform: data.platform,
 			socialLink: data.socialLink,
+			mediaKitUrl: data.mediaKitUrl,
 			location: data.location || "Other",
 			details: {
 				location: data.location || "Other",
@@ -105,6 +108,7 @@ export const creatorAPI = {
 		if (data.avatar) updateData.avatar = data.avatar;
 		if (data.platform) updateData.platform = data.platform;
 		if (data.socialLink) updateData.socialLink = data.socialLink;
+		if (data.mediaKitUrl) updateData.mediaKitUrl = data.mediaKitUrl;
 		if (data.location) updateData.location = data.location;
 
 		if (
