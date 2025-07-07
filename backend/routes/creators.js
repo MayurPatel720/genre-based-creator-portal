@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const Creator = require("../models/Creator");
@@ -26,6 +25,8 @@ router.get("/", async (req, res) => {
 			platform: creator.platform,
 			socialLink: creator.socialLink,
 			location: creator.location,
+			phoneNumber: creator.phoneNumber,
+			mediaKit: creator.mediaKit,
 			details: {
 				location: creator.details.location || creator.location,
 				bio: creator.details.bio,
@@ -35,7 +36,6 @@ router.get("/", async (req, res) => {
 					averageViews: creator.details.analytics.averageViews,
 				},
 				reels: creator.details.reels,
-				tags: creator.details.tags,
 				media: creator.details.media || [],
 			},
 			createdAt: creator.createdAt,
@@ -67,6 +67,8 @@ router.get("/:id", async (req, res) => {
 			platform: creator.platform,
 			socialLink: creator.socialLink,
 			location: creator.location,
+			phoneNumber: creator.phoneNumber,
+			mediaKit: creator.mediaKit,
 			details: {
 				location: creator.details.location || creator.location,
 				bio: creator.details.bio,
@@ -76,7 +78,6 @@ router.get("/:id", async (req, res) => {
 					averageViews: creator.details.analytics.averageViews,
 				},
 				reels: creator.details.reels,
-				tags: creator.details.tags,
 				media: creator.details.media || [],
 			},
 			createdAt: creator.createdAt,
@@ -138,9 +139,9 @@ router.post("/", async (req, res) => {
 			return res.status(400).json({ error: "Invalid socialLink URL" });
 		}
 
-		// Remove unexpected fields like engagement
-		if (details?.analytics?.engagement) {
-			delete details.analytics.engagement;
+		// Validate mediaKit URL if provided
+		if (req.body.mediaKit && !/^https?:\/\/.+/.test(req.body.mediaKit)) {
+			return res.status(400).json({ error: "Invalid mediaKit URL" });
 		}
 
 		const creator = new Creator(req.body);
@@ -155,6 +156,8 @@ router.post("/", async (req, res) => {
 			platform: creator.platform,
 			socialLink: creator.socialLink,
 			location: creator.location,
+			phoneNumber: creator.phoneNumber,
+			mediaKit: creator.mediaKit,
 			details: {
 				location: creator.details.location || creator.location,
 				bio: creator.details.bio,
@@ -164,7 +167,6 @@ router.post("/", async (req, res) => {
 					averageViews: creator.details.analytics.averageViews,
 				},
 				reels: creator.details.reels,
-				tags: creator.details.tags,
 				media: creator.details.media || [],
 			},
 			createdAt: creator.createdAt,
@@ -234,9 +236,9 @@ router.put("/:id", async (req, res) => {
 			return res.status(400).json({ error: "Invalid socialLink URL" });
 		}
 
-		// Remove unexpected fields like engagement
-		if (details?.analytics?.engagement) {
-			delete details.analytics.engagement;
+		// Validate mediaKit URL if provided
+		if (req.body.mediaKit && !/^https?:\/\/.+/.test(req.body.mediaKit)) {
+			return res.status(400).json({ error: "Invalid mediaKit URL" });
 		}
 
 		const creator = await Creator.findByIdAndUpdate(req.params.id, req.body, {
@@ -257,6 +259,8 @@ router.put("/:id", async (req, res) => {
 			platform: creator.platform,
 			socialLink: creator.socialLink,
 			location: creator.location,
+			phoneNumber: creator.phoneNumber,
+			mediaKit: creator.mediaKit,
 			details: {
 				location: creator.details.location || creator.location,
 				bio: creator.details.bio,
@@ -266,7 +270,6 @@ router.put("/:id", async (req, res) => {
 					averageViews: creator.details.analytics.averageViews,
 				},
 				reels: creator.details.reels,
-				tags: creator.details.tags,
 				media: creator.details.media || [],
 			},
 			createdAt: creator.createdAt,

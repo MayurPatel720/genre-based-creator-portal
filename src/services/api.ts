@@ -2,11 +2,11 @@ import axios from "axios";
 import { Creator } from "../types/Creator";
 
 // Use environment variable for API URL or fallback to local URL
-const API_BASE_URL =
-	import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 // const API_BASE_URL =
-// 	import.meta.env.VITE_API_URL ||
-// 	"https://genre-based-creator-portal.onrender.com/api";
+// 	import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_BASE_URL =
+	import.meta.env.VITE_API_URL ||
+	"https://genre-based-creator-portal.onrender.com/api";
 
 const api = axios.create({
 	baseURL: API_BASE_URL,
@@ -47,12 +47,13 @@ export interface CreateCreatorData {
 	platform: string;
 	socialLink: string;
 	location?: string;
+	phoneNumber?: string;
+	mediaKit?: string;
 	bio: string;
 	followers: number;
 	totalViews: number;
-	engagement?: string;
+	averageViews?: number;
 	reels: string[];
-	tags: string[];
 }
 
 export type UpdateCreatorData = Partial<CreateCreatorData>;
@@ -79,16 +80,17 @@ export const creatorAPI = {
 			platform: data.platform,
 			socialLink: data.socialLink,
 			location: data.location || "Other",
+			phoneNumber: data.phoneNumber,
+			mediaKit: data.mediaKit,
 			details: {
 				location: data.location || "Other",
 				bio: data.bio,
 				analytics: {
 					followers: data.followers,
 					totalViews: data.totalViews,
-					engagement: data.engagement,
+					averageViews: data.averageViews,
 				},
 				reels: data.reels,
-				tags: data.tags,
 			},
 		};
 		const response = await api.post("/creators", creatorData);
@@ -97,6 +99,10 @@ export const creatorAPI = {
 
 	// Update creator
 	update: async (id: string, data: UpdateCreatorData): Promise<Creator> => {
+		// First get the current creator to preserve media
+		const currentCreator = await api.get(`/creators/${id}`);
+		const existingMedia = currentCreator.data.details?.media || [];
+
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const updateData: any = {};
 
@@ -106,29 +112,33 @@ export const creatorAPI = {
 		if (data.platform) updateData.platform = data.platform;
 		if (data.socialLink) updateData.socialLink = data.socialLink;
 		if (data.location) updateData.location = data.location;
+		if (data.phoneNumber !== undefined)
+			updateData.phoneNumber = data.phoneNumber;
+		if (data.mediaKit !== undefined) updateData.mediaKit = data.mediaKit;
 
 		if (
 			data.bio ||
 			data.followers ||
 			data.totalViews ||
-			data.engagement ||
-			data.reels ||
-			data.tags
+			data.averageViews ||
+			data.reels
 		) {
 			updateData.details = {};
 			if (data.bio) updateData.details.bio = data.bio;
 			if (data.location) updateData.details.location = data.location;
-			if (data.followers || data.totalViews || data.engagement) {
+			if (data.followers || data.totalViews || data.averageViews) {
 				updateData.details.analytics = {};
 				if (data.followers)
 					updateData.details.analytics.followers = data.followers;
 				if (data.totalViews)
 					updateData.details.analytics.totalViews = data.totalViews;
-				if (data.engagement)
-					updateData.details.analytics.engagement = data.engagement;
+				if (data.averageViews)
+					updateData.details.analytics.averageViews = data.averageViews;
 			}
 			if (data.reels) updateData.details.reels = data.reels;
-			if (data.tags) updateData.details.tags = data.tags;
+
+			// Always preserve existing media
+			updateData.details.media = existingMedia;
 		}
 
 		const response = await api.put(`/creators/${id}`, updateData);

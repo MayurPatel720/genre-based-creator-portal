@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Creator {
 	_id?: string;
@@ -8,6 +9,8 @@ export interface Creator {
 	platform: string;
 	socialLink: string;
 	location?: string;
+	phoneNumber?: string;
+	mediaKit?: string;
 	details: {
 		pricing: any;
 		location: string;
@@ -16,10 +19,8 @@ export interface Creator {
 			followers: number;
 			totalViews: number;
 			averageViews?: number;
-			engagement?: string;
 		};
 		reels: string[];
-		tags: string[];
 		media?: MediaFile[];
 	};
 	createdAt?: string;

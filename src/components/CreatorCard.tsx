@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Creator } from "../types/Creator";
 import {
@@ -41,19 +42,19 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 	};
 
 	return (
-		<div className="group relative">
+		<div className="group relative font-poppins">
 			<button
 				onClick={onClick}
-				className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 w-full text-left border border-gray-100 hover:border-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-300 relative overflow-hidden group-hover:scale-[1.02]"
+				className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 w-full text-left border border-gray-100 hover:border-brand-orange/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 relative overflow-hidden group-hover:scale-[1.02]"
 				aria-label={`View profile of ${creator.name}, ${
 					creator.details?.analytics.followers || 0
 				}K followers on ${creator.platform || "unknown platform"}`}
 			>
 				{/* Gradient Border Effect */}
-				<div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+				<div className="absolute inset-0 bg-gradient-to-r from-brand-orange/10 to-brand-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
 
 				{/* Avatar Section */}
-				<div className="relative h-48 overflow-hidden rounded-t-xl bg-gradient-to-br from-purple-100 to-pink-100">
+				<div className="relative h-48 overflow-hidden rounded-t-xl bg-gradient-to-br from-brand-aureolin/10 to-brand-orange/10">
 					<img
 						src={creator.avatar || "/fallback-avatar.png"}
 						alt={`${creator.name}'s avatar`}
@@ -79,14 +80,6 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 									{formatNumber(creator.details?.analytics.totalViews || 0)}
 								</span>
 							</div>
-							{/* {creator.details?.analytics.averageViews && (
-								<div className="flex items-center gap-2 text-sm">
-									<Eye size={14} />
-									<span>
-										Avg: {formatNumber(creator.details.analytics.averageViews)}
-									</span>
-								</div>
-							)} */}
 						</div>
 					</div>
 
@@ -96,15 +89,15 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 					</div>
 				</div>
 
-				{/* Content Section */}
-				<div className="p-4 flex flex-col gap-3">
-					<div className="flex items-center justify-between">
-						<div>
-							<h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors duration-300 truncate">
+				{/* Content Section - Improved mobile layout */}
+				<div className="p-3 sm:p-4 flex flex-col gap-2.5 sm:gap-3">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+						<div className="flex-1 min-w-0">
+							<h3 className="text-base sm:text-lg font-semibold text-brand-black group-hover:text-brand-orange transition-colors duration-300 truncate">
 								{creator.name}
 							</h3>
-							<div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-								<MapPin size={12} />
+							<div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+								<MapPin size={10} className="sm:w-3 sm:h-3 flex-shrink-0" />
 								<span className="truncate">{creator.location}</span>
 							</div>
 						</div>
@@ -114,20 +107,20 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 							}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="flex items-center gap-1.5 bg-gray-100 hover:bg-purple-100 text-gray-700 hover:text-purple-600 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-sm"
+							className="flex items-center justify-center gap-1 sm:gap-1.5 bg-gray-100 hover:bg-brand-aureolin/20 text-gray-700 hover:text-brand-purple px-2.5 py-1.5 sm:px-3 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-sm self-end sm:self-auto"
 							aria-label={`Visit ${creator.name}'s ${
 								creator.platform || "Instagram"
 							} profile`}
 							onClick={(e) => e.stopPropagation()}
 						>
-							{renderPlatformIcon(12)}
-							<span>Visit</span>
+							{renderPlatformIcon(10)}
+							<span className="sm:inline">Visit</span>
 						</a>
 					</div>
 				</div>
 
 				{/* Shimmer effect on hover */}
-				<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+				<div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-aureolin/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 			</button>
 		</div>
 	);

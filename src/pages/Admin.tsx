@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Users, TrendingUp, Eye } from "lucide-react";
 import CreatorForm from "../components/admin/CreatorForm";
@@ -45,11 +46,11 @@ const Admin = () => {
 	);
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-screen bg-gray-50 font-poppins">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
 				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-gray-900 mb-2">
+					<h1 className="text-3xl font-bold text-gray-900 mb-2 font-anton">
 						Admin Dashboard
 					</h1>
 					<p className="text-gray-600">Manage creator profiles and content</p>

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +20,14 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Brand colors
+				brand: {
+					aureolin: '#F6EB18',
+					orange: '#F47E20',
+					purple: '#8C509F',
+					black: '#000000',
+					white: '#FFFFFF',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -62,6 +71,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			fontFamily: {
+				'poppins': ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
+				'anton': ['Anton', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

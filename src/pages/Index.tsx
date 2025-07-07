@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Dashboard from "../components/Dashboard";
@@ -17,7 +18,7 @@ const Index = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-screen bg-gray-50 font-poppins">
 			<div className="flex h-screen">
 				{/* Desktop Sidebar */}
 				<div className="hidden md:block">
@@ -67,10 +68,10 @@ const Index = () => {
 										<button
 											key={genre.name}
 											onClick={() => handleGenreChange(genre.name)}
-											className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left ${
+											className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 text-left font-poppins ${
 												isActive
-													? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
-													: "text-gray-700 hover:bg-gray-100 hover:text-purple-600"
+													? "bg-brand-orange text-white shadow-lg"
+													: "text-gray-700 hover:bg-brand-aureolin/10 hover:text-brand-purple"
 											}`}
 										>
 											<span className="font-medium">{genre.name}</span>
@@ -90,12 +91,12 @@ const Index = () => {
 				>
 					{/* Mobile header */}
 					<div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-						<h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+						<h1 className="text-lg font-bold bg-gradient-to-r from-brand-orange to-brand-purple bg-clip-text text-transparent font-anton">
 							Creators Dream
 						</h1>
 						<button
 							onClick={() => setIsMobileMenuOpen(true)}
-							className="p-2 rounded-lg hover:bg-gray-100"
+							className="p-2 rounded-lg hover:bg-brand-aureolin/10"
 						>
 							<Menu size={24} />
 						</button>
@@ -104,6 +105,7 @@ const Index = () => {
 					<Dashboard
 						activeGenre={activeGenre}
 						onCreatorClick={setSelectedCreator}
+						isModalOpen={!!selectedCreator}
 					/>
 				</div>
 			</div>
