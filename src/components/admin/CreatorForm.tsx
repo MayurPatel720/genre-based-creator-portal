@@ -20,6 +20,7 @@ import { imageUploadAPI } from "../../services/imageUpload";
 import { mediaService } from "../../services/mediaAPI";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Upload } from "lucide-react";
+import Papa from "papaparse";
 
 interface CreatorFormProps {
 	creator?: Creator | null;
@@ -35,6 +36,8 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 	const { createCreator, updateCreator } = useCreators();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [errorList, setErrorList] = useState<string[]>([]);
 	const [formData, setFormData] = useState<
 		CreateCreatorData & { location: string; averageViews: number }
 	>({
@@ -118,195 +121,222 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
 		const file = event.target.files?.[0];
-		if (!file) return;
+		if (!file) {
+			setError("No file selected");
+			setLoading(false);
+			return;
+		}
 
 		setLoading(true);
 		setError(null);
+		setSuccessMessage(null);
+		setErrorList([]);
 
 		try {
 			const reader = new FileReader();
 			reader.onload = async (e) => {
-				const csv = e.target?.result as string;
-				const lines = csv.split("\n").filter((line) => line.trim());
-
-				if (lines.length < 2) {
-					setError("CSV file must have at least a header row and one data row");
+				const csv = e.target?.result;
+				if (typeof csv !== "string") {
+					setError("Failed to read CSV file");
 					setLoading(false);
 					return;
 				}
 
-				const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
-				let successCount = 0;
-				let errorCount = 0;
-				const errors: string[] = [];
+				Papa.parse(csv, {
+					header: true,
+					skipEmptyLines: true,
+					transformHeader: (header) => header.trim().toLowerCase(),
+					transform: (value) => value.trim().replace(/^"|"$/g, ""),
+					complete: async (results) => {
+						const lines = results.data;
+						if (lines.length === 0) {
+							setError("CSV file is empty");
+							setLoading(false);
+							return;
+						}
 
-				// Process each data row (skip header)
-				for (let i = 1; i < lines.length; i++) {
-					const data = lines[i].split(",").map((d) => d.trim());
+						let successCount = 0;
+						let errorCount = 0;
+						const errors: string[] = [];
 
-					try {
-						const csvData: any = {};
-						headers.forEach((header, index) => {
-							csvData[header] = data[index] || "";
-						});
+						for (let i = 0; i < lines.length; i++) {
+							const data = lines[i] as any;
+							try {
+								const csvData: CreateCreatorData = {
+									name: data.name || data.creator_name || data.full_name || "",
+									genre: data.genre || data.category || data.niche || "",
+									avatar:
+										data.avatar ||
+										data.profile_pic ||
+										data.image ||
+										data.photo ||
+										"",
+									platform:
+										data.platform || data.social_platform || data.channel || "",
+									socialLink:
+										data.sociallink ||
+										data.social_link ||
+										data.profile_url ||
+										data.url ||
+										"",
+									location:
+										data.location ||
+										data.country ||
+										data.city ||
+										data.region ||
+										"Other",
+									phoneNumber:
+										data.phonenumber ||
+										data.phone_number ||
+										data.phone ||
+										data.contact ||
+										"",
+									mediaKit:
+										data.mediakit ||
+										data.media_kit ||
+										data.presskit ||
+										data.portfolio ||
+										data.mediakiturl ||
+										"",
+									bio:
+										data.bio ||
+										data.description ||
+										data.about ||
+										data.summary ||
+										"",
+									followers:
+										parseFloat(
+											data.followers ||
+												data.subscriber_count ||
+												data.audience ||
+												data.fans ||
+												"0"
+										) || 0,
+									totalViews:
+										parseInt(
+											data.totalviews ||
+												data.total_views ||
+												data.views ||
+												data.total_reach ||
+												"0"
+										) || 0,
+									averageViews:
+										parseInt(
+											data.avgviews ||
+												data.average_views ||
+												data.avg_views ||
+												data.typical_views ||
+												"0"
+										) || 0,
+									reels:
+										data.reels || data.videos || data.content
+											? (data.reels || data.videos || data.content)
+													.split(";")
+													.map((r: string) => r.trim())
+													.filter(Boolean)
+											: [],
+								};
 
-						// Enhanced mapping to use as much CSV data as possible
-						const creatorData: CreateCreatorData = {
-							name:
-								csvData.name || csvData.creator_name || csvData.full_name || "",
-							genre: csvData.genre || csvData.category || csvData.niche || "",
-							avatar:
-								csvData.avatar ||
-								csvData.profile_pic ||
-								csvData.image ||
-								csvData.photo ||
-								"",
-							platform:
-								csvData.platform ||
-								csvData.social_platform ||
-								csvData.channel ||
-								"",
-							socialLink:
-								csvData.sociallink ||
-								csvData.social_link ||
-								csvData.profile_url ||
-								csvData.url ||
-								"",
-							location:
-								csvData.location ||
-								csvData.country ||
-								csvData.city ||
-								csvData.region ||
-								"Other",
-							phoneNumber:
-								csvData.phonenumber ||
-								csvData.phone_number ||
-								csvData.phone ||
-								csvData.contact ||
-								"",
-							mediaKit:
-								csvData.mediakit ||
-								csvData.media_kit ||
-								csvData.presskit ||
-								csvData.portfolio ||
-								"",
-							bio:
-								csvData.bio ||
-								csvData.description ||
-								csvData.about ||
-								csvData.summary ||
-								"",
-							followers:
-								parseFloat(
-									csvData.followers ||
-										csvData.subscriber_count ||
-										csvData.audience ||
-										csvData.fans ||
-										"0"
-								) || 0,
-							totalViews:
-								parseInt(
-									csvData.totalviews ||
-										csvData.total_views ||
-										csvData.views ||
-										csvData.total_reach ||
-										"0"
-								) || 0,
-							averageViews:
-								parseInt(
-									csvData.averageviews ||
-										csvData.average_views ||
-										csvData.avg_views ||
-										csvData.typical_views ||
-										"0"
-								) || 0,
-							reels: csvData.reels
-								? csvData.reels
-										.split(";")
-										.map((r: string) => r.trim())
-										.filter(Boolean)
-								: csvData.videos
-								? csvData.videos
-										.split(";")
-										.map((r: string) => r.trim())
-										.filter(Boolean)
-								: csvData.content
-								? csvData.content
-										.split(";")
-										.map((r: string) => r.trim())
-										.filter(Boolean)
-								: [],
-						};
+								// Validate required fields (excluding avatar and bio)
+								const missingFields = [];
+								if (!csvData.name) missingFields.push("name");
+								if (!csvData.genre) missingFields.push("genre");
+								if (!csvData.platform) missingFields.push("platform");
+								if (!csvData.socialLink) missingFields.push("socialLink");
 
-						// Validate required fields with better error messages
-						const missingFields = [];
-						if (!creatorData.name) missingFields.push("name");
-						if (!creatorData.genre) missingFields.push("genre");
-						if (!creatorData.avatar) missingFields.push("avatar");
-						if (!creatorData.platform) missingFields.push("platform");
-						if (!creatorData.socialLink) missingFields.push("socialLink");
-						if (!creatorData.bio) missingFields.push("bio");
+								if (missingFields.length > 0) {
+									errors.push(
+										`Row ${
+											i + 2
+										}: Missing required fields: ${missingFields.join(", ")}`
+									);
+									errorCount++;
+									continue;
+								}
 
-						if (missingFields.length > 0) {
-							errors.push(
-								`Row ${i + 1}: Missing required fields: ${missingFields.join(
-									", "
-								)}`
+								// Validate URLs
+								const urlRegex = /^https?:\/\/.+/;
+								if (!urlRegex.test(csvData.socialLink)) {
+									errors.push(
+										`Row ${i + 2}: Invalid social link URL: ${
+											csvData.socialLink
+										}`
+									);
+									errorCount++;
+									continue;
+								}
+								if (csvData.mediaKit && !urlRegex.test(csvData.mediaKit)) {
+									errors.push(
+										`Row ${i + 2}: Invalid media kit URL: ${csvData.mediaKit}`
+									);
+									errorCount++;
+									continue;
+								}
+
+								// Validate numerical fields
+								if (csvData.followers < 0) {
+									errors.push(
+										`Row ${i + 2}: Followers cannot be negative: ${
+											csvData.followers
+										}`
+									);
+									errorCount++;
+									continue;
+								}
+								if (csvData.totalViews < 0) {
+									errors.push(
+										`Row ${i + 2}: Total views cannot be negative: ${
+											csvData.totalViews
+										}`
+									);
+									errorCount++;
+									continue;
+								}
+								if (csvData.averageViews < 0) {
+									errors.push(
+										`Row ${i + 2}: Average views cannot be negative: ${
+											csvData.averageViews
+										}`
+									);
+									errorCount++;
+									continue;
+								}
+
+								await createCreator(csvData);
+								successCount++;
+							} catch (error: any) {
+								errors.push(
+									`Row ${i + 2}: ${error.message || "Failed to create creator"}`
+								);
+								errorCount++;
+							}
+						}
+
+						if (successCount > 0) {
+							setSuccessMessage(
+								`Successfully imported ${successCount} creators. ${errorCount} rows failed.`
 							);
-							errorCount++;
-							continue;
+							setErrorList(errors);
+							if (errorCount === 0) {
+								onSuccess();
+							}
+						} else {
+							setError("No creators were imported successfully.");
+							setErrorList(errors);
 						}
-
-						// Validate URLs
-						if (!/^https?:\/\/.+/.test(creatorData.socialLink)) {
-							errors.push(`Row ${i + 1}: Invalid social link URL`);
-							errorCount++;
-							continue;
-						}
-
-						if (
-							creatorData.mediaKit &&
-							!/^https?:\/\/.+/.test(creatorData.mediaKit)
-						) {
-							errors.push(`Row ${i + 1}: Invalid media kit URL`);
-							errorCount++;
-							continue;
-						}
-
-						await createCreator(creatorData);
-						successCount++;
-					} catch (error: any) {
-						console.error(`Error creating creator from row ${i + 1}:`, error);
-						errors.push(`Row ${i + 1}: ${error.message}`);
-						errorCount++;
-					}
-				}
-
-				if (successCount > 0) {
-					setError(null);
-					const message = `Successfully imported ${successCount} creators.${
-						errorCount > 0 ? ` ${errorCount} failed.` : ""
-					}`;
-					alert(message);
-					if (errorCount === 0) {
-						onSuccess();
-					} else {
-						// Show first few errors for debugging
-						const errorSummary = errors.slice(0, 5).join("\n");
-						console.log("Import errors:", errorSummary);
-					}
-				} else {
-					setError(
-						`Failed to import any creators. Errors:\n${errors
-							.slice(0, 10)
-							.join("\n")}`
-					);
-				}
+						setLoading(false);
+					},
+					error: (err) => {
+						setError(`CSV parsing failed: ${err.message}`);
+						setErrorList([]);
+						setLoading(false);
+					},
+				});
 			};
 			reader.readAsText(file);
 		} catch (error: any) {
 			setError(`CSV import failed: ${error.message}`);
-		} finally {
+			setErrorList([]);
 			setLoading(false);
 		}
 	};
@@ -315,6 +345,8 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
+		setSuccessMessage(null);
+		setErrorList([]);
 
 		// Client-side validation
 		const missingFields = [];
@@ -352,7 +384,6 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 		}
 
 		try {
-			// Construct payload matching CreateCreatorData
 			const payload: CreateCreatorData = {
 				name: formData.name,
 				genre: formData.genre,
@@ -417,6 +448,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 							accept=".csv"
 							onChange={handleCSVImport}
 							className="hidden"
+							disabled={loading}
 						/>
 					</label>
 				</div>
@@ -425,6 +457,25 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 			{error && (
 				<div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded whitespace-pre-wrap">
 					{error}
+				</div>
+			)}
+
+			{successMessage && (
+				<div className="mb-4 p-4 bg-green-100 border border-green-300 text-green-700 rounded">
+					{successMessage}
+				</div>
+			)}
+
+			{errorList.length > 0 && (
+				<div className="mb-4 p-4 bg-yellow-100 border border-yellow-300 text-yellow-700 rounded max-h-64 overflow-y-auto">
+					<h3 className="text-lg font-semibold mb-2">Import Errors:</h3>
+					<ul className="list-disc pl-5">
+						{errorList.map((err, index) => (
+							<li key={index} className="mb-1">
+								{err}
+							</li>
+						))}
+					</ul>
 				</div>
 			)}
 

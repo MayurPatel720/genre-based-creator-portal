@@ -14,7 +14,9 @@ router.get("/", async (req, res) => {
 		}
 
 		const creators = await Creator.find(query);
-		console.log(`Found ${creators.length} creators for genre: ${genre || 'All'}`);
+		console.log(
+			`Found ${creators.length} creators for genre: ${genre || "All"}`
+		);
 
 		// Transform data to match frontend interface
 		const transformedCreators = creators.map((creator) => ({

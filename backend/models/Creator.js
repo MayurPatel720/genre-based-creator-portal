@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const mediaSchema = new mongoose.Schema({
@@ -44,7 +43,7 @@ const creatorSchema = new mongoose.Schema(
 		},
 		avatar: {
 			type: String,
-			required: true,
+			// required: true,
 			trim: true,
 		},
 		cloudinary_public_id: {
@@ -76,16 +75,16 @@ const creatorSchema = new mongoose.Schema(
 			type: String,
 			trim: true,
 			validate: {
-				validator: function(v) {
+				validator: function (v) {
 					return !v || /^https?:\/\/.+/i.test(v);
 				},
-				message: "Media kit must be a valid URL"
-			}
+				message: "Media kit must be a valid URL",
+			},
 		},
 		details: {
 			bio: {
 				type: String,
-				required: true,
+				// required: true,
 				trim: true,
 			},
 			analytics: {
