@@ -242,10 +242,10 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 						const missingFields = [];
 						if (!creatorData.name) missingFields.push("name");
 						if (!creatorData.genre) missingFields.push("genre");
-						if (!creatorData.avatar) missingFields.push("avatar");
+						// if (!creatorData.avatar) missingFields.push("avatar");
 						if (!creatorData.platform) missingFields.push("platform");
 						if (!creatorData.socialLink) missingFields.push("socialLink");
-						if (!creatorData.bio) missingFields.push("bio");
+						// if (!creatorData.bio) missingFields.push("bio");
 
 						if (missingFields.length > 0) {
 							errors.push(

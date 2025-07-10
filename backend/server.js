@@ -1,8 +1,8 @@
 require("dotenv").config({ path: "./.env" });
-
 const express = require("express");
 const cors = require("cors");
 const { dbConnect } = require("./Configs/dbConnect");
+const morgan = require("morgan");
 
 const app = express();
 
@@ -13,7 +13,7 @@ const allowedOrigins = [
 	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
 ];
-
+app.use(morgan("dev")); // 'dev' format logs concise output with method, URL, status, and response time
 const corsOptions = {
 	origin: (origin, callback) => {
 		if (!origin || allowedOrigins.includes(origin)) {

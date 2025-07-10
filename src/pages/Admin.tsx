@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Users, TrendingUp, Eye } from "lucide-react";
 import CreatorForm from "../components/admin/CreatorForm";
@@ -34,16 +33,20 @@ const Admin = () => {
 		setActiveTab("form");
 	};
 
-	// Calculate stats
-	const totalCreators = creators.length;
-	const totalFollowers = creators.reduce(
-		(sum, creator) => sum + (creator.details.analytics.followers || 0),
-		0
-	);
-	const totalViews = creators.reduce(
-		(sum, creator) => sum + (creator.details.analytics.totalViews || 0),
-		0
-	);
+	// Calculate stats safely
+	const totalCreators = Array.isArray(creators) ? creators.length : 0;
+	const totalFollowers = Array.isArray(creators)
+		? creators.reduce(
+				(sum, creator) => sum + (creator.details.analytics.followers || 0),
+				0
+		  )
+		: 0;
+	const totalViews = Array.isArray(creators)
+		? creators.reduce(
+				(sum, creator) => sum + (creator.details.analytics.totalViews || 0),
+				0
+		  )
+		: 0;
 
 	return (
 		<div className="min-h-screen bg-gray-50 font-poppins">
