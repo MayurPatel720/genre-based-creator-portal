@@ -16,7 +16,7 @@ const allowedOrigins = [
 ];
 
 // Enhanced Morgan logging with custom format
-const morganFormat = ':method :url :status :res[content-length] - :response-time ms :date[clf]';
+const morganFormat = ':method :url :status :res[content-length] - :response-time ms';
 app.use(morgan(morganFormat));
 
 const corsOptions = {
@@ -74,7 +74,8 @@ app.use("/api/*", (req, res) => {
 			"DELETE /api/creators/:id",
 			"POST /api/upload/image",
 			"DELETE /api/upload/image/:publicId",
-			"POST /api/csv/import"
+			"POST /api/csv/import",
+			"GET /api/csv/template"
 		]
 	});
 });
