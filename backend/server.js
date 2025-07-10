@@ -47,20 +47,30 @@ app.use((req, res, next) => {
 	next();
 });
 
-// ✅ Routes - Import and mount routes
+// ✅ Routes - Import and mount routes with try-catch for each route
 try {
+	console.log("Loading routes...");
+	
+	// Load creators routes
 	const creatorRoutes = require("./routes/creators");
-	const uploadRoutes = require("./routes/upload");
-	const csvRoutes = require("./routes/csv");
-
-	// Mount routes with proper paths
 	app.use("/api/creators", creatorRoutes);
+	console.log("✅ Creators routes loaded");
+	
+	// Load upload routes
+	const uploadRoutes = require("./routes/upload");
 	app.use("/api/upload", uploadRoutes);
+	console.log("✅ Upload routes loaded");
+	
+	// Load CSV routes
+	const csvRoutes = require("./routes/csv");
 	app.use("/api/csv", csvRoutes);
+	console.log("✅ CSV routes loaded");
 
 	console.log("✅ All routes loaded successfully");
 } catch (error) {
 	console.error("❌ Error loading routes:", error.message);
+	console.error(error.stack);
+	process.exit(1);
 }
 
 // ✅ 404 handler for API routes

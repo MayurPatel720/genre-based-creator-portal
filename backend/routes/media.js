@@ -4,14 +4,21 @@ const router = express.Router();
 const Creator = require('../models/Creator');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Configure multer for Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'creator-media',
-    resource_type: 'auto', // Supports both images and videos
+    resource_type: 'auto',
     allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'],
   },
 });
@@ -36,7 +43,6 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
       return res.status(404).json({ error: 'Creator not found' });
     }
 
-    // Determine media type based on mimetype and URL
     let mediaType = 'image';
     if (req.file.mimetype && req.file.mimetype.startsWith('video/')) {
       mediaType = 'video';
@@ -46,7 +52,6 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
 
     console.log('Detected media type:', mediaType, 'from mimetype:', req.file.mimetype);
 
-    // Create media object with proper structure
     const mediaFile = {
       id: req.file.public_id || req.file.filename || `media_${Date.now()}`,
       type: mediaType,
@@ -60,7 +65,6 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
 
     console.log('Created media object:', mediaFile);
 
-    // Initialize media array if it doesn't exist
     if (!creator.details.media) {
       creator.details.media = [];
     }
@@ -93,7 +97,6 @@ router.delete('/:creatorId/:mediaId', async (req, res) => {
     
     await creator.save();
 
-    // Delete from Cloudinary
     try {
       await cloudinary.uploader.destroy(mediaId);
     } catch (cloudinaryError) {
