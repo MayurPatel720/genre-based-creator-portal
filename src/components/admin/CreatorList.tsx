@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Trash2, Edit } from "lucide-react";
 import { useCreators } from "@/hooks/useCreators";
 import { Creator } from "@/types/Creator";
@@ -36,7 +37,7 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 			)}
 			{loading ? (
 				<p>Loading creators...</p>
-			) : !Array.isArray(creators) || creators.length === 0 ? (
+			) : creators.length === 0 ? (
 				<p>No creators found.</p>
 			) : (
 				<Table>

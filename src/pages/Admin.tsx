@@ -1,9 +1,8 @@
 
 import { useState } from "react";
-import { Plus, Users, TrendingUp, Eye, FileText } from "lucide-react";
+import { Plus, Users, TrendingUp, Eye } from "lucide-react";
 import CreatorForm from "../components/admin/CreatorForm";
 import CreatorList from "../components/admin/CreatorList";
-import CSVImport from "../components/admin/CSVImport";
 import { useCreators } from "../hooks/useCreators";
 import { Creator } from "../types/Creator";
 import { Button } from "../components/ui/button";
@@ -16,9 +15,9 @@ import {
 } from "../components/ui/card";
 
 const Admin = () => {
-	const [activeTab, setActiveTab] = useState<"list" | "form" | "import">("list");
+	const [activeTab, setActiveTab] = useState<"list" | "form">("list");
 	const [editingCreator, setEditingCreator] = useState<Creator | null>(null);
-	const { creators, loading, error, fetchCreators } = useCreators();
+	const { creators, loading, error } = useCreators();
 
 	const handleEdit = (creator: Creator) => {
 		setEditingCreator(creator);
@@ -35,25 +34,16 @@ const Admin = () => {
 		setActiveTab("form");
 	};
 
-	const handleImportComplete = () => {
-		fetchCreators(); // Refresh the creators list
-		setActiveTab("list");
-	};
-
-	// Calculate stats safely
-	const totalCreators = Array.isArray(creators) ? creators.length : 0;
-	const totalFollowers = Array.isArray(creators)
-		? creators.reduce(
-				(sum, creator) => sum + (creator.details.analytics.followers || 0),
-				0
-		  )
-		: 0;
-	const totalViews = Array.isArray(creators)
-		? creators.reduce(
-				(sum, creator) => sum + (creator.details.analytics.totalViews || 0),
-				0
-		  )
-		: 0;
+	// Calculate stats
+	const totalCreators = creators.length;
+	const totalFollowers = creators.reduce(
+		(sum, creator) => sum + (creator.details.analytics.followers || 0),
+		0
+	);
+	const totalViews = creators.reduce(
+		(sum, creator) => sum + (creator.details.analytics.totalViews || 0),
+		0
+	);
 
 	return (
 		<div className="min-h-screen bg-gray-50 font-poppins">
@@ -131,20 +121,13 @@ const Admin = () => {
 						<Plus className="w-4 h-4 mr-2" />
 						Add Creator
 					</Button>
-					<Button
-						variant={activeTab === "import" ? "default" : "outline"}
-						onClick={() => setActiveTab("import")}
-					>
-						<FileText className="w-4 h-4 mr-2" />
-						Import CSV
-					</Button>
 				</div>
 
 				{/* Content */}
 				<div className="bg-white rounded-lg shadow">
 					{activeTab === "list" ? (
 						<CreatorList onEdit={handleEdit} />
-					) : activeTab === "form" ? (
+					) : (
 						<CreatorForm
 							creator={editingCreator}
 							onSuccess={handleFormSuccess}
@@ -153,10 +136,6 @@ const Admin = () => {
 								setEditingCreator(null);
 							}}
 						/>
-					) : (
-						<div className="p-6">
-							<CSVImport onImportComplete={handleImportComplete} />
-						</div>
 					)}
 				</div>
 			</div>

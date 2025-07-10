@@ -1,9 +1,8 @@
-
 require("dotenv").config({ path: "./.env" });
+
 const express = require("express");
 const cors = require("cors");
 const { dbConnect } = require("./Configs/dbConnect");
-const morgan = require("morgan");
 
 const app = express();
 
@@ -14,9 +13,6 @@ const allowedOrigins = [
 	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
 ];
-
-// Enhanced Morgan logging with custom format
-app.use(morgan('combined'));
 
 const corsOptions = {
 	origin: (origin, callback) => {
@@ -41,64 +37,21 @@ app.get("/", (req, res) => {
 	res.send("✅ Server is running: Genre-Based Creator Portal Backend!");
 });
 
-// Debug middleware to log all requests
-app.use((req, res, next) => {
-	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-	next();
-});
+// ✅ Routes
+const creatorRoutes = require("./routes/creators");
+const uploadRoutes = require("./routes/upload");
+const instagramRoutes = require("./routes/instagram");
+const mediaRoutes = require("./routes/media");
 
-// ✅ Routes - Import and mount routes with try-catch for each route
-try {
-	console.log("Loading routes...");
-	
-	// Load creators routes
-	const creatorRoutes = require("./routes/creators");
-	app.use("/api/creators", creatorRoutes);
-	console.log("✅ Creators routes loaded");
-	
-	// Load upload routes
-	const uploadRoutes = require("./routes/upload");
-	app.use("/api/upload", uploadRoutes);
-	console.log("✅ Upload routes loaded");
-	
-	// Load CSV routes
-	const csvRoutes = require("./routes/csv");
-	app.use("/api/csv", csvRoutes);
-	console.log("✅ CSV routes loaded");
-
-	console.log("✅ All routes loaded successfully");
-} catch (error) {
-	console.error("❌ Error loading routes:", error.message);
-	console.error(error.stack);
-	process.exit(1);
-}
-
-// ✅ 404 handler for API routes
-app.use("/api/*", (req, res) => {
-	console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
-	res.status(404).json({ 
-		error: `Route ${req.method} ${req.originalUrl} not found`,
-		availableRoutes: [
-			"GET /api/creators",
-			"POST /api/creators", 
-			"GET /api/creators/:id",
-			"PUT /api/creators/:id",
-			"DELETE /api/creators/:id",
-			"POST /api/upload/image",
-			"DELETE /api/upload/image/:publicId",
-			"POST /api/csv/import",
-			"GET /api/csv/template"
-		]
-	});
-});
+app.use("/api/creators", creatorRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/instagram", instagramRoutes);
+app.use("/api/media", mediaRoutes);
 
 // ✅ Error Handling Middleware
 app.use((err, req, res, next) => {
-	console.error("Server Error:", err.stack);
-	res.status(500).json({ 
-		error: "Something went wrong!",
-		message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
-	});
+	console.error(err.stack);
+	res.status(500).json({ error: "Something went wrong!" });
 });
 
 // ✅ Connect to Database and Start Server
@@ -110,11 +63,11 @@ const startServer = async () => {
 		const PORT = process.env.PORT || 3000;
 		app.listen(PORT, () => {
 			console.log(`🚀 Server is running on port ${PORT}`);
-			console.log("📋 Available routes:");
-			console.log("  GET  / - Health check");
-			console.log("  *    /api/creators - Creator routes");
-			console.log("  *    /api/upload - Upload routes");
-			console.log("  *    /api/csv - CSV import routes");
+			const runPeriodicTask = () => {
+				console.log("⏱ Running scheduled task at", new Date().toLocaleString());
+			};
+
+			setInterval(runPeriodicTask, 5 * 60 * 1000);
 		});
 	} catch (err) {
 		console.error("🔥 Server failed to start:", err.message);

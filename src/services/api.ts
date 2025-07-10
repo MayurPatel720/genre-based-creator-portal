@@ -2,11 +2,11 @@ import axios from "axios";
 import { Creator } from "../types/Creator";
 
 // Use environment variable for API URL or fallback to local URL
-const API_BASE_URL =
-	import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 // const API_BASE_URL =
-// 	import.meta.env.VITE_API_URL ||
-// 	"https://genre-based-creator-portal.onrender.com/api";
+// 	import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_BASE_URL =
+	import.meta.env.VITE_API_URL ||
+	"https://genre-based-creator-portal.onrender.com/api";
 
 const api = axios.create({
 	baseURL: API_BASE_URL,
@@ -19,6 +19,7 @@ const api = axios.create({
 // Add request interceptor for debugging
 api.interceptors.request.use((config) => {
 	console.log("Making API request to:", config.baseURL + config.url);
+	console.log("Request payload:", config.data);
 	return config;
 });
 
