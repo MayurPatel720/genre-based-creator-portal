@@ -1,3 +1,4 @@
+
 require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const cors = require("cors");
@@ -43,14 +44,26 @@ const uploadRoutes = require("./routes/upload");
 const instagramRoutes = require("./routes/instagram");
 const mediaRoutes = require("./routes/media");
 
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+	console.log(`${req.method} ${req.url} - Body:`, req.body);
+	next();
+});
+
 app.use("/api/creators", creatorRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/instagram", instagramRoutes);
 app.use("/api/media", mediaRoutes);
 
+// ✅ 404 handler for API routes
+app.use("/api/*", (req, res) => {
+	console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
+	res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });
+});
+
 // ✅ Error Handling Middleware
 app.use((err, req, res, next) => {
-	console.error(err.stack);
+	console.error("Server Error:", err.stack);
 	res.status(500).json({ error: "Something went wrong!" });
 });
 
@@ -63,6 +76,13 @@ const startServer = async () => {
 		const PORT = process.env.PORT || 3000;
 		app.listen(PORT, () => {
 			console.log(`🚀 Server is running on port ${PORT}`);
+			console.log("📋 Available routes:");
+			console.log("  GET  / - Health check");
+			console.log("  *    /api/creators - Creator routes");
+			console.log("  *    /api/upload - Upload routes");
+			console.log("  *    /api/instagram - Instagram routes");
+			console.log("  *    /api/media - Media routes");
+			
 			const runPeriodicTask = () => {
 				console.log("⏱ Running scheduled task at", new Date().toLocaleString());
 			};
