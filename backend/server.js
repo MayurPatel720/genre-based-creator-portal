@@ -9,7 +9,7 @@ const app = express();
 // ✅ CORS setup
 const allowedOrigins = [
 	"http://localhost:8080",
-	"https://creatorsdreams.in/",
+	"https://creatorsdreams.in",
 	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
 ];
