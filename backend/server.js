@@ -14,7 +14,11 @@ const allowedOrigins = [
 	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
 ];
-app.use(morgan("dev")); // 'dev' format logs concise output with method, URL, status, and response time
+
+// Enhanced Morgan logging with custom format
+const morganFormat = ':method :url :status :res[content-length] - :response-time ms :date[clf]';
+app.use(morgan(morganFormat));
+
 const corsOptions = {
 	origin: (origin, callback) => {
 		if (!origin || allowedOrigins.includes(origin)) {
@@ -38,33 +42,50 @@ app.get("/", (req, res) => {
 	res.send("✅ Server is running: Genre-Based Creator Portal Backend!");
 });
 
-// ✅ Routes
-const creatorRoutes = require("./routes/creators");
-const uploadRoutes = require("./routes/upload");
-const instagramRoutes = require("./routes/instagram");
-const mediaRoutes = require("./routes/media");
-
 // Debug middleware to log all requests
 app.use((req, res, next) => {
-	console.log(`${req.method} ${req.url} - Body:`, req.body);
+	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+	if (req.body && Object.keys(req.body).length > 0) {
+		console.log('Request Body:', JSON.stringify(req.body, null, 2));
+	}
 	next();
 });
 
+// ✅ Routes - Import routes properly
+const creatorRoutes = require("./routes/creators");
+const uploadRoutes = require("./routes/upload");
+const csvRoutes = require("./routes/csv");
+
+// Mount routes with proper paths
 app.use("/api/creators", creatorRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/instagram", instagramRoutes);
-app.use("/api/media", mediaRoutes);
+app.use("/api/csv", csvRoutes);
 
 // ✅ 404 handler for API routes
 app.use("/api/*", (req, res) => {
 	console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
-	res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });
+	res.status(404).json({ 
+		error: `Route ${req.method} ${req.originalUrl} not found`,
+		availableRoutes: [
+			"GET /api/creators",
+			"POST /api/creators", 
+			"GET /api/creators/:id",
+			"PUT /api/creators/:id",
+			"DELETE /api/creators/:id",
+			"POST /api/upload/image",
+			"DELETE /api/upload/image/:publicId",
+			"POST /api/csv/import"
+		]
+	});
 });
 
 // ✅ Error Handling Middleware
 app.use((err, req, res, next) => {
 	console.error("Server Error:", err.stack);
-	res.status(500).json({ error: "Something went wrong!" });
+	res.status(500).json({ 
+		error: "Something went wrong!",
+		message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+	});
 });
 
 // ✅ Connect to Database and Start Server
@@ -80,14 +101,7 @@ const startServer = async () => {
 			console.log("  GET  / - Health check");
 			console.log("  *    /api/creators - Creator routes");
 			console.log("  *    /api/upload - Upload routes");
-			console.log("  *    /api/instagram - Instagram routes");
-			console.log("  *    /api/media - Media routes");
-			
-			const runPeriodicTask = () => {
-				console.log("⏱ Running scheduled task at", new Date().toLocaleString());
-			};
-
-			setInterval(runPeriodicTask, 5 * 60 * 1000);
+			console.log("  *    /api/csv - CSV import routes");
 		});
 	} catch (err) {
 		console.error("🔥 Server failed to start:", err.message);
