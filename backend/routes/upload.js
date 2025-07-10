@@ -80,9 +80,4 @@ router.delete('/image/:publicId', async (req, res) => {
     }
 });
 
-// Test route
-router.get('/test', (req, res) => {
-    res.json({ message: 'Upload routes are working!' });
-});
-
 module.exports = router;

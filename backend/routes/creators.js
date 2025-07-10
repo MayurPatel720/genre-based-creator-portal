@@ -29,6 +29,20 @@ router.get('/', async (req, res) => {
     }
 });
 
+// POST /api/creators - Create new creator
+router.post('/', async (req, res) => {
+    try {
+        console.log('Creating new creator:', req.body);
+        const creator = new Creator(req.body);
+        const savedCreator = await creator.save();
+        console.log('Creator created successfully:', savedCreator._id);
+        res.status(201).json(savedCreator);
+    } catch (error) {
+        console.error('Error creating creator:', error);
+        res.status(400).json({ error: 'Failed to create creator', details: error.message });
+    }
+});
+
 // GET /api/creators/:id - Get creator by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -43,20 +57,6 @@ router.get('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error fetching creator:', error);
         res.status(500).json({ error: 'Failed to fetch creator' });
-    }
-});
-
-// POST /api/creators - Create new creator
-router.post('/', async (req, res) => {
-    try {
-        console.log('Creating new creator:', req.body);
-        const creator = new Creator(req.body);
-        const savedCreator = await creator.save();
-        console.log('Creator created successfully:', savedCreator._id);
-        res.status(201).json(savedCreator);
-    } catch (error) {
-        console.error('Error creating creator:', error);
-        res.status(400).json({ error: 'Failed to create creator', details: error.message });
     }
 });
 
@@ -115,11 +115,6 @@ router.get('/:id/reels', async (req, res) => {
         console.error('Error fetching reels:', error);
         res.status(500).json({ error: 'Failed to fetch reels' });
     }
-});
-
-// Test route
-router.get('/test/health', (req, res) => {
-    res.json({ message: 'Creators routes are working!' });
 });
 
 module.exports = router;

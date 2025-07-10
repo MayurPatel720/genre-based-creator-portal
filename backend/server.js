@@ -16,8 +16,7 @@ const allowedOrigins = [
 ];
 
 // Enhanced Morgan logging with custom format
-const morganFormat = ':method :url :status :res[content-length] - :response-time ms';
-app.use(morgan(morganFormat));
+app.use(morgan('combined'));
 
 const corsOptions = {
 	origin: (origin, callback) => {
@@ -45,21 +44,24 @@ app.get("/", (req, res) => {
 // Debug middleware to log all requests
 app.use((req, res, next) => {
 	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-	if (req.body && Object.keys(req.body).length > 0) {
-		console.log('Request Body:', JSON.stringify(req.body, null, 2));
-	}
 	next();
 });
 
-// ✅ Routes - Import routes properly
-const creatorRoutes = require("./routes/creators");
-const uploadRoutes = require("./routes/upload");
-const csvRoutes = require("./routes/csv");
+// ✅ Routes - Import and mount routes
+try {
+	const creatorRoutes = require("./routes/creators");
+	const uploadRoutes = require("./routes/upload");
+	const csvRoutes = require("./routes/csv");
 
-// Mount routes with proper paths
-app.use("/api/creators", creatorRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/csv", csvRoutes);
+	// Mount routes with proper paths
+	app.use("/api/creators", creatorRoutes);
+	app.use("/api/upload", uploadRoutes);
+	app.use("/api/csv", csvRoutes);
+
+	console.log("✅ All routes loaded successfully");
+} catch (error) {
+	console.error("❌ Error loading routes:", error.message);
+}
 
 // ✅ 404 handler for API routes
 app.use("/api/*", (req, res) => {

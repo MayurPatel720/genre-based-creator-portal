@@ -142,9 +142,4 @@ Jane Smith,Fashion,https://example.com/avatar2.jpg,YouTube,https://youtube.com/j
     res.send(csvTemplate);
 });
 
-// Test route
-router.get('/test', (req, res) => {
-    res.json({ message: 'CSV routes are working!' });
-});
-
 module.exports = router;
