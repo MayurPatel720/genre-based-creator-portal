@@ -1,3 +1,4 @@
+
 require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
@@ -9,7 +10,6 @@ const app = express();
 // ✅ CORS setup
 const allowedOrigins = [
 	"http://localhost:8080",
-	"https://creatorsdreams.in",
 	"https://amancreatorhub.web.app",
 	"https://genre-based-creator-portal.vercel.app",
 ];
@@ -60,14 +60,10 @@ const startServer = async () => {
 		await dbConnect();
 		console.log("✅ Database connected successfully");
 
+		// Render requires dynamic port binding
 		const PORT = process.env.PORT || 3000;
 		app.listen(PORT, () => {
 			console.log(`🚀 Server is running on port ${PORT}`);
-			const runPeriodicTask = () => {
-				console.log("⏱ Running scheduled task at", new Date().toLocaleString());
-			};
-
-			setInterval(runPeriodicTask, 5 * 60 * 1000);
 		});
 	} catch (err) {
 		console.error("🔥 Server failed to start:", err.message);
