@@ -148,10 +148,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 					</h3>
 					<div className="space-y-2">
 						<p className="text-gray-600 max-w-md">
-							{error instanceof Error 
-								? error.message 
-								: "There was an error loading the creators. This might be due to server startup time."
-							}
+							{error instanceof Error
+								? error.message
+								: "There was an error loading the creators. This might be due to server startup time."}
 						</p>
 						<p className="text-sm text-gray-500">
 							Please try again or wait a moment for the server to fully start.
@@ -238,7 +237,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 				</div>
 
 				{/* Content */}
-				<div className="flex-1 overflow-y-auto">
+				<div className="flex-1">
 					<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
 						{filteredCreators.map((creator) => (
 							<CreatorCard

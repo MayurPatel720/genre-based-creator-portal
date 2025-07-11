@@ -41,10 +41,10 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 	};
 
 	return (
-		<div className="group relative font-poppins">
+		<div className="group relative font-poppins mb-4">
 			<button
 				onClick={onClick}
-				className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 w-full text-left border border-gray-100 hover:border-brand-orange/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 relative overflow-hidden group-hover:scale-[1.02]"
+				className="bg-white rounded-xl shadow-lg hover:shadow-lg transition-all duration-300 w-full text-left border border-gray-100 hover:border-brand-orange/30 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 relative overflow-hidden group-hover:scale-[1.02]"
 				aria-label={`View profile of ${creator.name}, ${
 					creator.details?.analytics.followers || 0
 				}K followers on ${creator.platform || "unknown platform"}`}
