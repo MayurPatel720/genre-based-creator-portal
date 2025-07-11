@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Creator } from "../types/Creator";
 import {
@@ -54,7 +53,7 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ creator, onClick }) => {
 				<div className="absolute inset-0 bg-gradient-to-r from-brand-orange/10 to-brand-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
 
 				{/* Avatar Section */}
-				<div className="relative h-48 overflow-hidden rounded-t-xl bg-gradient-to-br from-brand-aureolin/10 to-brand-orange/10">
+				<div className="relative h-56 overflow-hidden rounded-t-xl bg-gradient-to-br from-brand-aureolin/10 to-brand-orange/10">
 					<img
 						src={creator.avatar || "/fallback-avatar.png"}
 						alt={`${creator.name}'s avatar`}
