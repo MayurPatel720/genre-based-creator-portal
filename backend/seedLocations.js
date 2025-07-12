@@ -1,6 +1,7 @@
 
 const mongoose = require("mongoose");
 const Location = require("./models/Location");
+const { dbConnect } = require("./Configs/dbConnect");
 
 const predefinedLocations = [
 	"Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata", "Pune", 
@@ -11,7 +12,7 @@ const predefinedLocations = [
 
 const seedLocations = async () => {
 	try {
-		await mongoose.connect("mongodb://localhost:27017/creator-portal");
+		await dbConnect();
 		
 		console.log("🌱 Starting location seeding...");
 		

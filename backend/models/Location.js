@@ -6,21 +6,16 @@ const locationSchema = new mongoose.Schema(
 		name: {
 			type: String,
 			required: true,
-			unique: true,
 			trim: true,
+			unique: true,
 		},
 		isPredefined: {
 			type: Boolean,
 			default: false,
 		},
-		isActive: {
-			type: Boolean,
-			default: true,
-		},
 		createdBy: {
 			type: String,
-			enum: ["system", "admin"],
-			default: "admin",
+			default: "user",
 		},
 	},
 	{
@@ -28,8 +23,7 @@ const locationSchema = new mongoose.Schema(
 	}
 );
 
-// Index for faster queries
-locationSchema.index({ name: 1 });
-locationSchema.index({ isActive: 1 });
+// Remove duplicate index warning by using schema.index() instead of unique: true
+locationSchema.index({ name: 1 }, { unique: true });
 
 module.exports = mongoose.model("Location", locationSchema);
