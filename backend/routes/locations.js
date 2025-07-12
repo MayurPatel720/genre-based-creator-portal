@@ -34,7 +34,7 @@ router.get("/predefined", async (req, res) => {
 	}
 });
 
-// Get distinct locations from creators (for filtering)
+// Get distinct locations from creators AND predefined locations (for filtering)
 router.get("/distinct", async (req, res) => {
 	try {
 		const Creator = require("../models/Creator");
@@ -44,20 +44,34 @@ router.get("/distinct", async (req, res) => {
 			location: { $exists: true, $ne: "" }
 		});
 		
-		// Also get all active locations from Location model
-		const allLocations = await Location.find({ isActive: true })
+		// Get all active predefined locations from Location model
+		const predefinedLocations = await Location.find({ 
+			isPredefined: true, 
+			isActive: true 
+		})
 			.select("name")
 			.lean();
 		
-		// Combine and deduplicate
+		// Get all active custom locations from Location model
+		const customLocations = await Location.find({ 
+			isPredefined: false, 
+			isActive: true 
+		})
+			.select("name")
+			.lean();
+		
+		// Combine and deduplicate all locations
 		const locationSet = new Set([
 			...creatorLocations,
-			...allLocations.map(loc => loc.name)
+			...predefinedLocations.map(loc => loc.name),
+			...customLocations.map(loc => loc.name)
 		]);
 		
 		const distinctLocations = Array.from(locationSet)
 			.filter(loc => loc && loc.trim().length > 0)
 			.sort();
+		
+		console.log(`Found ${distinctLocations.length} distinct locations:`, distinctLocations.slice(0, 10));
 		
 		res.json(distinctLocations);
 	} catch (error) {

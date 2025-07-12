@@ -1,48 +1,82 @@
+require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
-const dbConnect = require("./Configs/dbConnect");
-
-dotenv.config();
+const { dbConnect } = require("./Configs/dbConnect");
 
 const app = express();
-const port = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// ✅ CORS setup
+const allowedOrigins = [
+	"http://localhost:8080",
+	"https://creatorsdreams.in",
+	"https://amancreatorhub.web.app",
+	"https://genre-based-creator-portal.vercel.app",
+];
+
+const corsOptions = {
+	origin: (origin, callback) => {
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS"));
+		}
+	},
+	methods: ["GET", "POST", "PUT", "DELETE"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	credentials: true,
+	optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// MongoDB Connection using our dbConnect function
-dbConnect().catch((err) => {
-	console.error("Failed to connect to MongoDB:", err);
-	process.exit(1);
+// ✅ Health Check
+app.get("/", (req, res) => {
+	res.send("✅ Server is running: Genre-Based Creator Portal Backend!");
 });
 
-// Routes
-app.use("/api/creators", require("./routes/creators"));
-app.use("/api/upload", require("./routes/upload"));
+// ✅ Routes
+const creatorRoutes = require("./routes/creators");
+const uploadRoutes = require("./routes/upload");
+const instagramRoutes = require("./routes/instagram");
+const mediaRoutes = require("./routes/media");
+
+app.use("/api/creators", creatorRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/instagram", instagramRoutes);
 app.use("/api/locations", require("./routes/locations"));
 app.use("/api/csv", require("./routes/csv"));
-app.use("/api/media", require("./routes/media"));
+app.use("/api/media", mediaRoutes);
 
-// Basic health check
-app.get("/", (req, res) => {
-	res.json({ message: "Creator Portal API is running!" });
-});
-
-// Error handling middleware
+// ✅ Error Handling Middleware
 app.use((err, req, res, next) => {
 	console.error(err.stack);
 	res.status(500).json({ error: "Something went wrong!" });
 });
 
-// 404 handler
-app.use("*", (req, res) => {
-	res.status(404).json({ error: "Route not found" });
-});
+// ✅ Connect to Database and Start Server
+const startServer = async () => {
+	try {
+		await dbConnect();
+		console.log("✅ Database connected successfully");
 
-app.listen(port, () => {
-	console.log(`Server is running on port: ${port}`);
-});
+		const PORT = process.env.PORT || 3000;
+		app.listen(PORT, () => {
+			console.log(`🚀 Server is running on port ${PORT}`);
+			const runPeriodicTask = () => {
+				console.log("⏱ Running scheduled task at", new Date().toLocaleString());
+			};
+
+			setInterval(runPeriodicTask, 5 * 60 * 1000);
+		});
+	} catch (err) {
+		console.error("🔥 Server failed to start:", err.message);
+		process.exit(1);
+	}
+};
+
+startServer();
+
+module.exports = app;
