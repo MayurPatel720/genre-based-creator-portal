@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Creator = require("../models/Creator");
 const axios = require("axios");
+const { handleCustomLocation } = require("../middleware/locationMiddleware");
 
 // GET /api/creators - Get all creators
 router.get("/", async (req, res) => {
@@ -93,8 +94,8 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-// POST /api/creators - Create new creator
-router.post("/", async (req, res) => {
+// Create creator - with location middleware
+router.post("/", handleCustomLocation, async (req, res) => {
 	try {
 		// Validate required fields
 		const { name, genre, avatar, platform, socialLink, details } = req.body;
@@ -190,8 +191,8 @@ router.post("/", async (req, res) => {
 	}
 });
 
-// PUT /api/creators/:id - Update creator
-router.put("/:id", async (req, res) => {
+// Update creator - with location middleware
+router.put("/:id", handleCustomLocation, async (req, res) => {
 	try {
 		// Validate required fields
 		const { name, genre, avatar, platform, socialLink, details } = req.body;

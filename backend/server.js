@@ -1,80 +1,58 @@
-require("dotenv").config({ path: "./.env" });
-
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
-const { dbConnect } = require("./Configs/dbConnect");
+const dotenv = require("dotenv");
+const path = require("path");
+
+dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 5000;
 
-// ✅ CORS setup
-const allowedOrigins = [
-	"http://localhost:8080",
-	"https://creatorsdreams.in",
-	"https://amancreatorhub.web.app",
-	"https://genre-based-creator-portal.vercel.app",
-];
-
-const corsOptions = {
-	origin: (origin, callback) => {
-		if (!origin || allowedOrigins.includes(origin)) {
-			callback(null, true);
-		} else {
-			callback(new Error("Not allowed by CORS"));
-		}
-	},
-	methods: ["GET", "POST", "PUT", "DELETE"],
-	allowedHeaders: ["Content-Type", "Authorization"],
-	credentials: true,
-	optionsSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
+// Middleware
+app.use(cors());
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// ✅ Health Check
-app.get("/", (req, res) => {
-	res.send("✅ Server is running: Genre-Based Creator Portal Backend!");
-});
+// MongoDB Connection
+mongoose
+	.connect(process.env.MONGODB_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+	.then(() => console.log("MongoDB connected"))
+	.catch((err) => console.log(err));
 
-// ✅ Routes
 const creatorRoutes = require("./routes/creators");
 const uploadRoutes = require("./routes/upload");
-const instagramRoutes = require("./routes/instagram");
+const csvRoutes = require("./routes/csv");
 const mediaRoutes = require("./routes/media");
+const locationRoutes = require("./routes/locations");
 
+// Routes
 app.use("/api/creators", creatorRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/instagram", instagramRoutes);
+app.use("/api/csv", csvRoutes);
 app.use("/api/media", mediaRoutes);
+app.use("/api/locations", locationRoutes);
 
-// ✅ Error Handling Middleware
+// Serve static assets if in production
+if (process.env.NODE_ENV === "production") {
+	// Set static folder
+	app.use(express.static("client/build"));
+
+	app.get("*", (req, res) => {
+		res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+	});
+}
+
+// Error handling middleware
 app.use((err, req, res, next) => {
 	console.error(err.stack);
-	res.status(500).json({ error: "Something went wrong!" });
+	res.status(500).send("Something broke!");
 });
 
-// ✅ Connect to Database and Start Server
-const startServer = async () => {
-	try {
-		await dbConnect();
-		console.log("✅ Database connected successfully");
-
-		const PORT = process.env.PORT || 3000;
-		app.listen(PORT, () => {
-			console.log(`🚀 Server is running on port ${PORT}`);
-			const runPeriodicTask = () => {
-				console.log("⏱ Running scheduled task at", new Date().toLocaleString());
-			};
-
-			setInterval(runPeriodicTask, 5 * 60 * 1000);
-		});
-	} catch (err) {
-		console.error("🔥 Server failed to start:", err.message);
-		process.exit(1);
-	}
-};
-
-startServer();
-
-module.exports = app;
+// Start the server
+app.listen(port, () => {
+	console.log(`Server is running on port: ${port}`);
+});

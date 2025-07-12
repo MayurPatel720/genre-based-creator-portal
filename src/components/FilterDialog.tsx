@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Slider } from "./ui/slider";
@@ -39,113 +41,18 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 		"LinkedIn",
 	];
 
-	const allLocations = [
-		// Countries
-		"USA",
-		"Canada",
-		"UK",
-		"Australia",
-		// Major Indian Cities
-		"Mumbai",
-		"Delhi",
-		"Bangalore",
-		"Hyderabad",
-		"Chennai",
-		"Kolkata",
-		"Pune",
-		"Ahmedabad",
-		"Jaipur",
-		"Lucknow",
-		"Kanpur",
-		"Nagpur",
-		"Indore",
-		"Thane",
-		"Bhopal",
-		"Visakhapatnam",
-		"Pimpri-Chinchwad",
-		"Patna",
-		"Vadodara",
-		"Ghaziabad",
-		"Ludhiana",
-		"Agra",
-		"Nashik",
-		"Faridabad",
-		"Meerut",
-		"Rajkot",
-		"Kalyan-Dombivli",
-		"Vasai-Virar",
-		"Varanasi",
-		"Srinagar",
-		"Aurangabad",
-		"Dhanbad",
-		"Amritsar",
-		"Navi Mumbai",
-		"Allahabad",
-		"Ranchi",
-		"Howrah",
-		"Coimbatore",
-		"Jabalpur",
-		"Gwalior",
-		"Vijayawada",
-		"Jodhpur",
-		"Madurai",
-		"Raipur",
-		"Kota",
-		"Gurgaon",
-		"Chandigarh",
-		"Solapur",
-		"Hubli-Dharwad",
-		"Tiruchirappalli",
-		"Bareilly",
-		"Mysore",
-		"Tiruppur",
-		"Guwahati",
-		"Moradabad",
-		"Warangal",
-		"Guntur",
-		"Bhiwandi",
-		"Saharanpur",
-		"Gorakhpur",
-		"Bikaner",
-		"Amravati",
-		"Noida",
-		"Jamshedpur",
-		"Bhilai",
-		"Cuttack",
-		"Firozabad",
-		"Kochi",
-		"Nellore",
-		"Bhavnagar",
-		"Dehradun",
-		"Durgapur",
-		"Asansol",
-		"Rourkela",
-		"Nanded",
-		"Kolhapur",
-		"Ajmer",
-		"Akola",
-		"Gulbarga",
-		"Jamnagar",
-		"Ujjain",
-		"Loni",
-		"Siliguri",
-		"Jhansi",
-		"Ulhasnagar",
-		"Jammu",
-		"Sangli-Miraj & Kupwad",
-		"Mangalore",
-		"Erode",
-		"Belgaum",
-		"Ambattur",
-		"Tirunelveli",
-		"Malegaon",
-		"Gaya",
-		"Jalgaon",
-		"Udaipur",
-		"Maheshtala",
-	];
+	// Fetch distinct locations from API
+	const { data: allLocations = [] } = useQuery({
+		queryKey: ["distinct-locations"],
+		queryFn: async () => {
+			const response = await fetch("http://localhost:3000/api/locations/distinct");
+			if (!response.ok) throw new Error("Failed to fetch locations");
+			return response.json();
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
 
-	const filteredLocations = allLocations.filter((location) =>
+	const filteredLocations = allLocations.filter((location: string) =>
 		location.toLowerCase().includes(locationSearch.toLowerCase())
 	);
 
@@ -223,7 +130,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 							/>
 						</div>
 						<div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-2">
-							{filteredLocations.map((location) => (
+							{filteredLocations.map((location: string) => (
 								<div key={location} className="flex items-center space-x-2">
 									<Checkbox
 										id={location}
