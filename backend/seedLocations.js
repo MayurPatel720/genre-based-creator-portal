@@ -1,4 +1,6 @@
 
+require("dotenv").config();
+
 const mongoose = require("mongoose");
 const Location = require("./models/Location");
 const { dbConnect } = require("./Configs/dbConnect");
