@@ -7,7 +7,6 @@ const locationSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			trim: true,
-			unique: true,
 		},
 		isPredefined: {
 			type: Boolean,
@@ -23,7 +22,7 @@ const locationSchema = new mongoose.Schema(
 	}
 );
 
-// Remove duplicate index warning by using schema.index() instead of unique: true
+// Create unique index - only use schema.index() to avoid duplicate warning
 locationSchema.index({ name: 1 }, { unique: true });
 
 module.exports = mongoose.model("Location", locationSchema);

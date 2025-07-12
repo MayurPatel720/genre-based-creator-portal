@@ -1,8 +1,9 @@
+
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const { dbConnect } = require("./Configs/dbConnect");
 
 dotenv.config();
 
@@ -14,14 +15,11 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// MongoDB Connection
-mongoose
-	.connect(process.env.MONGODB_URI, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	})
-	.then(() => console.log("MongoDB connected"))
-	.catch((err) => console.log(err));
+// MongoDB Connection using our dbConnect function
+dbConnect().catch(err => {
+	console.error("Failed to connect to MongoDB:", err);
+	process.exit(1);
+});
 
 const creatorRoutes = require("./routes/creators");
 const uploadRoutes = require("./routes/upload");
