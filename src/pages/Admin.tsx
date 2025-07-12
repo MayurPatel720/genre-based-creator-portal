@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Plus, Users, TrendingUp, Eye, Upload } from "lucide-react";
+import { Plus, Users, TrendingUp, Eye, Upload, Download } from "lucide-react";
 import CreatorForm from "../components/admin/CreatorForm";
 import CreatorList from "../components/admin/CreatorList";
 import CSVImport from "../components/admin/CSVImport";
@@ -14,11 +14,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../components/ui/card";
+import { exportCreatorsToCSV } from "../services/csvExport";
+import { useToast } from "../hooks/use-toast";
 
 const Admin = () => {
 	const [activeTab, setActiveTab] = useState<"list" | "form" | "import">("list");
 	const [editingCreator, setEditingCreator] = useState<Creator | null>(null);
 	const { creators, loading, error } = useCreators();
+	const { toast } = useToast();
 
 	const handleEdit = (creator: Creator) => {
 		setEditingCreator(creator);
@@ -33,6 +36,32 @@ const Admin = () => {
 	const handleAddNew = () => {
 		setEditingCreator(null);
 		setActiveTab("form");
+	};
+
+	const handleExportCSV = () => {
+		if (creators.length === 0) {
+			toast({
+				title: "No Data",
+				description: "No creators available to export.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		try {
+			exportCreatorsToCSV(creators);
+			toast({
+				title: "Success!",
+				description: `Exported ${creators.length} creators to CSV file.`,
+			});
+		} catch (error) {
+			console.error('Export error:', error);
+			toast({
+				title: "Error",
+				description: "Failed to export CSV file. Please try again.",
+				variant: "destructive",
+			});
+		}
 	};
 
 	// Calculate stats
@@ -108,7 +137,7 @@ const Admin = () => {
 				</div>
 
 				{/* Navigation */}
-				<div className="flex gap-4 mb-6">
+				<div className="flex gap-4 mb-6 flex-wrap">
 					<Button
 						variant={activeTab === "list" ? "default" : "outline"}
 						onClick={() => setActiveTab("list")}
@@ -128,6 +157,14 @@ const Admin = () => {
 					>
 						<Upload className="w-4 h-4 mr-2" />
 						Import CSV
+					</Button>
+					<Button
+						variant="outline"
+						onClick={handleExportCSV}
+						disabled={loading || creators.length === 0}
+					>
+						<Download className="w-4 h-4 mr-2" />
+						Export CSV
 					</Button>
 				</div>
 

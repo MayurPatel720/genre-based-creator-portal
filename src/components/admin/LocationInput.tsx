@@ -42,23 +42,33 @@ const LocationInput: React.FC<LocationInputProps> = ({
 	const [showManageDialog, setShowManageDialog] = useState(false);
 	const [newPredefinedLocation, setNewPredefinedLocation] = useState("");
 
-	// Fetch predefined locations
-	const { data: predefinedLocations = [], refetch: refetchLocations } = useQuery({
-		queryKey: ["predefined-locations"],
+	// Fetch ALL locations (predefined + distinct from creators)
+	const { data: allLocations = [], refetch: refetchLocations } = useQuery({
+		queryKey: ["all-locations"],
 		queryFn: async () => {
-			const response = await fetch("http://localhost:3000/api/locations/predefined");
+			const response = await fetch("http://localhost:3000/api/locations/distinct");
 			if (!response.ok) throw new Error("Failed to fetch locations");
 			return response.json();
 		},
 	});
 
-	// Check if current value is custom (not in predefined list)
+	// Fetch predefined locations for management
+	const { data: predefinedLocations = [] } = useQuery({
+		queryKey: ["predefined-locations"],
+		queryFn: async () => {
+			const response = await fetch("http://localhost:3000/api/locations/predefined");
+			if (!response.ok) throw new Error("Failed to fetch predefined locations");
+			return response.json();
+		},
+	});
+
+	// Check if current value is custom (not in all locations list)
 	useEffect(() => {
-		if (value && !predefinedLocations.some((loc: Location) => loc.name === value)) {
+		if (value && !allLocations.includes(value)) {
 			setShowCustomInput(true);
 			setCustomLocation(value);
 		}
-	}, [value, predefinedLocations]);
+	}, [value, allLocations]);
 
 	const handleLocationSelect = (selectedValue: string) => {
 		if (selectedValue === "custom") {
@@ -156,9 +166,9 @@ const LocationInput: React.FC<LocationInputProps> = ({
 					<SelectValue placeholder="Select or enter location" />
 				</SelectTrigger>
 				<SelectContent>
-					{predefinedLocations.map((location: Location) => (
-						<SelectItem key={location._id} value={location.name}>
-							{location.name}
+					{allLocations.map((location: string, index: number) => (
+						<SelectItem key={index} value={location}>
+							{location}
 						</SelectItem>
 					))}
 					<SelectItem value="custom">

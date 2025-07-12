@@ -1,8 +1,8 @@
+
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const path = require("path");
-const { dbConnect } = require("./Configs/dbConnect");
+const dbConnect = require("./Configs/dbConnect");
 
 dotenv.config();
 
@@ -20,36 +20,29 @@ dbConnect().catch((err) => {
 	process.exit(1);
 });
 
-const creatorRoutes = require("./routes/creators");
-const uploadRoutes = require("./routes/upload");
-const csvRoutes = require("./routes/csv");
-const mediaRoutes = require("./routes/media");
-const locationRoutes = require("./routes/locations");
-
 // Routes
-app.use("/api/creators", creatorRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/csv", csvRoutes);
-app.use("/api/media", mediaRoutes);
-app.use("/api/locations", locationRoutes);
+app.use("/api/creators", require("./routes/creators"));
+app.use("/api/upload", require("./routes/upload"));
+app.use("/api/locations", require("./routes/locations"));
+app.use("/api/csv", require("./routes/csv"));
+app.use("/api/media", require("./routes/media"));
 
-// Serve static assets if in production
-if (process.env.NODE_ENV === "production") {
-	// Set static folder
-	app.use(express.static("client/build"));
-
-	app.get("*", (req, res) => {
-		res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-	});
-}
+// Basic health check
+app.get("/", (req, res) => {
+	res.json({ message: "Creator Portal API is running!" });
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
 	console.error(err.stack);
-	res.status(500).send("Something broke!");
+	res.status(500).json({ error: "Something went wrong!" });
 });
 
-// Start the server
+// 404 handler
+app.use("*", (req, res) => {
+	res.status(404).json({ error: "Route not found" });
+});
+
 app.listen(port, () => {
 	console.log(`Server is running on port: ${port}`);
 });
