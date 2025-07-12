@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
-const MONGODB_URI = process.env.MONGODB_URL;
+const dotenv = require("dotenv");
 
-if (!MONGODB_URI) {
+dotenv.config();
+
+const MONGODB_URL = process.env.MONGODB_URL;
+
+if (!MONGODB_URL) {
 	throw new Error("Missing MONGODB_URL in env");
 }
 
@@ -16,7 +20,7 @@ async function dbConnect() {
 
 	if (!cached.promise) {
 		cached.promise = mongoose
-			.connect(MONGODB_URI, {
+			.connect(MONGODB_URL, {
 				serverSelectionTimeoutMS: 5000,
 				bufferCommands: false,
 			})
