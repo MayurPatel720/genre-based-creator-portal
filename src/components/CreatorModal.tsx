@@ -14,7 +14,11 @@ import {
 	FileText,
 } from "lucide-react";
 import MediaViewer from "./MediaViewer";
-import { trackCreatorView, trackCreatorContact, trackMediaView } from "../utils/analytics";
+import {
+	trackCreatorView,
+	trackCreatorContact,
+	trackMediaView,
+} from "../utils/analytics";
 
 interface CreatorModalProps {
 	creator: Creator;
@@ -38,8 +42,8 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 
 	const handleContactCreator = () => {
 		// Track contact event
-		trackCreatorContact(creator.name, 'whatsapp');
-		
+		trackCreatorContact(creator.name, "whatsapp");
+
 		if (creator.phoneNumber) {
 			// Remove any non-digit characters and format for WhatsApp
 			const cleanPhone = creator.phoneNumber.replace(/\D/g, "");
@@ -60,8 +64,8 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 
 	const handleVisitMediaKit = () => {
 		// Track media kit visit
-		trackCreatorContact(creator.name, 'media_kit');
-		
+		trackCreatorContact(creator.name, "media_kit");
+
 		if (creator.mediaKit) {
 			window.open(creator.mediaKit, "_blank");
 		}
@@ -136,14 +140,16 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 									className="flex items-center justify-center gap-2 bg-brand-purple hover:bg-brand-purple/80 text-white px-4 py-2.5 md:px-3 md:py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 text-sm font-medium"
 								>
 									<ExternalLink size={16} />
-									<span className="md:hidden lg:inline">Visit {creator.platform}</span>
+									<span className="md:hidden lg:inline">
+										Visit {creator.platform}
+									</span>
 									<span className="hidden md:inline lg:hidden">Visit</span>
 								</a>
 							</div>
 						</div>
 
 						{/* Quick Stats */}
-						<div className="grid grid-cols-3 gap-4 mb-6">
+						<div className="grid grid-cols-3 gap-2 mb-6">
 							<div className="bg-gradient-to-br from-brand-aureolin/10 to-brand-aureolin/20 pt-4 pb-4 rounded-xl text-center">
 								<div className="flex items-center justify-center mb-2">
 									<Users className="text-brand-purple" size={20} />

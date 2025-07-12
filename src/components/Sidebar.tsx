@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
 	Users,
@@ -12,6 +11,7 @@ import {
 	MessageCircleMore,
 } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
 	activeGenre: string;
@@ -35,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	isCollapsed,
 	onToggleCollapse,
 }) => {
+	const navigate = useNavigate();
 	return (
 		<div
 			className={`fixed left-0 top-0 h-full bg-brand-black/5 shadow-xl border-r border-brand-black/10 transition-all duration-300 z-30 ${
@@ -44,7 +45,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 			{/* Header */}
 			<div className="p-4 border-b border-brand-black/10 flex items-center justify-between">
 				{!isCollapsed ? (
-					<div className="w-full">
+					<div
+						className="w-full hover:cursor-pointer"
+						onClick={() => onGenreChange("All Creators")}
+					>
 						<img
 							src="https://res.cloudinary.com/ds7bybp6g/image/upload/v1750859567/creatordream_nlvcgd.png"
 							alt="CreatorDream Logo"
