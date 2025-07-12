@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
@@ -44,16 +45,21 @@ export interface CreateCreatorData {
 	name: string;
 	genre: string;
 	avatar: string;
-	platform: string;
+	platform: "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other";
 	socialLink: string;
 	location?: string;
 	phoneNumber?: string;
 	mediaKit?: string;
-	bio: string;
-	followers: number;
-	totalViews: number;
-	averageViews?: number;
-	reels: string[];
+	details: {
+		bio: string;
+		location: string;
+		analytics: {
+			followers: number;
+			totalViews: number;
+			averageViews?: number;
+		};
+		reels: string[];
+	};
 }
 
 export type UpdateCreatorData = Partial<CreateCreatorData>;
@@ -83,14 +89,14 @@ export const creatorAPI = {
 			phoneNumber: data.phoneNumber,
 			mediaKit: data.mediaKit,
 			details: {
-				location: data.location || "Other",
-				bio: data.bio,
+				location: data.details.location || data.location || "Other",
+				bio: data.details.bio,
 				analytics: {
-					followers: data.followers,
-					totalViews: data.totalViews,
-					averageViews: data.averageViews,
+					followers: data.details.analytics.followers,
+					totalViews: data.details.analytics.totalViews,
+					averageViews: data.details.analytics.averageViews,
 				},
-				reels: data.reels,
+				reels: data.details.reels,
 			},
 		};
 		const response = await api.post("/creators", creatorData);
@@ -116,26 +122,20 @@ export const creatorAPI = {
 			updateData.phoneNumber = data.phoneNumber;
 		if (data.mediaKit !== undefined) updateData.mediaKit = data.mediaKit;
 
-		if (
-			data.bio ||
-			data.followers ||
-			data.totalViews ||
-			data.averageViews ||
-			data.reels
-		) {
+		if (data.details) {
 			updateData.details = {};
-			if (data.bio) updateData.details.bio = data.bio;
-			if (data.location) updateData.details.location = data.location;
-			if (data.followers || data.totalViews || data.averageViews) {
+			if (data.details.bio) updateData.details.bio = data.details.bio;
+			if (data.details.location) updateData.details.location = data.details.location;
+			if (data.details.analytics) {
 				updateData.details.analytics = {};
-				if (data.followers)
-					updateData.details.analytics.followers = data.followers;
-				if (data.totalViews)
-					updateData.details.analytics.totalViews = data.totalViews;
-				if (data.averageViews)
-					updateData.details.analytics.averageViews = data.averageViews;
+				if (data.details.analytics.followers)
+					updateData.details.analytics.followers = data.details.analytics.followers;
+				if (data.details.analytics.totalViews)
+					updateData.details.analytics.totalViews = data.details.analytics.totalViews;
+				if (data.details.analytics.averageViews)
+					updateData.details.analytics.averageViews = data.details.analytics.averageViews;
 			}
-			if (data.reels) updateData.details.reels = data.reels;
+			if (data.details.reels) updateData.details.reels = data.details.reels;
 
 			// Always preserve existing media
 			updateData.details.media = existingMedia;

@@ -1,31 +1,22 @@
+
 import React, { useState, useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "../ui/button";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "../ui/form";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { useToast } from "@/components/ui/use-toast";
-import { ImageIcon, Pencil, Plus, Upload } from "lucide-react";
 import {
-	CreateCreatorData,
-	UpdateCreatorData,
-	creatorAPI,
-} from "../../services/api";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
 import { useCreators } from "../../hooks/useCreators";
-import { Creator } from "@/types/Creator";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Creator } from "../../types/Creator";
+import { CreateCreatorData } from "../../services/api";
 import LocationInput from "./LocationInput";
 
 interface CreatorFormProps {
@@ -35,437 +26,353 @@ interface CreatorFormProps {
 }
 
 const formSchema = z.object({
-	name: z.string().min(2, {
-		message: "Creator name must be at least 2 characters.",
-	}),
-	genre: z.string().min(2, {
-		message: "Genre must be at least 2 characters.",
-	}),
-	avatar: z.string().optional(),
-	platform: z.enum(["Instagram", "YouTube", "TikTok", "Twitter", "Other"], {
-		required_error: "Please select a platform.",
-	}),
-	socialLink: z.string().url({
-		message: "Please enter a valid URL.",
-	}),
-	location: z.string().optional(),
+	name: z.string().min(1, "Name is required"),
+	genre: z.string().min(1, "Genre is required"),
+	avatar: z.string().url("Avatar must be a valid URL"),
+	platform: z.enum(["Instagram", "YouTube", "TikTok", "Twitter", "Other"]),
+	socialLink: z.string().url("Social link must be a valid URL"),
+	location: z.string().min(1, "Location is required"),
 	phoneNumber: z.string().optional(),
-	mediaKit: z.string().optional(),
-	bio: z.string().optional(),
-	followers: z.number().min(0, {
-		message: "Followers must be a positive number.",
+	mediaKit: z.string().url("Media kit must be a valid URL").optional().or(z.literal("")),
+	details: z.object({
+		bio: z.string().min(1, "Bio is required"),
+		analytics: z.object({
+			followers: z.number().min(0, "Followers must be 0 or greater"),
+			totalViews: z.number().min(0, "Total views must be 0 or greater"),
+			averageViews: z.number().min(0, "Average views must be 0 or greater").optional(),
+		}),
+		reels: z.array(z.string()).default([]),
 	}),
-	totalViews: z.number().min(0, {
-		message: "Total views must be a positive number.",
-	}),
-	averageViews: z.number().optional(),
-	reels: z.array(z.string()).optional(),
 });
 
-const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel }) => {
-	const [isEditMode, setIsEditMode] = useState(!!creator);
-	const [avatarPreview, setAvatarPreview] = useState(creator?.avatar || "");
-	const [uploading, setUploading] = useState(false);
-	const [formData, setFormData] = useState({
-		name: creator?.name || "",
-		genre: creator?.genre || "",
-		avatar: creator?.avatar || "",
-		platform: creator?.platform || "Instagram",
-		socialLink: creator?.socialLink || "",
-		location: creator?.location || "",
-		phoneNumber: creator?.phoneNumber || "",
-		mediaKit: creator?.mediaKit || "",
-		bio: creator?.details?.bio || "",
-		followers: creator?.details?.analytics?.followers || 0,
-		totalViews: creator?.details?.analytics?.totalViews || 0,
-		averageViews: creator?.details?.analytics?.averageViews || 0,
-		reels: creator?.details?.reels || [],
-	});
+type FormData = z.infer<typeof formSchema>;
+
+const CreatorForm: React.FC<CreatorFormProps> = ({
+	creator,
+	onSuccess,
+	onCancel,
+}) => {
+	const { createCreator, updateCreator, loading } = useCreators();
+	const [reelInput, setReelInput] = useState("");
 
 	const {
-		creators,
-		createCreator,
-		updateCreator,
-		deleteCreator,
-		loading,
-		error,
-	} = useCreators();
-	const { toast } = useToast();
-	const navigate = useNavigate();
-
-	const form = useForm<z.infer<typeof formSchema>>({
+		register,
+		handleSubmit,
+		formState: { errors },
+		setValue,
+		watch,
+		reset,
+	} = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: creator?.name || "",
-			genre: creator?.genre || "",
-			avatar: creator?.avatar || "",
-			platform: creator?.platform || "Instagram",
-			socialLink: creator?.socialLink || "",
-			location: creator?.location || "",
-			phoneNumber: creator?.phoneNumber || "",
-			mediaKit: creator?.mediaKit || "",
-			bio: creator?.details?.bio || "",
-			followers: creator?.details?.analytics?.followers || 0,
-			totalViews: creator?.details?.analytics?.totalViews || 0,
-			averageViews: creator?.details?.analytics?.averageViews || 0,
-			reels: creator?.details?.reels || [],
+			name: "",
+			genre: "",
+			avatar: "",
+			platform: "Instagram",
+			socialLink: "",
+			location: "",
+			phoneNumber: "",
+			mediaKit: "",
+			details: {
+				bio: "",
+				analytics: {
+					followers: 0,
+					totalViews: 0,
+					averageViews: 0,
+				},
+				reels: [],
+			},
 		},
-		mode: "onChange",
 	});
 
-	const { handleSubmit, control, formState } = form;
-	const { errors } = formState;
+	const watchedReels = watch("details.reels");
 
-	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+	useEffect(() => {
+		if (creator) {
+			reset({
+				name: creator.name,
+				genre: creator.genre,
+				avatar: creator.avatar,
+				platform: creator.platform as "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other",
+				socialLink: creator.socialLink,
+				location: creator.location || "",
+				phoneNumber: creator.phoneNumber || "",
+				mediaKit: creator.mediaKit || "",
+				details: {
+					bio: creator.details.bio,
+					analytics: {
+						followers: creator.details.analytics.followers,
+						totalViews: creator.details.analytics.totalViews,
+						averageViews: creator.details.analytics.averageViews || 0,
+					},
+					reels: creator.details.reels || [],
+				},
+			});
+		}
+	}, [creator, reset]);
+
+	const onSubmit = async (data: FormData) => {
 		try {
-			if (creator) {
-				// Update creator
-				const updateData: UpdateCreatorData = {
-					name: values.name,
-					genre: values.genre,
-					avatar: values.avatar,
-					platform: values.platform,
-					socialLink: values.socialLink,
-					location: values.location,
-					phoneNumber: values.phoneNumber,
-					mediaKit: values.mediaKit,
-					details: {
-						bio: values.bio,
-						analytics: {
-							followers: values.followers,
-							totalViews: values.totalViews,
-							averageViews: values.averageViews,
-						},
-						reels: values.reels,
+			const formattedData: CreateCreatorData = {
+				name: data.name,
+				genre: data.genre,
+				avatar: data.avatar,
+				platform: data.platform,
+				socialLink: data.socialLink,
+				location: data.location,
+				phoneNumber: data.phoneNumber,
+				mediaKit: data.mediaKit,
+				details: {
+					bio: data.details.bio,
+					location: data.location,
+					analytics: {
+						followers: data.details.analytics.followers,
+						totalViews: data.details.analytics.totalViews,
+						averageViews: data.details.analytics.averageViews,
 					},
-				};
-				await updateCreator(creator._id as string, updateData);
-				toast({
-					title: "Success",
-					description: "Creator updated successfully.",
-				});
+					reels: data.details.reels,
+				},
+			};
+
+			if (creator?._id) {
+				await updateCreator(creator._id, formattedData);
 			} else {
-				// Create creator
-				const createData: CreateCreatorData = {
-					name: values.name,
-					genre: values.genre,
-					avatar: values.avatar,
-					platform: values.platform,
-					socialLink: values.socialLink,
-					location: values.location,
-					phoneNumber: values.phoneNumber,
-					mediaKit: values.mediaKit,
-					details: {
-						bio: values.bio,
-						analytics: {
-							followers: values.followers,
-							totalViews: values.totalViews,
-							averageViews: values.averageViews,
-						},
-						reels: values.reels,
-					},
-				};
-				await createCreator(createData);
-				toast({
-					title: "Success",
-					description: "Creator created successfully.",
-				});
+				await createCreator(formattedData);
 			}
 			onSuccess();
-			navigate("/admin");
-		} catch (error: any) {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error.message || "Failed to save creator.",
-			});
+		} catch (error) {
+			console.error("Error submitting form:", error);
 		}
 	};
 
-	const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		setUploading(true);
-		try {
-			const formData = new FormData();
-			formData.append("image", file);
-
-			const response = await fetch("http://localhost:3000/api/upload", {
-				method: "POST",
-				body: formData,
-			});
-
-			if (!response.ok) {
-				throw new Error("Image upload failed");
-			}
-
-			const result = await response.json();
-			setFormData((prev) => ({ ...prev, avatar: result.url }));
-			setAvatarPreview(result.url);
-			form.setValue("avatar", result.url);
-			toast({
-				title: "Success",
-				description: "Avatar uploaded successfully.",
-			});
-		} catch (error: any) {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error.message || "Failed to upload avatar.",
-			});
-		} finally {
-			setUploading(false);
+	const addReel = () => {
+		if (reelInput.trim()) {
+			const currentReels = watchedReels || [];
+			setValue("details.reels", [...currentReels, reelInput.trim()]);
+			setReelInput("");
 		}
+	};
+
+	const removeReel = (index: number) => {
+		const currentReels = watchedReels || [];
+		setValue("details.reels", currentReels.filter((_, i) => i !== index));
 	};
 
 	return (
 		<div className="p-6">
+			<h2 className="text-xl font-semibold mb-6">
+				{creator ? "Edit Creator" : "Add New Creator"}
+			</h2>
+
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-				{/* Name */}
-				<div>
-					<FormLabel htmlFor="name">Creator Name *</FormLabel>
-					<Input
-						id="name"
-						placeholder="Enter creator name"
-						value={formData.name}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, name: e.target.value }))
-						}
-						className={errors.name ? "border-red-500" : ""}
-					/>
-					{errors.name && (
-						<p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
-					)}
-				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					{/* Basic Information */}
+					<div>
+						<Label htmlFor="name">Name *</Label>
+						<Input
+							id="name"
+							{...register("name")}
+							className={errors.name ? "border-red-500" : ""}
+						/>
+						{errors.name && (
+							<p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+						)}
+					</div>
 
-				{/* Genre */}
-				<div>
-					<FormLabel htmlFor="genre">Genre *</FormLabel>
-					<Input
-						id="genre"
-						placeholder="e.g., Tech, Lifestyle, Music"
-						value={formData.genre}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, genre: e.target.value }))
-						}
-						className={errors.genre ? "border-red-500" : ""}
-					/>
-					{errors.genre && (
-						<p className="text-red-500 text-xs mt-1">{errors.genre.message}</p>
-					)}
-				</div>
+					<div>
+						<Label htmlFor="genre">Genre *</Label>
+						<Input
+							id="genre"
+							{...register("genre")}
+							className={errors.genre ? "border-red-500" : ""}
+						/>
+						{errors.genre && (
+							<p className="text-red-500 text-xs mt-1">{errors.genre.message}</p>
+						)}
+					</div>
 
-				{/* Avatar */}
-				<div>
-					<FormLabel>Avatar</FormLabel>
-					<div className="flex items-center space-x-4">
-						<Avatar className="h-12 w-12">
-							{avatarPreview ? (
-								<AvatarImage src={avatarPreview} alt="Creator Avatar" />
-							) : (
-								<AvatarFallback>{formData.name?.charAt(0).toUpperCase()}</AvatarFallback>
-							)}
-						</Avatar>
-						<div className="space-y-1">
-							<Input
-								type="file"
-								id="avatar"
-								accept="image/*"
-								onChange={handleAvatarChange}
-								disabled={uploading}
-								className="hidden"
-							/>
-							<FormLabel
-								htmlFor="avatar"
-								className="cursor-pointer rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50"
-							>
-								{uploading ? (
-									<>
-										<Upload className="mr-2 h-4 w-4 animate-spin" />
-										Uploading...
-									</>
-								) : (
-									<>
-										<Upload className="mr-2 h-4 w-4" />
-										Upload
-									</>
-								)}
-							</FormLabel>
-							<FormDescription>
-								Upload a new avatar for the creator.
-							</FormDescription>
-						</div>
+					<div>
+						<Label htmlFor="avatar">Avatar URL *</Label>
+						<Input
+							id="avatar"
+							{...register("avatar")}
+							className={errors.avatar ? "border-red-500" : ""}
+							placeholder="https://example.com/avatar.jpg"
+						/>
+						{errors.avatar && (
+							<p className="text-red-500 text-xs mt-1">{errors.avatar.message}</p>
+						)}
+					</div>
+
+					<div>
+						<Label htmlFor="platform">Platform *</Label>
+						<Select
+							value={watch("platform")}
+							onValueChange={(value) => setValue("platform", value as "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other")}
+						>
+							<SelectTrigger className={errors.platform ? "border-red-500" : ""}>
+								<SelectValue placeholder="Select platform" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="Instagram">Instagram</SelectItem>
+								<SelectItem value="YouTube">YouTube</SelectItem>
+								<SelectItem value="TikTok">TikTok</SelectItem>
+								<SelectItem value="Twitter">Twitter</SelectItem>
+								<SelectItem value="Other">Other</SelectItem>
+							</SelectContent>
+						</Select>
+						{errors.platform && (
+							<p className="text-red-500 text-xs mt-1">{errors.platform.message}</p>
+						)}
+					</div>
+
+					<div>
+						<Label htmlFor="socialLink">Social Link *</Label>
+						<Input
+							id="socialLink"
+							{...register("socialLink")}
+							className={errors.socialLink ? "border-red-500" : ""}
+							placeholder="https://instagram.com/username"
+						/>
+						{errors.socialLink && (
+							<p className="text-red-500 text-xs mt-1">{errors.socialLink.message}</p>
+						)}
+					</div>
+
+					<div>
+						<LocationInput
+							value={watch("location")}
+							onChange={(value) => setValue("location", value)}
+							error={errors.location?.message}
+						/>
+					</div>
+
+					<div>
+						<Label htmlFor="phoneNumber">Phone Number</Label>
+						<Input
+							id="phoneNumber"
+							{...register("phoneNumber")}
+							className={errors.phoneNumber ? "border-red-500" : ""}
+						/>
+						{errors.phoneNumber && (
+							<p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>
+						)}
+					</div>
+
+					<div>
+						<Label htmlFor="mediaKit">Media Kit URL</Label>
+						<Input
+							id="mediaKit"
+							{...register("mediaKit")}
+							className={errors.mediaKit ? "border-red-500" : ""}
+							placeholder="https://example.com/mediakit.pdf"
+						/>
+						{errors.mediaKit && (
+							<p className="text-red-500 text-xs mt-1">{errors.mediaKit.message}</p>
+						)}
 					</div>
 				</div>
 
-				{/* Platform */}
-				<div>
-					<FormLabel htmlFor="platform">Platform *</FormLabel>
-					<Select
-						value={formData.platform}
-						onValueChange={(value) =>
-							setFormData((prev) => ({ ...prev, platform: value }))
-						}
-					>
-						<SelectTrigger className={errors.platform ? "border-red-500" : ""}>
-							<SelectValue placeholder="Select platform" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="Instagram">Instagram</SelectItem>
-							<SelectItem value="YouTube">YouTube</SelectItem>
-							<SelectItem value="TikTok">TikTok</SelectItem>
-							<SelectItem value="Twitter">Twitter</SelectItem>
-							<SelectItem value="Other">Other</SelectItem>
-						</SelectContent>
-					</Select>
-					{errors.platform && (
-						<p className="text-red-500 text-xs mt-1">{errors.platform}</p>
-					)}
-				</div>
+				{/* Details Section */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-medium">Details</h3>
 
-				{/* Social Link */}
-				<div>
-					<FormLabel htmlFor="socialLink">Social Profile Link *</FormLabel>
-					<Input
-						id="socialLink"
-						type="url"
-						placeholder="https://..."
-						value={formData.socialLink}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, socialLink: e.target.value }))
-						}
-						className={errors.socialLink ? "border-red-500" : ""}
-					/>
-					{errors.socialLink && (
-						<p className="text-red-500 text-xs mt-1">{errors.socialLink}</p>
-					)}
-				</div>
-
-				{/* Location - Updated to use LocationInput */}
-				<LocationInput
-					value={formData.location}
-					onChange={(value) =>
-						setFormData((prev) => ({ ...prev, location: value }))
-					}
-					error={errors.location}
-				/>
-
-				{/* Phone Number */}
-				<div>
-					<FormLabel htmlFor="phoneNumber">Phone Number</FormLabel>
-					<Input
-						id="phoneNumber"
-						type="tel"
-						placeholder="Enter phone number"
-						value={formData.phoneNumber}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, phoneNumber: e.target.value }))
-						}
-					/>
-				</div>
-
-				{/* Media Kit */}
-				<div>
-					<FormLabel htmlFor="mediaKit">Media Kit URL</FormLabel>
-					<Input
-						id="mediaKit"
-						type="url"
-						placeholder="https://..."
-						value={formData.mediaKit}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, mediaKit: e.target.value }))
-						}
-					/>
-				</div>
-
-				{/* Bio */}
-				<div>
-					<FormLabel htmlFor="bio">Bio</FormLabel>
-					<Textarea
-						id="bio"
-						placeholder="Write a short bio"
-						value={formData.bio}
-						onChange={(e) =>
-							setFormData((prev) => ({ ...prev, bio: e.target.value }))
-						}
-					/>
-				</div>
-
-				{/* Analytics */}
-				<div>
-					<FormLabel htmlFor="followers">Followers *</FormLabel>
-					<Input
-						id="followers"
-						type="number"
-						placeholder="Enter number of followers"
-						value={formData.followers}
-						onChange={(e) =>
-							setFormData((prev) => ({
-								...prev,
-								followers: Number(e.target.value),
-							}))
-						}
-						className={errors.followers ? "border-red-500" : ""}
-					/>
-					{errors.followers && (
-						<p className="text-red-500 text-xs mt-1">{errors.followers.message}</p>
-					)}
-				</div>
-
-				<div>
-					<FormLabel htmlFor="totalViews">Total Views *</FormLabel>
-					<Input
-						id="totalViews"
-						type="number"
-						placeholder="Enter total views"
-						value={formData.totalViews}
-						onChange={(e) =>
-							setFormData((prev) => ({
-								...prev,
-								totalViews: Number(e.target.value),
-							}))
-						}
-						className={errors.totalViews ? "border-red-500" : ""}
-					/>
-					{errors.totalViews && (
-						<p className="text-red-500 text-xs mt-1">{errors.totalViews.message}</p>
-					)}
-				</div>
-
-				<div>
-					<FormLabel htmlFor="averageViews">Average Views</FormLabel>
-					<Input
-						id="averageViews"
-						type="number"
-						placeholder="Enter average views (optional)"
-						value={formData.averageViews}
-						onChange={(e) =>
-							setFormData((prev) => ({
-								...prev,
-								averageViews: Number(e.target.value),
-							}))
-						}
-					/>
-				</div>
-
-				{/* Form Buttons */}
-				<div className="flex justify-end gap-4">
-					<Button variant="ghost" onClick={onCancel}>
-						Cancel
-					</Button>
-					<Button type="submit" disabled={loading}>
-						{loading ? (
-							<>
-								Saving...
-								<Upload className="ml-2 h-4 w-4 animate-spin" />
-							</>
-						) : (
-							<>
-								{isEditMode ? "Update" : "Create"}
-								<Pencil className="ml-2 h-4 w-4" />
-							</>
+					<div>
+						<Label htmlFor="bio">Bio *</Label>
+						<Textarea
+							id="bio"
+							{...register("details.bio")}
+							className={errors.details?.bio ? "border-red-500" : ""}
+							rows={4}
+						/>
+						{errors.details?.bio && (
+							<p className="text-red-500 text-xs mt-1">{errors.details.bio.message}</p>
 						)}
+					</div>
+
+					{/* Analytics */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div>
+							<Label htmlFor="followers">Followers *</Label>
+							<Input
+								id="followers"
+								type="number"
+								{...register("details.analytics.followers", { valueAsNumber: true })}
+								className={errors.details?.analytics?.followers ? "border-red-500" : ""}
+							/>
+							{errors.details?.analytics?.followers && (
+								<p className="text-red-500 text-xs mt-1">{errors.details.analytics.followers.message}</p>
+							)}
+						</div>
+
+						<div>
+							<Label htmlFor="totalViews">Total Views *</Label>
+							<Input
+								id="totalViews"
+								type="number"
+								{...register("details.analytics.totalViews", { valueAsNumber: true })}
+								className={errors.details?.analytics?.totalViews ? "border-red-500" : ""}
+							/>
+							{errors.details?.analytics?.totalViews && (
+								<p className="text-red-500 text-xs mt-1">{errors.details.analytics.totalViews.message}</p>
+							)}
+						</div>
+
+						<div>
+							<Label htmlFor="averageViews">Average Views</Label>
+							<Input
+								id="averageViews"
+								type="number"
+								{...register("details.analytics.averageViews", { valueAsNumber: true })}
+								className={errors.details?.analytics?.averageViews ? "border-red-500" : ""}
+							/>
+							{errors.details?.analytics?.averageViews && (
+								<p className="text-red-500 text-xs mt-1">{errors.details.analytics.averageViews.message}</p>
+							)}
+						</div>
+					</div>
+
+					{/* Reels */}
+					<div>
+						<Label>Reels</Label>
+						<div className="flex gap-2 mb-2">
+							<Input
+								value={reelInput}
+								onChange={(e) => setReelInput(e.target.value)}
+								placeholder="Enter reel URL"
+								className="flex-1"
+							/>
+							<Button type="button" onClick={addReel} variant="outline">
+								Add
+							</Button>
+						</div>
+						{watchedReels && watchedReels.length > 0 && (
+							<div className="space-y-2">
+								{watchedReels.map((reel, index) => (
+									<div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+										<span className="flex-1 text-sm">{reel}</span>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											onClick={() => removeReel(index)}
+										>
+											Remove
+										</Button>
+									</div>
+								))}
+							</div>
+						)}
+					</div>
+				</div>
+
+				{/* Form Actions */}
+				<div className="flex gap-4 pt-4">
+					<Button type="submit" disabled={loading}>
+						{loading ? "Saving..." : creator ? "Update Creator" : "Create Creator"}
+					</Button>
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancel
 					</Button>
 				</div>
 			</form>
