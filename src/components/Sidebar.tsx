@@ -25,6 +25,7 @@ const genres = [
 	{ name: "AI Creators", icon: Lightbulb },
 	{ name: "Video Editing", icon: Video },
 	{ name: "Tech Product", icon: Laptop },
+	{ name: "Tips & Tricks", icon: Lightbulb },
 	{ name: "Business", icon: Building2 },
 	{ name: "Lifestyle", icon: Heart },
 ];

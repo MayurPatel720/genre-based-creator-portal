@@ -19,6 +19,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
+import { API_BASE_URL } from "../../services/api";
 
 interface LocationInputProps {
 	value: string;
@@ -46,7 +47,7 @@ const LocationInput: React.FC<LocationInputProps> = ({
 	const { data: allLocations = [], refetch: refetchLocations } = useQuery({
 		queryKey: ["all-locations"],
 		queryFn: async () => {
-			const response = await fetch("http://localhost:3000/api/locations/distinct");
+			const response = await fetch(`${API_BASE_URL}/locations/distinct`);
 			if (!response.ok) throw new Error("Failed to fetch locations");
 			return response.json();
 		},
@@ -56,7 +57,7 @@ const LocationInput: React.FC<LocationInputProps> = ({
 	const { data: predefinedLocations = [] } = useQuery({
 		queryKey: ["predefined-locations"],
 		queryFn: async () => {
-			const response = await fetch("http://localhost:3000/api/locations/predefined");
+			const response = await fetch(`${API_BASE_URL}/locations/predefined`);
 			if (!response.ok) throw new Error("Failed to fetch predefined locations");
 			return response.json();
 		},
@@ -91,7 +92,7 @@ const LocationInput: React.FC<LocationInputProps> = ({
 		if (!newPredefinedLocation.trim()) return;
 
 		try {
-			const response = await fetch("http://localhost:3000/api/locations/predefined", {
+			const response = await fetch(`${API_BASE_URL}/locations/predefined`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

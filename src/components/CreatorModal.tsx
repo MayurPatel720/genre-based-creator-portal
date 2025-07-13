@@ -77,13 +77,28 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 		setSelectedMedia(media);
 	};
 
+	const handleBackdropClick = (e: React.MouseEvent) => {
+		if (e.target === e.currentTarget) {
+			onClose();
+		}
+	};
+
 	return (
 		<>
-			<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-poppins">
+			<div
+				className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 font-poppins"
+				onClick={handleBackdropClick}
+			>
 				<div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-					{/* Header */}
+					{/* Header with Banner Image */}
 					<div className="relative">
-						<div className="h-48 bg-gradient-to-br from-brand-aureolin/20 via-brand-orange/20 to-brand-purple/20 rounded-t-2xl"></div>
+						<div className="h-48 bg-gradient-to-br from-brand-aureolin/20 via-brand-orange/20 to-brand-purple/20 rounded-t-2xl overflow-hidden">
+							<img
+								src="/lovable-uploads/27249619-0749-4ac7-be51-296f36f7b496.png"
+								alt="Banner"
+								className="w-full h-full object-cover "
+							/>
+						</div>
 						<button
 							onClick={onClose}
 							className="absolute top-4 right-4 p-2 bg-brand-black/20 hover:bg-brand-black/40 text-white rounded-full transition-colors"
@@ -124,9 +139,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 								{creator.phoneNumber && (
 									<button
 										onClick={handleContactCreator}
-										className="flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange/80 text-white px-4 py-2.5 md:px-3 md:py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 text-sm font-medium"
+										className="flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange/80 text-white px-3 py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 text-sm font-medium"
 									>
-										<MessageCircle size={16} />
+										<MessageCircle size={14} />
 										<span className="md:hidden lg:inline">Contact Creator</span>
 										<span className="hidden md:inline lg:hidden">Contact</span>
 									</button>
@@ -137,9 +152,9 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 									target="_blank"
 									rel="noopener noreferrer"
 									onClick={handleVisitSocial}
-									className="flex items-center justify-center gap-2 bg-brand-purple hover:bg-brand-purple/80 text-white px-4 py-2.5 md:px-3 md:py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 text-sm font-medium"
+									className="flex items-center justify-center gap-2 bg-brand-purple hover:bg-brand-purple/80 text-white px-3 py-2 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 text-sm font-medium"
 								>
-									<ExternalLink size={16} />
+									<ExternalLink size={14} />
 									<span className="md:hidden lg:inline">
 										Visit {creator.platform}
 									</span>

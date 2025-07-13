@@ -36,7 +36,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 		platform: "All",
 		locations: [],
 		priceRange: [0, 10000],
-		followersRange: [0, 1000],
+		followersRange: [0, 15000], // Increased to 15M to include all creators
 	});
 
 	const {
@@ -115,7 +115,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 			platform: "All",
 			locations: [],
 			priceRange: [0, 10000],
-			followersRange: [0, 1000],
+			followersRange: [0, 15000], // Updated to match default
 		});
 	};
 
@@ -123,7 +123,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 		filters.platform !== "All" ||
 		filters.locations.length > 0 ||
 		filters.followersRange[0] !== 0 ||
-		filters.followersRange[1] !== 1000;
+		filters.followersRange[1] !== 15000; // Updated to match new default
 
 	const handleRetry = () => {
 		refetch();
@@ -218,7 +218,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 									filters.platform !== "All" ? 1 : 0,
 									filters.locations.length,
 									filters.followersRange[0] !== 0 ||
-									filters.followersRange[1] !== 1000
+									filters.followersRange[1] !== 15000
 										? 1
 										: 0,
 								].reduce((a, b) => a + b, 0)}

@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -7,6 +6,7 @@ import { Slider } from "./ui/slider";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { X, Search } from "lucide-react";
+import { API_BASE_URL } from "@/services/api";
 
 interface FilterState {
 	platform: string;
@@ -45,7 +45,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 	const { data: allLocations = [] } = useQuery({
 		queryKey: ["distinct-locations"],
 		queryFn: async () => {
-			const response = await fetch("http://localhost:3000/api/locations/distinct");
+			const response = await fetch(`${API_BASE_URL}/locations/distinct`);
 			if (!response.ok) throw new Error("Failed to fetch locations");
 			return response.json();
 		},
@@ -187,9 +187,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 						<Slider
 							value={filters.followersRange}
 							onValueChange={handleFollowersRangeChange}
-							max={1000}
+							max={15000}
 							min={0}
-							step={10}
+							step={100}
 							className="w-full"
 						/>
 					</div>
