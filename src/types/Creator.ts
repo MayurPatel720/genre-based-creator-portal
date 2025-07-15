@@ -54,6 +54,7 @@ export interface CreateCreatorData {
 			averageViews?: number;
 		};
 		reels: string[];
+		media?: MediaFile[];
 	};
 }
 
