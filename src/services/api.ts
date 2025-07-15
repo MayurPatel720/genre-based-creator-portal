@@ -4,9 +4,6 @@ import { Creator } from "../types/Creator";
 // Use environment variable for API URL or fallback to local URL
 export const API_BASE_URL =
 	import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-// export const API_BASE_URL =
-// 	import.meta.env.VITE_API_URL ||
-// 	"https://genre-based-creator-portal.onrender.com/api";
 
 const api = axios.create({
 	baseURL: API_BASE_URL,
@@ -29,7 +26,7 @@ api.interceptors.response.use(
 		console.error("API Error:", error);
 		if (error.code === "ERR_NETWORK") {
 			throw new Error(
-				"Network error - please check if the API server is running"
+				"Network error - please check if the API server is running on port 5000"
 			);
 		}
 		if (error.response?.status === 500) {
