@@ -25,6 +25,10 @@ export const mediaAPI = {
   },
 
   deleteMedia: async (creatorId: string, mediaId: string): Promise<void> => {
-    await mediaApi.delete(`/${creatorId}/${mediaId}`);
+    // Encode the mediaId to handle special characters like slashes
+    const encodedMediaId = encodeURIComponent(mediaId);
+    console.log('Deleting media with encoded ID:', encodedMediaId);
+    
+    await mediaApi.delete(`/${creatorId}/${encodedMediaId}`);
   },
 };

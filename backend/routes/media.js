@@ -19,7 +19,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // POST /api/media/:creatorId - Add media to creator
-router.post('/:creatorId', upload.single('media'), async (req, res) => {
+router.post('/:creatorId', upload.single('file'), async (req, res) => {
   try {
     const { creatorId } = req.params;
     const { caption } = req.body;
@@ -86,10 +86,16 @@ router.delete('/:creatorId/:mediaId', async (req, res) => {
     const decodedMediaId = decodeURIComponent(mediaId);
     
     console.log('Delete request for creator:', creatorId, 'media:', decodedMediaId);
+    console.log('Original mediaId param:', mediaId);
 
     const creator = await Creator.findById(creatorId);
     if (!creator) {
       return res.status(404).json({ error: 'Creator not found' });
+    }
+
+    // Initialize media array if it doesn't exist
+    if (!creator.details.media) {
+      creator.details.media = [];
     }
 
     // Find the media item to delete
@@ -97,6 +103,7 @@ router.delete('/:creatorId/:mediaId', async (req, res) => {
     
     if (!mediaToDelete) {
       console.log('Media not found in creator media array:', decodedMediaId);
+      console.log('Available media IDs:', creator.details.media.map(m => m.id));
       return res.status(404).json({ error: 'Media not found' });
     }
 
