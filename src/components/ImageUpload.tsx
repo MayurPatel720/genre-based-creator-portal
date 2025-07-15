@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 
 interface ImageUploadProps {
   currentImage?: string;
-  onImageUpload: (imageUrl: string, publicId?: string) => void;
+  onImageUpload: (imageUrl: string) => void;
   onImageDelete?: () => void;
   className?: string;
 }
@@ -42,7 +42,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
     try {
       const result = await imageUploadAPI.uploadImage(file);
-      onImageUpload(result.url, result.public_id);
+      onImageUpload(result.url);
     } catch (err) {
       setError('Failed to upload image. Please try again.');
       console.error('Upload error:', err);
