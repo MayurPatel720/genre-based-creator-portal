@@ -1,388 +1,102 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Creator = require("../models/Creator");
-const axios = require("axios");
-const { handleCustomLocation } = require("../middleware/locationMiddleware");
+const Creator = require('../models/Creator');
 
 // GET /api/creators - Get all creators
-router.get("/", async (req, res) => {
-	try {
-		const { genre } = req.query;
-		let query = {};
-		if (genre && genre !== "All Creators") {
-			// Exact match for genre
-			query.genre = genre;
-		}
-
-		const creators = await Creator.find(query);
-		console.log(
-			`Found ${creators.length} creators for genre: ${genre || "All"}`
-		);
-
-		// Transform data to match frontend interface
-		const transformedCreators = creators.map((creator) => ({
-			_id: creator._id.toString(),
-			name: creator.name,
-			genre: creator.genre,
-			avatar: creator.avatar,
-			platform: creator.platform,
-			socialLink: creator.socialLink,
-			location: creator.location,
-			phoneNumber: creator.phoneNumber,
-			mediaKit: creator.mediaKit,
-			details: {
-				location: creator.details.location || creator.location,
-				bio: creator.details.bio,
-				analytics: {
-					followers: creator.details.analytics.followers,
-					totalViews: creator.details.analytics.totalViews,
-					averageViews: creator.details.analytics.averageViews,
-				},
-				reels: creator.details.reels,
-				media: creator.details.media || [],
-			},
-			createdAt: creator.createdAt,
-			updatedAt: creator.updatedAt,
-		}));
-
-		res.json(transformedCreators);
-	} catch (error) {
-		console.error("Error fetching creators:", error);
-		res.status(500).json({ error: "Failed to fetch creators" });
-	}
+router.get('/', async (req, res) => {
+  try {
+    const creators = await Creator.find();
+    res.json(creators);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// GET /api/creators/:id - Get creator by ID
-router.get("/:id", async (req, res) => {
-	try {
-		const creator = await Creator.findById(req.params.id);
-
-		if (!creator) {
-			return res.status(404).json({ error: "Creator not found" });
-		}
-
-		// Transform data to match frontend interface
-		const transformedCreator = {
-			_id: creator._id.toString(),
-			name: creator.name,
-			genre: creator.genre,
-			avatar: creator.avatar,
-			platform: creator.platform,
-			socialLink: creator.socialLink,
-			location: creator.location,
-			phoneNumber: creator.phoneNumber,
-			mediaKit: creator.mediaKit,
-			details: {
-				location: creator.details.location || creator.location,
-				bio: creator.details.bio,
-				analytics: {
-					followers: creator.details.analytics.followers,
-					totalViews: creator.details.analytics.totalViews,
-					averageViews: creator.details.analytics.averageViews,
-				},
-				reels: creator.details.reels,
-				media: creator.details.media || [],
-			},
-			createdAt: creator.createdAt,
-			updatedAt: creator.updatedAt,
-		};
-
-		res.json(transformedCreator);
-	} catch (error) {
-		console.error("Error fetching creator:", error);
-		res.status(500).json({ error: "Failed to fetch creator" });
-	}
+// GET /api/creators/:id - Get a specific creator by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const creator = await Creator.findById(req.params.id);
+    if (!creator) {
+      return res.status(404).json({ error: 'Creator not found' });
+    }
+    res.json(creator);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// Create creator - with location middleware
-router.post("/", handleCustomLocation, async (req, res) => {
-	try {
-		// Validate required fields
-		const { name, genre, avatar, platform, socialLink, details } = req.body;
-		const missingFields = [];
-		if (!name) missingFields.push("name");
-		if (!genre) missingFields.push("genre");
-		if (!avatar) missingFields.push("avatar");
-		if (!platform) missingFields.push("platform");
-		if (!socialLink) missingFields.push("socialLink");
-		if (!details) missingFields.push("details");
-		if (details) {
-			if (!details.bio) missingFields.push("details.bio");
-			if (!details.analytics) missingFields.push("details.analytics");
-			else {
-				if (details.analytics.followers === undefined)
-					missingFields.push("details.analytics.followers");
-				if (details.analytics.totalViews === undefined)
-					missingFields.push("details.analytics.totalViews");
-			}
-		}
-
-		if (missingFields.length > 0) {
-			return res.status(400).json({
-				error: `Missing required fields: ${missingFields.join(", ")}`,
-			});
-		}
-
-		// Validate platform
-		const validPlatforms = [
-			"Instagram",
-			"YouTube",
-			"TikTok",
-			"Twitter",
-			"Other",
-		];
-		if (!validPlatforms.includes(platform)) {
-			return res.status(400).json({
-				error: `Invalid platform. Must be one of: ${validPlatforms.join(", ")}`,
-			});
-		}
-
-		// Validate socialLink format
-		if (!/^https?:\/\/.+/.test(socialLink)) {
-			return res.status(400).json({ error: "Invalid socialLink URL" });
-		}
-
-		// Validate mediaKit URL if provided
-		if (req.body.mediaKit && !/^https?:\/\/.+/.test(req.body.mediaKit)) {
-			return res.status(400).json({ error: "Invalid mediaKit URL" });
-		}
-
-		const creator = new Creator(req.body);
-		await creator.save();
-
-		// Transform data to match frontend interface
-		const transformedCreator = {
-			_id: creator._id.toString(),
-			name: creator.name,
-			genre: creator.genre,
-			avatar: creator.avatar,
-			platform: creator.platform,
-			socialLink: creator.socialLink,
-			location: creator.location,
-			phoneNumber: creator.phoneNumber,
-			mediaKit: creator.mediaKit,
-			details: {
-				location: creator.details.location || creator.location,
-				bio: creator.details.bio,
-				analytics: {
-					followers: creator.details.analytics.followers,
-					totalViews: creator.details.analytics.totalViews,
-					averageViews: creator.details.analytics.averageViews,
-				},
-				reels: creator.details.reels,
-				media: creator.details.media || [],
-			},
-			createdAt: creator.createdAt,
-			updatedAt: creator.updatedAt,
-		};
-
-		res.status(201).json(transformedCreator);
-	} catch (error) {
-		console.error("Error creating creator:", error);
-		if (error.name === "ValidationError") {
-			res.status(400).json({
-				error: Object.values(error.errors)
-					.map((err) => err.message)
-					.join(", "),
-			});
-		} else {
-			res.status(500).json({ error: "Failed to create creator" });
-		}
-	}
+// POST /api/creators - Create a new creator
+router.post('/', async (req, res) => {
+  try {
+    console.log('Creating creator with data:', req.body);
+    
+    // Extract cloudinary public_id from avatar URL if present
+    let cloudinary_public_id = null;
+    if (req.body.avatar) {
+      const urlParts = req.body.avatar.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      const publicIdParts = urlParts.slice(-2); // Get folder/filename
+      cloudinary_public_id = publicIdParts.join('/').split('.')[0]; // Remove extension
+    }
+    
+    const creator = new Creator({
+      ...req.body,
+      cloudinary_public_id
+    });
+    
+    const savedCreator = await creator.save();
+    console.log('Creator created successfully:', savedCreator._id);
+    res.status(201).json(savedCreator);
+  } catch (error) {
+    console.error('Error creating creator:', error);
+    res.status(400).json({ error: error.message });
+  }
 });
 
-// Update creator - with location middleware
-router.put("/:id", handleCustomLocation, async (req, res) => {
-	try {
-		// Validate required fields
-		const { name, genre, avatar, platform, socialLink, details } = req.body;
-		const missingFields = [];
-		if (!name) missingFields.push("name");
-		if (!genre) missingFields.push("genre");
-		if (!avatar) missingFields.push("avatar");
-		if (!platform) missingFields.push("platform");
-		if (!socialLink) missingFields.push("socialLink");
-		if (!details) missingFields.push("details");
-		if (details) {
-			if (!details.bio) missingFields.push("details.bio");
-			if (!details.analytics) missingFields.push("details.analytics");
-			else {
-				if (details.analytics.followers === undefined)
-					missingFields.push("details.analytics.followers");
-				if (details.analytics.totalViews === undefined)
-					missingFields.push("details.analytics.totalViews");
-			}
-		}
-
-		if (missingFields.length > 0) {
-			return res.status(400).json({
-				error: `Missing required fields: ${missingFields.join(", ")}`,
-			});
-		}
-
-		// Validate platform
-		const validPlatforms = [
-			"Instagram",
-			"YouTube",
-			"TikTok",
-			"Twitter",
-			"Other",
-		];
-		if (!validPlatforms.includes(platform)) {
-			return res.status(400).json({
-				error: `Invalid platform. Must be one of: ${validPlatforms.join(", ")}`,
-			});
-		}
-
-		// Validate socialLink format
-		if (!/^https?:\/\/.+/.test(socialLink)) {
-			return res.status(400).json({ error: "Invalid socialLink URL" });
-		}
-
-		// Validate mediaKit URL if provided
-		if (req.body.mediaKit && !/^https?:\/\/.+/.test(req.body.mediaKit)) {
-			return res.status(400).json({ error: "Invalid mediaKit URL" });
-		}
-
-		const creator = await Creator.findByIdAndUpdate(req.params.id, req.body, {
-			new: true,
-			runValidators: true,
-		});
-
-		if (!creator) {
-			return res.status(404).json({ error: "Creator not found" });
-		}
-
-		// Transform data to match frontend interface
-		const transformedCreator = {
-			_id: creator._id.toString(),
-			name: creator.name,
-			genre: creator.genre,
-			avatar: creator.avatar,
-			platform: creator.platform,
-			socialLink: creator.socialLink,
-			location: creator.location,
-			phoneNumber: creator.phoneNumber,
-			mediaKit: creator.mediaKit,
-			details: {
-				location: creator.details.location || creator.location,
-				bio: creator.details.bio,
-				analytics: {
-					followers: creator.details.analytics.followers,
-					totalViews: creator.details.analytics.totalViews,
-					averageViews: creator.details.analytics.averageViews,
-				},
-				reels: creator.details.reels,
-				media: creator.details.media || [],
-			},
-			createdAt: creator.createdAt,
-			updatedAt: creator.updatedAt,
-		};
-
-		res.json(transformedCreator);
-	} catch (error) {
-		console.error("Error updating creator:", error);
-		if (error.name === "ValidationError") {
-			res.status(400).json({
-				error: Object.values(error.errors)
-					.map((err) => err.message)
-					.join(", "),
-			});
-		} else {
-			res.status(500).json({ error: "Failed to update creator" });
-		}
-	}
+// PUT /api/creators/:id - Update a creator
+router.put('/:id', async (req, res) => {
+  try {
+    console.log('Updating creator:', req.params.id, 'with data:', req.body);
+    
+    const updateData = { ...req.body };
+    
+    // Extract cloudinary public_id from avatar URL if avatar is being updated
+    if (req.body.avatar) {
+      const urlParts = req.body.avatar.split('/');
+      const filename = urlParts[urlParts.length - 1];
+      const publicIdParts = urlParts.slice(-2); // Get folder/filename
+      updateData.cloudinary_public_id = publicIdParts.join('/').split('.')[0]; // Remove extension
+    }
+    
+    const updatedCreator = await Creator.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedCreator) {
+      return res.status(404).json({ error: 'Creator not found' });
+    }
+    
+    console.log('Creator updated successfully:', updatedCreator._id);
+    res.json(updatedCreator);
+  } catch (error) {
+    console.error('Error updating creator:', error);
+    res.status(400).json({ error: error.message });
+  }
 });
 
-// DELETE /api/creators/:id - Delete creator
-router.delete("/:id", async (req, res) => {
-	try {
-		const creator = await Creator.findByIdAndDelete(req.params.id);
-
-		if (!creator) {
-			return res.status(404).json({ error: "Creator not found" });
-		}
-
-		res.json({ message: "Creator deleted successfully" });
-	} catch (error) {
-		console.error("Error deleting creator:", error);
-		res.status(500).json({ error: "Failed to delete creator" });
-	}
-});
-
-// GET /api/creators/:id/reels - Get creator's Instagram Reels
-router.get("/:id/reels", async (req, res) => {
-	try {
-		const creator = await Creator.findById(req.params.id);
-		if (!creator) {
-			return res.status(404).json({ error: "Creator not found" });
-		}
-		if (creator.platform !== "Instagram") {
-			return res
-				.status(400)
-				.json({ error: "Reels only supported for Instagram" });
-		}
-
-		// Extract username from socialLink (e.g., https://instagram.com/username)
-		const usernameMatch = creator.socialLink.match(
-			/instagram\.com\/([^\/?]+)/i
-		);
-		if (!usernameMatch) {
-			return res.status(400).json({ error: "Invalid Instagram socialLink" });
-		}
-		const username = usernameMatch[1];
-		const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-
-		if (!accessToken) {
-			return res
-				.status(500)
-				.json({ error: "Instagram API access token not configured" });
-		}
-
-		// Fetch Instagram user ID
-		const userResponse = await axios.get(
-			`https://graph.facebook.com/v20.0/instagram_accounts`,
-			{
-				params: {
-					fields: "id,username",
-					access_token: accessToken,
-				},
-			}
-		);
-		const accounts = userResponse.data.data;
-		const account = accounts.find(
-			(acc) => acc.username.toLowerCase() === username.toLowerCase()
-		);
-		if (!account) {
-			return res
-				.status(404)
-				.json({ error: "Instagram account not found or not linked" });
-		}
-		const igUserId = account.id;
-
-		// Fetch Reels
-		const reelsResponse = await axios.get(
-			`https://graph.facebook.com/v20.0/${igUserId}/media`,
-			{
-				params: {
-					fields:
-						"id,media_type,media_url,thumbnail_url,caption,timestamp,permalink",
-					access_token: accessToken,
-				},
-			}
-		);
-		const reels = reelsResponse.data.data.filter(
-			(media) => media.media_type === "VIDEO"
-		);
-
-		res.json(reels);
-	} catch (error) {
-		console.error(
-			"Error fetching Reels:",
-			error.response?.data || error.message
-		);
-		res.status(500).json({ error: "Failed to fetch Reels" });
-	}
+// DELETE /api/creators/:id - Delete a creator
+router.delete('/:id', async (req, res) => {
+  try {
+    const creator = await Creator.findByIdAndDelete(req.params.id);
+    if (!creator) {
+      return res.status(404).json({ error: 'Creator not found' });
+    }
+    res.json({ message: 'Creator deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = router;
