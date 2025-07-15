@@ -27,7 +27,9 @@ export const mediaService = {
 
   // Delete media from a creator
   deleteMedia: async (creatorId: string, mediaId: string): Promise<void> => {
-    await mediaAPI.delete(`/${creatorId}/${mediaId}`);
+    // Encode the mediaId to handle special characters and slashes
+    const encodedMediaId = encodeURIComponent(mediaId);
+    await mediaAPI.delete(`/${creatorId}/${encodedMediaId}`);
   },
 
   // Get all media for a creator

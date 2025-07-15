@@ -81,25 +81,41 @@ router.post('/:creatorId', upload.single('media'), async (req, res) => {
 router.delete('/:creatorId/:mediaId', async (req, res) => {
   try {
     const { creatorId, mediaId } = req.params;
+    
+    // Decode the media ID to handle encoded special characters
+    const decodedMediaId = decodeURIComponent(mediaId);
+    
+    console.log('Delete request for creator:', creatorId, 'media:', decodedMediaId);
 
     const creator = await Creator.findById(creatorId);
     if (!creator) {
       return res.status(404).json({ error: 'Creator not found' });
     }
 
+    // Find the media item to delete
+    const mediaToDelete = creator.details.media.find(media => media.id === decodedMediaId);
+    
+    if (!mediaToDelete) {
+      console.log('Media not found in creator media array:', decodedMediaId);
+      return res.status(404).json({ error: 'Media not found' });
+    }
+
+    // Remove from creator's media array
     creator.details.media = creator.details.media.filter(
-      media => media.id !== mediaId
+      media => media.id !== decodedMediaId
     );
     
     await creator.save();
 
     // Delete from Cloudinary
     try {
-      await cloudinary.uploader.destroy(mediaId);
+      console.log('Deleting from Cloudinary:', decodedMediaId);
+      await cloudinary.uploader.destroy(decodedMediaId);
     } catch (cloudinaryError) {
       console.error('Error deleting from Cloudinary:', cloudinaryError);
     }
 
+    console.log('Media deleted successfully');
     res.json({ message: 'Media deleted successfully' });
   } catch (error) {
     console.error('Error deleting media:', error);
