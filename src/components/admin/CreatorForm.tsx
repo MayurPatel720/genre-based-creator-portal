@@ -178,20 +178,8 @@ const CreatorForm: React.FC<CreatorFormProps> = ({
 		}
 
 		try {
-			const formData = new FormData();
-			formData.append("media", file);
-			formData.append("caption", caption);
-
-			const response = await fetch(`${API_BASE_URL}/media/${creator._id}`, {
-				method: "POST",
-				body: formData,
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to upload media");
-			}
-
-			const mediaFile = await response.json();
+			const { mediaService } = await import("../../services/mediaAPI");
+			await mediaService.uploadMedia(creator._id, file, caption);
 
 			toast({
 				title: "Success!",
