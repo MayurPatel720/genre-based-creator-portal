@@ -35,3 +35,26 @@ export interface MediaFile {
 	caption?: string;
 	createdAt: string;
 }
+
+export interface CreateCreatorData {
+	name: string;
+	genre: string;
+	avatar: string;
+	platform: "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other";
+	socialLink: string;
+	location?: string;
+	phoneNumber?: string;
+	mediaKit?: string;
+	details: {
+		bio: string;
+		location: string;
+		analytics: {
+			followers: number;
+			totalViews: number;
+			averageViews?: number;
+		};
+		reels: string[];
+	};
+}
+
+export type UpdateCreatorData = Partial<CreateCreatorData>;
