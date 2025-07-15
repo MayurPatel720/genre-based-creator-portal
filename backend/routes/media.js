@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const Creator = require('../models/Creator');
@@ -96,6 +95,7 @@ router.delete('/:creatorId/:mediaId', async (req, res) => {
     // Initialize media array if it doesn't exist
     if (!creator.details.media) {
       creator.details.media = [];
+      return res.status(404).json({ error: 'Media not found' });
     }
 
     // Find the media item to delete
@@ -108,25 +108,42 @@ router.delete('/:creatorId/:mediaId', async (req, res) => {
     }
 
     // Remove from creator's media array
+    const originalLength = creator.details.media.length;
     creator.details.media = creator.details.media.filter(
       media => media.id !== decodedMediaId
     );
     
+    // Verify the media was actually removed
+    if (creator.details.media.length === originalLength) {
+      console.log('Media was not removed from array');
+      return res.status(500).json({ error: 'Failed to remove media from database' });
+    }
+    
     await creator.save();
+    console.log('Media removed from database successfully');
 
     // Delete from Cloudinary
     try {
-      console.log('Deleting from Cloudinary:', decodedMediaId);
-      await cloudinary.uploader.destroy(decodedMediaId);
+      console.log('Attempting to delete from Cloudinary:', decodedMediaId);
+      const cloudinaryResult = await cloudinary.uploader.destroy(decodedMediaId);
+      console.log('Cloudinary deletion result:', cloudinaryResult);
+      
+      if (cloudinaryResult.result !== 'ok' && cloudinaryResult.result !== 'not found') {
+        console.warn('Cloudinary deletion may have failed:', cloudinaryResult);
+      }
     } catch (cloudinaryError) {
       console.error('Error deleting from Cloudinary:', cloudinaryError);
+      // Don't fail the whole operation if Cloudinary deletion fails
     }
 
     console.log('Media deleted successfully');
-    res.json({ message: 'Media deleted successfully' });
+    res.json({ 
+      message: 'Media deleted successfully',
+      deletedMediaId: decodedMediaId
+    });
   } catch (error) {
     console.error('Error deleting media:', error);
-    res.status(500).json({ error: 'Failed to delete media' });
+    res.status(500).json({ error: 'Failed to delete media', details: error.message });
   }
 });
 
