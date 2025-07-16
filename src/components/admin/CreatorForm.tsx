@@ -1,450 +1,382 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Creator } from '../../types/Creator';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Creator, CreateCreatorData, UpdateCreatorData, MediaFile } from '../../types/Creator';
-import { creatorAPI } from '../../services/api';
-import { mediaAPI } from '../../services/mediaAPI';
-import { cloudinaryService } from '../../services/cloudinary';
-import LocationInput from './LocationInput';
-import MediaManager from './MediaManager';
-import { useToast } from '../../hooks/use-toast';
-
-const FormSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  genre: z.string().min(1, 'Genre is required'),
-  avatar: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  platform: z.enum(['Instagram', 'YouTube', 'TikTok', 'Twitter', 'Other']),
-  socialLink: z.string().url('Must be a valid URL'),
-  location: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  mediaKit: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  bio: z.string().min(1, 'Bio is required'),
-  followers: z.number().min(0, 'Must be a positive number'),
-  totalViews: z.number().min(0, 'Must be a positive number'),
-  averageViews: z.number().min(0, 'Must be a positive number').optional(),
-  reels: z.string().optional(),
-});
-
-type FormData = z.infer<typeof FormSchema>;
+import { useToast } from "../../hooks/use-toast"
+import { updateCreatorAPI, createCreatorAPI } from '../../services/creators';
+import ImageUpload from '../ImageUpload';
 
 interface CreatorFormProps {
-  creator?: Creator | null;
+  creator?: Creator;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel }) => {
-  const [loading, setLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
-  const [media, setMedia] = useState<MediaFile[]>([]);
-  const { toast } = useToast();
+const creatorSchema = z.object({
+  name: z.string().min(2, {
+    message: "Creator name must be at least 2 characters.",
+  }),
+  platform: z.string().min(2, {
+    message: "Platform must be at least 2 characters.",
+  }),
+  genre: z.string().min(2, {
+    message: "Genre must be at least 2 characters.",
+  }),
+  location: z.string().min(2, {
+    message: "Location must be at least 2 characters.",
+  }),
+  phoneNumber: z.string().optional(),
+  socialLink: z.string().optional(),
+  avatar: z.string().optional(),
+  avatarPublicId: z.string().optional(),
+  mediaKit: z.string().optional(),
+  bio: z.string().optional(),
+  followers: z.number().optional(),
+  totalViews: z.number().optional(),
+  averageViews: z.number().optional(),
+});
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-    reset,
-  } = useForm<FormData>({
-    resolver: zodResolver(FormSchema),
+type CreatorSchemaType = z.infer<typeof creatorSchema>;
+
+const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel }) => {
+  const { toast } = useToast()
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CreatorSchemaType>({
+    resolver: zodResolver(creatorSchema),
     defaultValues: {
-      name: '',
-      genre: '',
-      avatar: '',
-      platform: 'Instagram' as const,
-      socialLink: '',
-      location: '',
-      phoneNumber: '',
-      mediaKit: '',
-      bio: '',
-      followers: 0,
-      totalViews: 0,
-      averageViews: 0,
-      reels: '',
+      name: creator?.name || '',
+      platform: creator?.platform || '',
+      genre: creator?.genre || '',
+      location: creator?.location || '',
+      phoneNumber: creator?.phoneNumber || '',
+      socialLink: creator?.socialLink || '',
+      avatar: creator?.avatar || '',
+      avatarPublicId: creator?.avatarPublicId || '',
+      mediaKit: creator?.mediaKit || '',
+      bio: creator?.details?.bio || '',
+      followers: creator?.details?.analytics?.followers || 0,
+      totalViews: creator?.details?.analytics?.totalViews || 0,
+      averageViews: creator?.details?.analytics?.averageViews || 0,
     },
   });
 
-  useEffect(() => {
-    if (creator) {
-      reset({
-        name: creator.name || '',
-        genre: creator.genre || '',
-        avatar: creator.avatar || '',
-        platform: creator.platform as 'Instagram' | 'YouTube' | 'TikTok' | 'Twitter' | 'Other',
-        socialLink: creator.socialLink || '',
-        location: creator.location || '',
-        phoneNumber: creator.phoneNumber || '',
-        mediaKit: creator.mediaKit || '',
-        bio: creator.details?.bio || '',
-        followers: creator.details?.analytics?.followers || 0,
-        totalViews: creator.details?.analytics?.totalViews || 0,
-        averageViews: creator.details?.analytics?.averageViews || 0,
-        reels: creator.details?.reels?.join('\n') || '',
-      });
-      setAvatarPreview(creator.avatar || '');
-      setMedia(creator.details?.media || []);
-    }
-  }, [creator, reset]);
-
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadAvatar = async (): Promise<string> => {
-    if (!avatarFile) {
-      return watch('avatar') || '';
-    }
-
+  const updateCreator = async (id: string, data: Partial<CreatorSchemaType>) => {
     try {
-      const result = await cloudinaryService.uploadImage(avatarFile);
-      return result.secure_url;
+      await updateCreatorAPI(id, data);
     } catch (error) {
-      console.error('Avatar upload failed:', error);
-      throw new Error('Failed to upload avatar');
-    }
-  };
-
-  const refreshMedia = async () => {
-    if (creator?._id) {
-      try {
-        const updatedCreator = await creatorAPI.getById(creator._id);
-        setMedia(updatedCreator.details?.media || []);
-      } catch (error) {
-        console.error('Failed to refresh media:', error);
-      }
-    }
-  };
-
-  const handleMediaAdd = async (file: File, caption: string): Promise<void> => {
-    if (!creator?._id) {
-      throw new Error('Creator ID is required');
-    }
-
-    try {
-      const newMedia = await mediaAPI.uploadMedia(creator._id, file, caption);
-      setMedia(prevMedia => [...prevMedia, newMedia]);
-      toast({
-        title: "Success!",
-        description: "Media uploaded successfully.",
-      });
-    } catch (error) {
-      console.error('Media upload failed:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload media. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Update error:', error);
       throw error;
     }
   };
 
-  const handleMediaDelete = async (mediaId: string): Promise<void> => {
-    if (!creator?._id) {
-      throw new Error('Creator ID is required');
-    }
-
+  const onSubmit = async (data: CreatorSchemaType) => {
     try {
-      console.log('Deleting media:', mediaId, 'for creator:', creator._id);
-      await mediaAPI.deleteMedia(creator._id, mediaId);
-      
-      // Remove from local state immediately
-      setMedia(prevMedia => prevMedia.filter(m => m.id !== mediaId));
-      
-      // Also refresh from server to ensure consistency
-      await refreshMedia();
-      
-      toast({
-        title: "Success!",
-        description: "Media deleted successfully.",
-      });
-    } catch (error) {
-      console.error('Error deleting media:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete media. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const onSubmit = async (data: FormData) => {
-    setLoading(true);
-    try {
-      const avatarUrl = await uploadAvatar();
-
-      const creatorData: CreateCreatorData | UpdateCreatorData = {
-        name: data.name,
-        genre: data.genre,
-        avatar: avatarUrl,
-        platform: data.platform,
-        socialLink: data.socialLink,
-        location: data.location || 'Other',
-        phoneNumber: data.phoneNumber,
-        mediaKit: data.mediaKit,
-        details: {
-          bio: data.bio,
-          location: data.location || 'Other',
-          analytics: {
-            followers: data.followers,
-            totalViews: data.totalViews,
-            averageViews: data.averageViews,
+      if (creator) {
+        // Update existing creator
+        await updateCreatorAPI(creator._id, {
+          name: data.name,
+          platform: data.platform,
+          genre: data.genre,
+          location: data.location,
+          phoneNumber: data.phoneNumber,
+          socialLink: data.socialLink,
+          avatar: data.avatar,
+          avatarPublicId: data.avatarPublicId,
+          mediaKit: data.mediaKit,
+          details: {
+            bio: data.bio,
+            analytics: {
+              followers: data.followers,
+              totalViews: data.totalViews,
+              averageViews: data.averageViews,
+            },
           },
-          reels: data.reels ? data.reels.split('\n').filter(Boolean) : [],
-          media: media,
-        },
-      };
-
-      if (creator?._id) {
-        await creatorAPI.update(creator._id, creatorData as UpdateCreatorData);
+        });
         toast({
           title: "Success!",
           description: "Creator updated successfully.",
         });
       } else {
-        await creatorAPI.create(creatorData as CreateCreatorData);
+        // Create new creator
+        await createCreatorAPI({
+          name: data.name,
+          platform: data.platform,
+          genre: data.genre,
+          location: data.location,
+          phoneNumber: data.phoneNumber,
+          socialLink: data.socialLink,
+          avatar: data.avatar,
+          avatarPublicId: data.avatarPublicId,
+          mediaKit: data.mediaKit,
+          details: {
+            bio: data.bio,
+            analytics: {
+              followers: data.followers,
+              totalViews: data.totalViews,
+              averageViews: data.averageViews,
+            },
+          },
+        });
         toast({
           title: "Success!",
           description: "Creator created successfully.",
         });
       }
-
       onSuccess();
     } catch (error) {
-      console.error('Error saving creator:', error);
+      console.error('Error submitting form:', error);
       toast({
         title: "Error",
-        description: "Failed to save creator. Please try again.",
+        description: "Failed to submit form. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (imageUrl: string) => {
+    console.log('Avatar uploaded:', imageUrl);
+    
+    // Extract public_id from Cloudinary URL for future deletion
+    const urlParts = imageUrl.split('/');
+    const filename = urlParts[urlParts.length - 1];
+    const publicId = filename.split('.')[0];
+    
+    setValue('avatar', imageUrl);
+    setValue('avatarPublicId', `creator-avatars/${publicId}`);
+    
+    // If editing existing creator, update immediately
+    if (creator) {
+      try {
+        await updateCreator(creator._id, { 
+          avatar: imageUrl,
+          avatarPublicId: `creator-avatars/${publicId}`
+        });
+        toast({
+          title: "Success!",
+          description: "Avatar updated successfully.",
+        });
+      } catch (error) {
+        console.error('Error updating avatar:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update avatar. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    setValue('avatar', '');
+    setValue('avatarPublicId', '');
+    
+    // If editing existing creator, update immediately
+    if (creator) {
+      try {
+        await updateCreator(creator._id, { 
+          avatar: '',
+          avatarPublicId: ''
+        });
+        toast({
+          title: "Success!",
+          description: "Avatar removed successfully.",
+        });
+      } catch (error) {
+        console.error('Error removing avatar:', error);
+        toast({
+          title: "Error",
+          description: "Failed to remove avatar. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   return (
     <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            {creator ? 'Edit Creator' : 'Add New Creator'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    {...register('name')}
-                    className="mt-1"
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                  )}
-                </div>
+      <h2 className="text-2xl font-bold mb-6">
+        {creator ? 'Edit Creator' : 'Add New Creator'}
+      </h2>
 
-                <div>
-                  <Label htmlFor="genre">Genre *</Label>
-                  <Input
-                    id="genre"
-                    {...register('genre')}
-                    className="mt-1"
-                  />
-                  {errors.genre && (
-                    <p className="text-red-500 text-sm mt-1">{errors.genre.message}</p>
-                  )}
-                </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Avatar Upload */}
+          <div className="md:col-span-2 flex justify-center">
+            <ImageUpload
+              currentImage={watch('avatar')}
+              onImageUpload={handleAvatarUpload}
+              onImageDelete={handleAvatarDelete}
+            />
+          </div>
 
-                <div>
-                  <Label htmlFor="platform">Platform *</Label>
-                  <Select onValueChange={(value) => setValue('platform', value as any)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select platform" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Instagram">Instagram</SelectItem>
-                      <SelectItem value="YouTube">YouTube</SelectItem>
-                      <SelectItem value="TikTok">TikTok</SelectItem>
-                      <SelectItem value="Twitter">Twitter</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.platform && (
-                    <p className="text-red-500 text-sm mt-1">{errors.platform.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="socialLink">Social Link *</Label>
-                  <Input
-                    id="socialLink"
-                    {...register('socialLink')}
-                    className="mt-1"
-                  />
-                  {errors.socialLink && (
-                    <p className="text-red-500 text-sm mt-1">{errors.socialLink.message}</p>
-                  )}
-                </div>
-
-                <LocationInput
-                  value={watch('location') || ''}
-                  onChange={(value) => setValue('location', value)}
-                  error={errors.location?.message}
-                />
-
-                <div>
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <Input
-                    id="phoneNumber"
-                    {...register('phoneNumber')}
-                    className="mt-1"
-                  />
-                  {errors.phoneNumber && (
-                    <p className="text-red-500 text-sm mt-1">{errors.phoneNumber.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="mediaKit">Media Kit URL</Label>
-                  <Input
-                    id="mediaKit"
-                    {...register('mediaKit')}
-                    className="mt-1"
-                  />
-                  {errors.mediaKit && (
-                    <p className="text-red-500 text-sm mt-1">{errors.mediaKit.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="avatar">Avatar</Label>
-                  <div className="mt-1 space-y-2">
-                    <Input
-                      id="avatar"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                    />
-                    {avatarPreview && (
-                      <img
-                        src={avatarPreview}
-                        alt="Avatar preview"
-                        className="w-20 h-20 object-cover rounded-full"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="bio">Bio *</Label>
-                  <Textarea
-                    id="bio"
-                    {...register('bio')}
-                    rows={3}
-                    className="mt-1"
-                  />
-                  {errors.bio && (
-                    <p className="text-red-500 text-sm mt-1">{errors.bio.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="followers">Followers *</Label>
-                  <Input
-                    id="followers"
-                    type="number"
-                    {...register('followers', { valueAsNumber: true })}
-                    className="mt-1"
-                  />
-                  {errors.followers && (
-                    <p className="text-red-500 text-sm mt-1">{errors.followers.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="totalViews">Total Views *</Label>
-                  <Input
-                    id="totalViews"
-                    type="number"
-                    {...register('totalViews', { valueAsNumber: true })}
-                    className="mt-1"
-                  />
-                  {errors.totalViews && (
-                    <p className="text-red-500 text-sm mt-1">{errors.totalViews.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="averageViews">Average Views</Label>
-                  <Input
-                    id="averageViews"
-                    type="number"
-                    {...register('averageViews', { valueAsNumber: true })}
-                    className="mt-1"
-                  />
-                  {errors.averageViews && (
-                    <p className="text-red-500 text-sm mt-1">{errors.averageViews.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="reels">Instagram Reels (one per line)</Label>
-                  <Textarea
-                    id="reels"
-                    {...register('reels')}
-                    rows={4}
-                    className="mt-1"
-                    placeholder="https://www.instagram.com/reel/..."
-                  />
-                  {errors.reels && (
-                    <p className="text-red-500 text-sm mt-1">{errors.reels.message}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {creator?._id && (
-              <MediaManager
-                creatorId={creator._id}
-                media={media}
-                onMediaAdd={handleMediaAdd}
-                onMediaDelete={handleMediaDelete}
-              />
+          {/* Name */}
+          <div>
+            <Label htmlFor="name">Name</Label>
+            <Input
+              type="text"
+              id="name"
+              placeholder="Enter creator name"
+              {...register('name')}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
             )}
+          </div>
 
-            <div className="flex gap-4 pt-6">
-              <Button type="submit" disabled={loading}>
-                {loading ? 'Saving...' : creator ? 'Update Creator' : 'Create Creator'}
-              </Button>
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          {/* Platform */}
+          <div>
+            <Label htmlFor="platform">Platform</Label>
+            <Input
+              type="text"
+              id="platform"
+              placeholder="Enter platform"
+              {...register('platform')}
+            />
+            {errors.platform && (
+              <p className="text-red-500 text-sm mt-1">{errors.platform.message}</p>
+            )}
+          </div>
+
+          {/* Genre */}
+          <div>
+            <Label htmlFor="genre">Genre</Label>
+            <Input
+              type="text"
+              id="genre"
+              placeholder="Enter genre"
+              {...register('genre')}
+            />
+            {errors.genre && (
+              <p className="text-red-500 text-sm mt-1">{errors.genre.message}</p>
+            )}
+          </div>
+
+          {/* Location */}
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              type="text"
+              id="location"
+              placeholder="Enter location"
+              {...register('location')}
+            />
+            {errors.location && (
+              <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
+            )}
+          </div>
+
+          {/* Phone Number */}
+          <div>
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              type="text"
+              id="phoneNumber"
+              placeholder="Enter phone number"
+              {...register('phoneNumber')}
+            />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-sm mt-1">{errors.phoneNumber.message}</p>
+            )}
+          </div>
+
+          {/* Social Link */}
+          <div>
+            <Label htmlFor="socialLink">Social Link</Label>
+            <Input
+              type="text"
+              id="socialLink"
+              placeholder="Enter social link"
+              {...register('socialLink')}
+            />
+            {errors.socialLink && (
+              <p className="text-red-500 text-sm mt-1">{errors.socialLink.message}</p>
+            )}
+          </div>
+
+          {/* Media Kit */}
+          <div>
+            <Label htmlFor="mediaKit">Media Kit</Label>
+            <Input
+              type="text"
+              id="mediaKit"
+              placeholder="Enter media kit link"
+              {...register('mediaKit')}
+            />
+            {errors.mediaKit && (
+              <p className="text-red-500 text-sm mt-1">{errors.mediaKit.message}</p>
+            )}
+          </div>
+
+          {/* Bio */}
+          <div className="md:col-span-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              placeholder="Enter bio"
+              {...register('bio')}
+            />
+            {errors.bio && (
+              <p className="text-red-500 text-sm mt-1">{errors.bio.message}</p>
+            )}
+          </div>
+
+          {/* Followers */}
+          <div>
+            <Label htmlFor="followers">Followers</Label>
+            <Input
+              type="number"
+              id="followers"
+              placeholder="Enter followers count"
+              {...register('followers', { valueAsNumber: true })}
+            />
+            {errors.followers && (
+              <p className="text-red-500 text-sm mt-1">{errors.followers.message}</p>
+            )}
+          </div>
+
+          {/* Total Views */}
+          <div>
+            <Label htmlFor="totalViews">Total Views</Label>
+            <Input
+              type="number"
+              id="totalViews"
+              placeholder="Enter total views count"
+              {...register('totalViews', { valueAsNumber: true })}
+            />
+            {errors.totalViews && (
+              <p className="text-red-500 text-sm mt-1">{errors.totalViews.message}</p>
+            )}
+          </div>
+
+          {/* Average Views */}
+          <div>
+            <Label htmlFor="averageViews">Average Views</Label>
+            <Input
+              type="number"
+              id="averageViews"
+              placeholder="Enter average views count"
+              {...register('averageViews', { valueAsNumber: true })}
+            />
+            {errors.averageViews && (
+              <p className="text-red-500 text-sm mt-1">{errors.averageViews.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-4">
+          <Button variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {creator ? 'Update Creator' : 'Create Creator'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
