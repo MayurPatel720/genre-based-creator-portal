@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
@@ -66,6 +67,11 @@ export const creatorAPI = {
 	// Get all creators
 	getAll: async (): Promise<Creator[]> => {
 		const response = await api.get("/creators");
+		// Handle the new response format that includes pagination
+		if (response.data.creators) {
+			return response.data.creators;
+		}
+		// Fallback for old format
 		return response.data;
 	},
 
@@ -155,6 +161,11 @@ export const creatorAPI = {
 	// Get creators by genre
 	getByGenre: async (genre: string): Promise<Creator[]> => {
 		const response = await api.get(`/creators?genre=${genre}`);
+		// Handle the new response format that includes pagination
+		if (response.data.creators) {
+			return response.data.creators;
+		}
+		// Fallback for old format
 		return response.data;
 	},
 
