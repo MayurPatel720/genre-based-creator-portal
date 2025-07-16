@@ -1,23 +1,11 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { CreateCreatorData, UpdateCreatorData } from "../services/api";
 import * as api from "../services/api";
 import { Creator } from "@/types/Creator";
 
-interface PaginationData {
-	creators: Creator[];
-	totalPages: number;
-	currentPage: number;
-}
-
 export const useCreators = () => {
 	const [creators, setCreators] = useState<Creator[]>([]);
-	const [paginationData, setPaginationData] = useState<PaginationData>({
-		creators: [],
-		totalPages: 1,
-		currentPage: 1,
-	});
 	const [genres, setGenres] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -29,8 +17,7 @@ export const useCreators = () => {
 			setError(null);
 			try {
 				const response = await api.creatorAPI.getAll();
-				setCreators(response.creators);
-				setPaginationData(response);
+				setCreators(response);
 			} catch (err: any) {
 				setError(err.message || "Failed to fetch creators");
 			} finally {
@@ -99,13 +86,12 @@ export const useCreators = () => {
 		}
 	};
 
-	const fetchCreators = async (page: number = 1, limit: number = 10, genre?: string) => {
+	const fetchCreators = async (search?: string, genre?: string) => {
 		setLoading(true);
 		setError(null);
 		try {
-			const response = await api.creatorAPI.getAll(page, limit, genre);
-			setCreators(response.creators);
-			setPaginationData(response);
+			const response = await api.creatorAPI.getAll(search, genre);
+			setCreators(response);
 			return response;
 		} catch (err: any) {
 			setError(err.message || "Failed to fetch creators");
@@ -145,7 +131,6 @@ export const useCreators = () => {
 
 	return {
 		creators,
-		paginationData,
 		genres,
 		createCreator,
 		updateCreator,

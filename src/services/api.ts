@@ -63,19 +63,23 @@ export interface CreateCreatorData {
 
 export type UpdateCreatorData = Partial<CreateCreatorData>;
 
-interface PaginatedResponse {
-	creators: Creator[];
-	totalPages: number;
-	currentPage: number;
-}
-
 export const creatorAPI = {
-	// Get all creators with pagination
-	getAll: async (page: number = 1, limit: number = 10, genre?: string): Promise<PaginatedResponse> => {
-		let url = `/creators?page=${page}&limit=${limit}`;
-		if (genre && genre !== "all") {
-			url += `&genre=${encodeURIComponent(genre)}`;
+	// Get all creators with filtering and search
+	getAll: async (search?: string, genre?: string): Promise<Creator[]> => {
+		let url = `/creators`;
+		const params = new URLSearchParams();
+		
+		if (search) {
+			params.append('search', search);
 		}
+		if (genre && genre !== "all") {
+			params.append('genre', genre);
+		}
+		
+		if (params.toString()) {
+			url += `?${params.toString()}`;
+		}
+		
 		const response = await api.get(url);
 		return response.data;
 	},

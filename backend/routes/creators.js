@@ -15,12 +15,10 @@ router.get('/genres', async (req, res) => {
   }
 });
 
-// GET /api/creators - Get all creators with pagination and filtering
+// GET /api/creators - Get all creators with filtering and search
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 10, platform, genre, location, search } = req.query;
-    const pageNumber = parseInt(page.toString(), 10);
-    const limitNumber = parseInt(limit.toString(), 10);
+    const { platform, genre, location, search } = req.query;
 
     const filter = {};
     if (platform) filter.platform = platform;
@@ -35,17 +33,9 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    const creators = await Creator.find(filter)
-      .skip((pageNumber - 1) * limitNumber)
-      .limit(limitNumber);
+    const creators = await Creator.find(filter);
 
-    const totalCreators = await Creator.countDocuments(filter);
-
-    res.json({
-      creators,
-      totalPages: Math.ceil(totalCreators / limitNumber),
-      currentPage: pageNumber
-    });
+    res.json(creators);
   } catch (error) {
     console.error('Error fetching creators:', error);
     res.status(500).json({ error: 'Failed to fetch creators' });
