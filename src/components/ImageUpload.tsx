@@ -1,14 +1,8 @@
 
 import React, { useState, useRef } from 'react';
-import { Upload, X, Loader2, MoreVertical, Camera, Trash2 } from 'lucide-react';
+import { Upload, X, Loader2 } from 'lucide-react';
 import { imageUploadAPI } from '../services/imageUpload';
 import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -71,41 +65,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-center">
         {currentImage ? (
-          <div className="relative group">
+          <div className="relative">
             <img
               src={currentImage}
               alt="Current avatar"
               className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
             />
-            <div className="absolute top-2 right-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="h-8 w-8 rounded-full bg-white/90 hover:bg-white shadow-md"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={handleUploadClick} disabled={uploading}>
-                    <Camera className="mr-2 h-4 w-4" />
-                    Change Avatar
-                  </DropdownMenuItem>
-                  {onImageDelete && (
-                    <DropdownMenuItem 
-                      onClick={handleDeleteImage}
-                      className="text-red-600 focus:text-red-600"
-                      disabled={uploading}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Remove Avatar
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            {onImageDelete && (
+              <button
+                onClick={handleDeleteImage}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                type="button"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         ) : (
           <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center bg-gray-50">
@@ -114,37 +88,35 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         )}
       </div>
 
-      {!currentImage && (
-        <div className="text-center">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleUploadClick}
-            disabled={uploading}
-            className="w-full"
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Avatar
-              </>
-            )}
-          </Button>
-        </div>
-      )}
-      
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
+      <div className="text-center">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleUploadClick}
+          disabled={uploading}
+          className="w-full"
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              {currentImage ? 'Change Image' : 'Upload Image'}
+            </>
+          )}
+        </Button>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </div>
 
       {error && (
         <p className="text-red-500 text-sm text-center">{error}</p>

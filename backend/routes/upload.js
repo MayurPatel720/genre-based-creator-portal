@@ -1,76 +1,60 @@
 
 const express = require('express');
-const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
-
 const router = express.Router();
+const cloudinary = require('../config/cloudinary');
+const multer = require('multer');
 
-// Configure multer for Cloudinary storage
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'creator-avatars',
-    format: async (req, file) => 'jpg', // supports promises as well
-    public_id: (req, file) => Date.now().toString(),
-    transformation: [
-      { width: 400, height: 400, crop: 'fill', gravity: 'face' }
-    ]
-  },
-});
-
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Only image files are allowed'), false);
-    }
-    cb(null, true);
-  }
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Upload image endpoint
+// Upload image to Cloudinary
 router.post('/image', upload.single('image'), async (req, res) => {
-  try {
-    console.log('Upload request received');
-    
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No image file provided' });
+        }
+
+        // Convert buffer to base64
+        const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        
+        // Upload to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(fileStr, {
+            folder: 'creator-avatars',
+            transformation: [
+                { width: 400, height: 400, crop: 'fill', gravity: 'auto' },
+                { quality: 'auto', fetch_format: 'auto' }
+            ]
+        });
+
+        res.json({
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id
+        });
+    } catch (error) {
+        console.error('Image upload error:', error);
+        res.status(500).json({ error: 'Failed to upload image' });
     }
-
-    console.log('File uploaded to Cloudinary:', req.file.path);
-
-    res.json({
-      url: req.file.path,
-      public_id: req.file.filename
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: 'Failed to upload image' });
-  }
 });
 
-// Delete image endpoint
+// Delete image from Cloudinary
 router.delete('/image/:publicId', async (req, res) => {
-  try {
-    const { publicId } = req.params;
-    console.log('Deleting image with public_id:', publicId);
-
-    const result = await cloudinary.uploader.destroy(publicId);
-    console.log('Cloudinary deletion result:', result);
-
-    if (result.result === 'ok') {
-      res.json({ message: 'Image deleted successfully' });
-    } else {
-      res.status(404).json({ error: 'Image not found' });
+    try {
+        const { publicId } = req.params;
+        const result = await cloudinary.uploader.destroy(publicId);
+        
+        if (result.result === 'ok') {
+            res.json({ message: 'Image deleted successfully' });
+        } else {
+            res.status(400).json({ error: 'Failed to delete image' });
+        }
+    } catch (error) {
+        console.error('Image deletion error:', error);
+        res.status(500).json({ error: 'Failed to delete image' });
     }
-  } catch (error) {
-    console.error('Delete error:', error);
-    res.status(500).json({ error: 'Failed to delete image' });
-  }
 });
 
 module.exports = router;
