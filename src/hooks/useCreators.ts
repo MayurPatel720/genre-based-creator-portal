@@ -6,7 +6,6 @@ import { Creator } from "@/types/Creator";
 
 export const useCreators = () => {
 	const [creators, setCreators] = useState<Creator[]>([]);
-	const [genres, setGenres] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -25,19 +24,6 @@ export const useCreators = () => {
 			}
 		};
 		loadCreators();
-	}, []);
-
-	// Fetch genres on mount
-	useEffect(() => {
-		const loadGenres = async () => {
-			try {
-				const genreList = await api.creatorAPI.getGenres();
-				setGenres(genreList);
-			} catch (err: any) {
-				console.error("Failed to fetch genres:", err);
-			}
-		};
-		loadGenres();
 	}, []);
 
 	const createCreator = async (creatorData: CreateCreatorData) => {
@@ -86,11 +72,13 @@ export const useCreators = () => {
 		}
 	};
 
-	const fetchCreators = async (search?: string, genre?: string) => {
+	const fetchCreators = async (genre?: string) => {
 		setLoading(true);
 		setError(null);
 		try {
-			const response = await api.creatorAPI.getAll(search, genre);
+			const response = genre
+				? await api.creatorAPI.getByGenre(genre)
+				: await api.creatorAPI.getAll();
 			setCreators(response);
 			return response;
 		} catch (err: any) {
@@ -131,7 +119,6 @@ export const useCreators = () => {
 
 	return {
 		creators,
-		genres,
 		createCreator,
 		updateCreator,
 		deleteCreator,

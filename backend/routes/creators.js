@@ -4,21 +4,12 @@ const cloudinary = require('../config/cloudinary');
 
 const router = express.Router();
 
-// GET /api/creators/genres - Get all unique genres
-router.get('/genres', async (req, res) => {
-  try {
-    const genres = await Creator.distinct('genre');
-    res.json(genres.filter(Boolean).sort());
-  } catch (error) {
-    console.error('Error fetching genres:', error);
-    res.status(500).json({ error: 'Failed to fetch genres' });
-  }
-});
-
-// GET /api/creators - Get all creators with filtering and search
+// GET /api/creators - Get all creators with pagination and filtering
 router.get('/', async (req, res) => {
   try {
-    const { platform, genre, location, search } = req.query;
+    const { page = 1, limit = 10, platform, genre, location, search } = req.query;
+    const pageNumber = parseInt(page.toString(), 10);
+    const limitNumber = parseInt(limit.toString(), 10);
 
     const filter = {};
     if (platform) filter.platform = platform;
@@ -33,9 +24,17 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    const creators = await Creator.find(filter);
+    const creators = await Creator.find(filter)
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
 
-    res.json(creators);
+    const totalCreators = await Creator.countDocuments(filter);
+
+    res.json({
+      creators,
+      totalPages: Math.ceil(totalCreators / limitNumber),
+      currentPage: pageNumber
+    });
   } catch (error) {
     console.error('Error fetching creators:', error);
     res.status(500).json({ error: 'Failed to fetch creators' });

@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
@@ -64,29 +63,9 @@ export interface CreateCreatorData {
 export type UpdateCreatorData = Partial<CreateCreatorData>;
 
 export const creatorAPI = {
-	// Get all creators with filtering and search
-	getAll: async (search?: string, genre?: string): Promise<Creator[]> => {
-		let url = `/creators`;
-		const params = new URLSearchParams();
-		
-		if (search) {
-			params.append('search', search);
-		}
-		if (genre && genre !== "all") {
-			params.append('genre', genre);
-		}
-		
-		if (params.toString()) {
-			url += `?${params.toString()}`;
-		}
-		
-		const response = await api.get(url);
-		return response.data;
-	},
-
-	// Get unique genres
-	getGenres: async (): Promise<string[]> => {
-		const response = await api.get("/creators/genres");
+	// Get all creators
+	getAll: async (): Promise<Creator[]> => {
+		const response = await api.get("/creators");
 		return response.data;
 	},
 
@@ -173,10 +152,10 @@ export const creatorAPI = {
 		await api.delete(`/creators/${id}`);
 	},
 
-	// Get creators by genre (deprecated - use getAll with genre parameter)
+	// Get creators by genre
 	getByGenre: async (genre: string): Promise<Creator[]> => {
 		const response = await api.get(`/creators?genre=${genre}`);
-		return response.data.creators || response.data;
+		return response.data;
 	},
 
 	// Get creator's Instagram Reels
