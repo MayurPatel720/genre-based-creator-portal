@@ -1,130 +1,104 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import * as z from "zod";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Separator } from "../ui/separator";
 import { useCreators } from "../../hooks/useCreators";
-import { useToast } from "../../hooks/use-toast";
+import { creatorAPI } from "../../services/api";
 import { Creator } from "../../types/Creator";
+import { useToast } from "../../hooks/use-toast";
 import ImageUpload from "../ImageUpload";
 
-// Define the schema for form validation
-const formSchema = z.object({
-	name: z.string().min(2, {
-		message: "Creator name must be at least 2 characters.",
-	}),
-	genre: z.string().min(2, {
-		message: "Genre must be at least 2 characters.",
-	}),
-	avatar: z.string().url({ message: "Avatar must be a valid URL." }),
+const creatorSchema = z.object({
+	name: z.string().min(1, "Name is required"),
+	genre: z.string().min(1, "Genre is required"),
+	avatar: z.string().url("Avatar must be a valid URL"),
 	platform: z.enum(["Instagram", "YouTube", "TikTok", "Twitter", "Other"]),
-	socialLink: z.string().url({ message: "Social link must be a valid URL." }),
-	location: z.string().optional(),
+	socialLink: z.string().url("Social link must be a valid URL"),
+	location: z.string().min(1, "Location is required"),
 	phoneNumber: z.string().optional(),
 	mediaKit: z.string().optional(),
 	details: z.object({
-		bio: z.string().min(10, {
-			message: "Bio must be at least 10 characters.",
-		}),
-		location: z.string().optional(),
+		bio: z.string().min(1, "Bio is required"),
+		location: z.string().min(1, "Location is required"),
 		analytics: z.object({
-			followers: z.number().min(0, {
-				message: "Followers must be a positive number.",
-			}).default(0),
-			totalViews: z.number().min(0, {
-				message: "Total views must be a positive number.",
-			}).default(0),
-			averageViews: z.number().optional(),
+			followers: z.number().min(0),
+			totalViews: z.number().min(0),
+			averageViews: z.number().min(0).optional(),
 		}),
-		reels: z.array(z.string()).optional(),
+		reels: z.array(z.string()).default([]),
 	}),
 });
 
-// Define the form data type based on the schema
-type CreatorFormData = z.infer<typeof formSchema>;
+type CreatorFormData = z.infer<typeof creatorSchema>;
 
 interface CreatorFormProps {
-	creator?: Creator;
+	creator?: Creator | null;
 	onSuccess: () => void;
 	onCancel: () => void;
 }
 
 const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel }) => {
+	const [loading, setLoading] = useState(false);
 	const { createCreator, updateCreator } = useCreators();
 	const { toast } = useToast();
-	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	// Initialize the form with react-hook-form
-	const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CreatorFormData>({
-		resolver: zodResolver(formSchema),
-		defaultValues: creator
-			? {
-				name: creator.name,
-				genre: creator.genre,
-				avatar: creator.avatar,
-				platform: creator.platform,
-				socialLink: creator.socialLink,
-				location: creator.location || "",
-				phoneNumber: creator.phoneNumber || "",
-				mediaKit: creator.mediaKit || "",
-				details: {
-					bio: creator.details.bio,
-					location: creator.details.location || "",
-					analytics: {
-						followers: creator.details.analytics.followers,
-						totalViews: creator.details.analytics.totalViews,
-						averageViews: creator.details.analytics.averageViews,
-					},
-					reels: creator.details.reels || [],
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		setValue,
+		watch,
+		reset,
+	} = useForm<CreatorFormData>({
+		resolver: zodResolver(creatorSchema),
+		defaultValues: creator ? {
+			name: creator.name,
+			genre: creator.genre,
+			avatar: creator.avatar,
+			platform: creator.platform as "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other",
+			socialLink: creator.socialLink,
+			location: creator.location || "",
+			phoneNumber: creator.phoneNumber || "",
+			mediaKit: creator.mediaKit || "",
+			details: {
+				bio: creator.details.bio,
+				location: creator.details.location,
+				analytics: {
+					followers: creator.details.analytics.followers,
+					totalViews: creator.details.analytics.totalViews,
+					averageViews: creator.details.analytics.averageViews || 0,
 				},
-			}
-			: {
-				name: "",
-				genre: "",
-				avatar: "",
-				platform: "Instagram",
-				socialLink: "",
-				location: "",
-				phoneNumber: "",
-				mediaKit: "",
-				details: {
-					bio: "",
-					location: "",
-					analytics: {
-						followers: 0,
-						totalViews: 0,
-						averageViews: 0,
-					},
-					reels: [],
-				},
+				reels: creator.details.reels || [],
 			},
+		} : {
+			name: "",
+			genre: "",
+			avatar: "",
+			platform: "Instagram",
+			socialLink: "",
+			location: "",
+			phoneNumber: "",
+			mediaKit: "",
+			details: {
+				bio: "",
+				location: "",
+				analytics: {
+					followers: 0,
+					totalViews: 0,
+					averageViews: 0,
+				},
+				reels: [],
+			},
+		},
 	});
 
-	useEffect(() => {
-		if (creator) {
-			// Update form values when editing a creator
-			setValue("name", creator.name);
-			setValue("genre", creator.genre);
-			setValue("avatar", creator.avatar);
-			setValue("platform", creator.platform);
-			setValue("socialLink", creator.socialLink);
-			setValue("location", creator.location || "");
-			setValue("phoneNumber", creator.phoneNumber || "");
-			setValue("mediaKit", creator.mediaKit || "");
-			setValue("details.bio", creator.details.bio);
-			setValue("details.location", creator.details.location || "");
-			setValue("details.analytics.followers", creator.details.analytics.followers);
-			setValue("details.analytics.totalViews", creator.details.analytics.totalViews);
-			setValue("details.analytics.averageViews", creator.details.analytics.averageViews);
-			setValue("details.reels", creator.details.reels || []);
-		}
-	}, [creator, setValue]);
+	const watchedAvatar = watch("avatar");
 
 	const handleAvatarUpload = (imageUrl: string) => {
 		setValue("avatar", imageUrl);
@@ -134,245 +108,283 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ creator, onSuccess, onCancel 
 		setValue("avatar", "");
 	};
 
-	// Handle form submission
+	const handlePlatformChange = (value: string) => {
+		setValue("platform", value as "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other");
+	};
+
 	const onSubmit = async (data: CreatorFormData) => {
-		setIsSubmitting(true);
+		setLoading(true);
 		try {
-			if (creator) {
+			if (creator?._id) {
 				// Update existing creator
-				await updateCreator(creator._id as string, data);
+				const updateData = {
+					name: data.name,
+					genre: data.genre,
+					avatar: data.avatar,
+					platform: data.platform,
+					socialLink: data.socialLink,
+					location: data.location,
+					phoneNumber: data.phoneNumber,
+					mediaKit: data.mediaKit,
+					details: {
+						bio: data.details.bio,
+						location: data.details.location,
+						analytics: {
+							followers: data.details.analytics.followers,
+							totalViews: data.details.analytics.totalViews,
+							averageViews: data.details.analytics.averageViews,
+						},
+						reels: data.details.reels,
+					},
+				};
+				await updateCreator(creator._id, updateData);
 				toast({
 					title: "Success!",
 					description: "Creator updated successfully.",
 				});
 			} else {
 				// Create new creator
-				await createCreator(data);
+				const createData = {
+					name: data.name,
+					genre: data.genre,
+					avatar: data.avatar,
+					platform: data.platform,
+					socialLink: data.socialLink,
+					location: data.location,
+					phoneNumber: data.phoneNumber,
+					mediaKit: data.mediaKit,
+					details: {
+						bio: data.details.bio,
+						location: data.details.location,
+						analytics: {
+							followers: data.details.analytics.followers,
+							totalViews: data.details.analytics.totalViews,
+							averageViews: data.details.analytics.averageViews,
+						},
+						reels: data.details.reels,
+					},
+				};
+				await createCreator(createData);
 				toast({
 					title: "Success!",
 					description: "Creator created successfully.",
 				});
 			}
 			onSuccess();
-		} catch (error: any) {
+		} catch (error) {
 			toast({
 				title: "Error",
-				description: error.message || "Failed to save creator. Please try again.",
+				description: "Failed to save creator. Please try again.",
 				variant: "destructive",
 			});
 		} finally {
-			setIsSubmitting(false);
+			setLoading(false);
 		}
 	};
 
 	return (
-		<div className="p-6 max-w-4xl mx-auto">
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-2xl font-bold">
-						{creator ? "Edit Creator" : "Add New Creator"}
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-6">
-					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-						{/* Avatar Upload Section */}
-						<div className="space-y-2">
-							<Label>Avatar</Label>
-							<ImageUpload
-								currentImage={watch("avatar")}
-								onImageUpload={handleAvatarUpload}
-								onImageDelete={handleAvatarDelete}
-								className="flex justify-center"
-							/>
-						</div>
+		<div className="p-6">
+			<h2 className="text-2xl font-bold mb-6">
+				{creator ? "Edit Creator" : "Add New Creator"}
+			</h2>
 
-						{/* Name Input */}
-						<div className="space-y-2">
-							<Label htmlFor="name">Name</Label>
-							<Input
-								id="name"
-								type="text"
-								placeholder="Enter creator name"
-								{...register("name")}
-							/>
-							{errors.name && (
-								<p className="text-red-500 text-sm">{errors.name.message}</p>
-							)}
-						</div>
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+				{/* Avatar Upload */}
+				<div className="space-y-2">
+					<Label>Avatar</Label>
+					<ImageUpload
+						currentImage={watchedAvatar}
+						onImageUpload={handleAvatarUpload}
+						onImageDelete={handleAvatarDelete}
+					/>
+					{errors.avatar && (
+						<p className="text-red-500 text-sm">{errors.avatar.message}</p>
+					)}
+				</div>
 
-						{/* Genre Input */}
-						<div className="space-y-2">
-							<Label htmlFor="genre">Genre</Label>
-							<Input
-								id="genre"
-								type="text"
-								placeholder="Enter genre"
-								{...register("genre")}
-							/>
-							{errors.genre && (
-								<p className="text-red-500 text-sm">{errors.genre.message}</p>
-							)}
-						</div>
+				{/* Basic Information */}
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="space-y-2">
+						<Label htmlFor="name">Name *</Label>
+						<Input
+							id="name"
+							{...register("name")}
+							placeholder="Creator name"
+						/>
+						{errors.name && (
+							<p className="text-red-500 text-sm">{errors.name.message}</p>
+						)}
+					</div>
 
-						{/* Platform Select */}
-						<div className="space-y-2">
-							<Label htmlFor="platform">Platform</Label>
-							<Select>
-								<SelectTrigger className="w-full">
-									<SelectValue placeholder="Select platform" {...register("platform")} />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="Instagram" {...register("platform")}>Instagram</SelectItem>
-									<SelectItem value="YouTube" {...register("platform")}>YouTube</SelectItem>
-									<SelectItem value="TikTok" {...register("platform")}>TikTok</SelectItem>
-									<SelectItem value="Twitter" {...register("platform")}>Twitter</SelectItem>
-									<SelectItem value="Other" {...register("platform")}>Other</SelectItem>
-								</SelectContent>
-							</Select>
-							{errors.platform && (
-								<p className="text-red-500 text-sm">{errors.platform.message}</p>
-							)}
-						</div>
+					<div className="space-y-2">
+						<Label htmlFor="genre">Genre *</Label>
+						<Input
+							id="genre"
+							{...register("genre")}
+							placeholder="e.g. Fashion, Food, Tech"
+						/>
+						{errors.genre && (
+							<p className="text-red-500 text-sm">{errors.genre.message}</p>
+						)}
+					</div>
+				</div>
 
-						{/* Social Link Input */}
-						<div className="space-y-2">
-							<Label htmlFor="socialLink">Social Link</Label>
-							<Input
-								id="socialLink"
-								type="text"
-								placeholder="Enter social link"
-								{...register("socialLink")}
-							/>
-							{errors.socialLink && (
-								<p className="text-red-500 text-sm">{errors.socialLink.message}</p>
-							)}
-						</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="space-y-2">
+						<Label htmlFor="platform">Platform *</Label>
+						<Select onValueChange={handlePlatformChange} defaultValue={watch("platform")}>
+							<SelectTrigger>
+								<SelectValue placeholder="Select platform" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="Instagram">Instagram</SelectItem>
+								<SelectItem value="YouTube">YouTube</SelectItem>
+								<SelectItem value="TikTok">TikTok</SelectItem>
+								<SelectItem value="Twitter">Twitter</SelectItem>
+								<SelectItem value="Other">Other</SelectItem>
+							</SelectContent>
+						</Select>
+						{errors.platform && (
+							<p className="text-red-500 text-sm">{errors.platform.message}</p>
+						)}
+					</div>
 
-						{/* Location Input */}
-						<div className="space-y-2">
-							<Label htmlFor="location">Location</Label>
-							<Input
-								id="location"
-								type="text"
-								placeholder="Enter location"
-								{...register("location")}
-							/>
-							{errors.location && (
-								<p className="text-red-500 text-sm">{errors.location.message}</p>
-							)}
-						</div>
+					<div className="space-y-2">
+						<Label htmlFor="socialLink">Social Link *</Label>
+						<Input
+							id="socialLink"
+							{...register("socialLink")}
+							placeholder="https://instagram.com/username"
+						/>
+						{errors.socialLink && (
+							<p className="text-red-500 text-sm">{errors.socialLink.message}</p>
+						)}
+					</div>
+				</div>
 
-						{/* Phone Number Input */}
-						<div className="space-y-2">
-							<Label htmlFor="phoneNumber">Phone Number</Label>
-							<Input
-								id="phoneNumber"
-								type="text"
-								placeholder="Enter phone number"
-								{...register("phoneNumber")}
-							/>
-							{errors.phoneNumber && (
-								<p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>
-							)}
-						</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="space-y-2">
+						<Label htmlFor="location">Location *</Label>
+						<Input
+							id="location"
+							{...register("location")}
+							placeholder="City, Country"
+						/>
+						{errors.location && (
+							<p className="text-red-500 text-sm">{errors.location.message}</p>
+						)}
+					</div>
 
-						{/* Media Kit Input */}
-						<div className="space-y-2">
-							<Label htmlFor="mediaKit">Media Kit</Label>
-							<Input
-								id="mediaKit"
-								type="text"
-								placeholder="Enter media kit link"
-								{...register("mediaKit")}
-							/>
-							{errors.mediaKit && (
-								<p className="text-red-500 text-sm">{errors.mediaKit.message}</p>
-							)}
-						</div>
+					<div className="space-y-2">
+						<Label htmlFor="phoneNumber">Phone Number</Label>
+						<Input
+							id="phoneNumber"
+							{...register("phoneNumber")}
+							placeholder="+1234567890"
+						/>
+						{errors.phoneNumber && (
+							<p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>
+						)}
+					</div>
+				</div>
 
-						{/* Bio Textarea */}
-						<div className="space-y-2">
-							<Label htmlFor="bio">Bio</Label>
-							<Textarea
-								id="bio"
-								placeholder="Enter bio"
-								{...register("details.bio")}
-							/>
-							{errors.details?.bio && (
-								<p className="text-red-500 text-sm">{errors.details.bio.message}</p>
-							)}
-						</div>
+				<div className="space-y-2">
+					<Label htmlFor="mediaKit">Media Kit URL</Label>
+					<Input
+						id="mediaKit"
+						{...register("mediaKit")}
+						placeholder="https://example.com/mediakit.pdf"
+					/>
+					{errors.mediaKit && (
+						<p className="text-red-500 text-sm">{errors.mediaKit.message}</p>
+					)}
+				</div>
 
-						{/* Details Location Input */}
-						<div className="space-y-2">
-							<Label htmlFor="detailsLocation">Details Location</Label>
-							<Input
-								id="detailsLocation"
-								type="text"
-								placeholder="Enter details location"
-								{...register("details.location")}
-							/>
-							{errors.details?.location && (
-								<p className="text-red-500 text-sm">{errors.details.location.message}</p>
-							)}
-						</div>
+				{/* Details Section */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold">Details</h3>
+					
+					<div className="space-y-2">
+						<Label htmlFor="bio">Bio *</Label>
+						<Textarea
+							id="bio"
+							{...register("details.bio")}
+							placeholder="Tell us about the creator..."
+							rows={4}
+						/>
+						{errors.details?.bio && (
+							<p className="text-red-500 text-sm">{errors.details.bio.message}</p>
+						)}
+					</div>
 
-						{/* Analytics Followers Input */}
-						<div className="space-y-2">
-							<Label htmlFor="followers">Followers</Label>
-							<Input
-								id="followers"
-								type="number"
-								placeholder="Enter followers count"
-								{...register("details.analytics.followers", { valueAsNumber: true })}
-							/>
-							{errors.details?.analytics?.followers && (
-								<p className="text-red-500 text-sm">{errors.details.analytics.followers.message}</p>
-							)}
-						</div>
+					<div className="space-y-2">
+						<Label htmlFor="detailsLocation">Details Location *</Label>
+						<Input
+							id="detailsLocation"
+							{...register("details.location")}
+							placeholder="Detailed location info"
+						/>
+						{errors.details?.location && (
+							<p className="text-red-500 text-sm">{errors.details.location.message}</p>
+						)}
+					</div>
 
-						{/* Analytics Total Views Input */}
-						<div className="space-y-2">
-							<Label htmlFor="totalViews">Total Views</Label>
-							<Input
-								id="totalViews"
-								type="number"
-								placeholder="Enter total views count"
-								{...register("details.analytics.totalViews", { valueAsNumber: true })}
-							/>
-							{errors.details?.analytics?.totalViews && (
-								<p className="text-red-500 text-sm">{errors.details.analytics.totalViews.message}</p>
-							)}
-						</div>
+					{/* Analytics */}
+					<div className="space-y-4">
+						<h4 className="font-medium">Analytics</h4>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="space-y-2">
+								<Label htmlFor="followers">Followers *</Label>
+								<Input
+									id="followers"
+									type="number"
+									{...register("details.analytics.followers", { valueAsNumber: true })}
+									placeholder="0"
+								/>
+								{errors.details?.analytics?.followers && (
+									<p className="text-red-500 text-sm">{errors.details.analytics.followers.message}</p>
+								)}
+							</div>
 
-						{/* Analytics Average Views Input */}
-						<div className="space-y-2">
-							<Label htmlFor="averageViews">Average Views</Label>
-							<Input
-								id="averageViews"
-								type="number"
-								placeholder="Enter average views count"
-								{...register("details.analytics.averageViews", { valueAsNumber: true })}
-							/>
-							{errors.details?.analytics?.averageViews && (
-								<p className="text-red-500 text-sm">{errors.details.analytics.averageViews.message}</p>
-							)}
-						</div>
+							<div className="space-y-2">
+								<Label htmlFor="totalViews">Total Views *</Label>
+								<Input
+									id="totalViews"
+									type="number"
+									{...register("details.analytics.totalViews", { valueAsNumber: true })}
+									placeholder="0"
+								/>
+								{errors.details?.analytics?.totalViews && (
+									<p className="text-red-500 text-sm">{errors.details.analytics.totalViews.message}</p>
+								)}
+							</div>
 
-						<Separator />
-
-						{/* Form Actions */}
-						<div className="flex justify-end space-x-4">
-							<Button type="button" variant="outline" onClick={onCancel}>
-								Cancel
-							</Button>
-							<Button type="submit" disabled={isSubmitting}>
-								{isSubmitting ? "Saving..." : creator ? "Update Creator" : "Create Creator"}
-							</Button>
+							<div className="space-y-2">
+								<Label htmlFor="averageViews">Average Views</Label>
+								<Input
+									id="averageViews"
+									type="number"
+									{...register("details.analytics.averageViews", { valueAsNumber: true })}
+									placeholder="0"
+								/>
+								{errors.details?.analytics?.averageViews && (
+									<p className="text-red-500 text-sm">{errors.details.analytics.averageViews.message}</p>
+								)}
+							</div>
 						</div>
-					</form>
-				</CardContent>
-			</Card>
+					</div>
+				</div>
+
+				{/* Form Actions */}
+				<div className="flex gap-4 pt-6">
+					<Button type="submit" disabled={loading}>
+						{loading ? "Saving..." : creator ? "Update Creator" : "Create Creator"}
+					</Button>
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancel
+					</Button>
+				</div>
+			</form>
 		</div>
 	);
 };
