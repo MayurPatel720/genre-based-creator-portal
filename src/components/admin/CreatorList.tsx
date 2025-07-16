@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2, Edit, Search, Filter } from "lucide-react";
 import { useCreators } from "@/hooks/useCreators";
 import { Creator } from "@/types/Creator";
@@ -36,49 +36,36 @@ interface CreatorListProps {
 const ITEMS_PER_PAGE = 10;
 
 const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
-	const { creators, deleteCreator, loading, error } = useCreators();
+	const { paginationData, genres, fetchCreators, deleteCreator, loading, error } = useCreators();
 	const [currentPage, setCurrentPage] = useState(1);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedGenre, setSelectedGenre] = useState("all");
 
-	// Get unique genres for filter
-	const genres = useMemo(() => {
-		const uniqueGenres = [...new Set(creators.map(creator => creator.genre))];
-		return uniqueGenres.filter(Boolean).sort();
-	}, [creators]);
-
-	// Filter and search creators
-	const filteredCreators = useMemo(() => {
-		if (!Array.isArray(creators)) return [];
-		
-		return creators.filter(creator => {
-			const matchesSearch = !searchTerm || 
-				creator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				creator.platform.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				creator.genre.toLowerCase().includes(searchTerm.toLowerCase());
-			
-			const matchesGenre = selectedGenre === "all" || 
-				creator.genre.toLowerCase() === selectedGenre.toLowerCase();
-			
-			return matchesSearch && matchesGenre;
-		});
-	}, [creators, searchTerm, selectedGenre]);
-
-	// Pagination
-	const totalPages = Math.ceil(filteredCreators.length / ITEMS_PER_PAGE);
-	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-	const endIndex = startIndex + ITEMS_PER_PAGE;
-	const currentCreators = filteredCreators.slice(startIndex, endIndex);
+	// Fetch creators when page, search term, or genre changes
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				await fetchCreators(currentPage, ITEMS_PER_PAGE, selectedGenre);
+			} catch (err) {
+				console.error("Failed to fetch creators:", err);
+			}
+		};
+		fetchData();
+	}, [currentPage, selectedGenre, fetchCreators]);
 
 	// Reset to page 1 when filters change
-	React.useEffect(() => {
-		setCurrentPage(1);
+	useEffect(() => {
+		if (currentPage !== 1) {
+			setCurrentPage(1);
+		}
 	}, [searchTerm, selectedGenre]);
 
 	const handleDelete = async (id: string) => {
 		if (window.confirm("Are you sure you want to delete this creator?")) {
 			try {
 				await deleteCreator(id);
+				// Refresh the current page after deletion
+				await fetchCreators(currentPage, ITEMS_PER_PAGE, selectedGenre);
 			} catch (err) {
 				console.error("Failed to delete creator:", err);
 			}
@@ -87,6 +74,41 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
+	};
+
+	// Filter creators by search term (client-side filtering)
+	const filteredCreators = paginationData.creators.filter(creator => {
+		if (!searchTerm) return true;
+		
+		return creator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			creator.platform.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			creator.genre.toLowerCase().includes(searchTerm.toLowerCase());
+	});
+
+	// Calculate pagination range
+	const generatePageNumbers = () => {
+		const pages = [];
+		const totalPages = paginationData.totalPages;
+		const current = currentPage;
+		
+		// Always show first page
+		if (totalPages > 0) pages.push(1);
+		
+		// Show ellipsis if needed
+		if (current > 3) pages.push("...");
+		
+		// Show pages around current
+		for (let i = Math.max(2, current - 1); i <= Math.min(totalPages - 1, current + 1); i++) {
+			if (!pages.includes(i)) pages.push(i);
+		}
+		
+		// Show ellipsis if needed
+		if (current < totalPages - 2) pages.push("...");
+		
+		// Always show last page
+		if (totalPages > 1 && !pages.includes(totalPages)) pages.push(totalPages);
+		
+		return pages;
 	};
 
 	return (
@@ -126,14 +148,17 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 
 			{/* Results Summary */}
 			<div className="mb-4 text-sm text-gray-600">
-				Showing {startIndex + 1}-{Math.min(endIndex, filteredCreators.length)} of {filteredCreators.length} creators
+				Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredCreators.length)} of {filteredCreators.length} creators
 				{searchTerm && ` for "${searchTerm}"`}
 				{selectedGenre !== "all" && ` in ${selectedGenre}`}
+				{paginationData.totalPages > 1 && ` (Page ${currentPage} of ${paginationData.totalPages})`}
 			</div>
 
 			{loading ? (
-				<p>Loading creators...</p>
-			) : currentCreators.length === 0 ? (
+				<div className="flex justify-center items-center py-8">
+					<p>Loading creators...</p>
+				</div>
+			) : filteredCreators.length === 0 ? (
 				<div className="text-center py-8">
 					<p className="text-gray-500 mb-2">No creators found.</p>
 					{(searchTerm || selectedGenre !== "all") && (
@@ -168,7 +193,7 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{currentCreators.map((creator) => (
+							{filteredCreators.map((creator) => (
 								<TableRow key={creator._id}>
 									<TableCell>{creator.name}</TableCell>
 									<TableCell>{creator.genre}</TableCell>
@@ -177,23 +202,24 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 										{creator.details.analytics.followers.toLocaleString()}
 									</TableCell>
 									<TableCell>
-										<Button
-											variant="outline"
-											size="sm"
-											className="mr-2"
-											onClick={() => onEdit(creator)}
-										>
-											<Edit className="w-4 h-4 mr-1" />
-											Edit
-										</Button>
-										<Button
-											variant="destructive"
-											size="sm"
-											onClick={() => handleDelete(creator._id!)}
-										>
-											<Trash2 className="w-4 h-4 mr-1" />
-											Delete
-										</Button>
+										<div className="flex gap-2">
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => onEdit(creator)}
+											>
+												<Edit className="w-4 h-4 mr-1" />
+												Edit
+											</Button>
+											<Button
+												variant="destructive"
+												size="sm"
+												onClick={() => handleDelete(creator._id!)}
+											>
+												<Trash2 className="w-4 h-4 mr-1" />
+												Delete
+											</Button>
+										</div>
 									</TableCell>
 								</TableRow>
 							))}
@@ -201,7 +227,7 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 					</Table>
 
 					{/* Pagination */}
-					{totalPages > 1 && (
+					{paginationData.totalPages > 1 && (
 						<div className="mt-6 flex justify-center">
 							<Pagination>
 								<PaginationContent>
@@ -212,22 +238,26 @@ const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
 										/>
 									</PaginationItem>
 									
-									{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-										<PaginationItem key={page}>
-											<PaginationLink
-												onClick={() => handlePageChange(page)}
-												isActive={page === currentPage}
-												className="cursor-pointer"
-											>
-												{page}
-											</PaginationLink>
+									{generatePageNumbers().map((page, index) => (
+										<PaginationItem key={index}>
+											{page === "..." ? (
+												<span className="px-3 py-2">...</span>
+											) : (
+												<PaginationLink
+													onClick={() => handlePageChange(page as number)}
+													isActive={page === currentPage}
+													className="cursor-pointer"
+												>
+													{page}
+												</PaginationLink>
+											)}
 										</PaginationItem>
 									))}
 									
 									<PaginationItem>
 										<PaginationNext 
-											onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-											className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+											onClick={() => handlePageChange(Math.min(paginationData.totalPages, currentPage + 1))}
+											className={currentPage === paginationData.totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
 										/>
 									</PaginationItem>
 								</PaginationContent>

@@ -1,11 +1,24 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { CreateCreatorData, UpdateCreatorData } from "../services/api";
 import * as api from "../services/api";
 import { Creator } from "@/types/Creator";
 
+interface PaginationData {
+	creators: Creator[];
+	totalPages: number;
+	currentPage: number;
+}
+
 export const useCreators = () => {
 	const [creators, setCreators] = useState<Creator[]>([]);
+	const [paginationData, setPaginationData] = useState<PaginationData>({
+		creators: [],
+		totalPages: 1,
+		currentPage: 1,
+	});
+	const [genres, setGenres] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +29,8 @@ export const useCreators = () => {
 			setError(null);
 			try {
 				const response = await api.creatorAPI.getAll();
-				setCreators(response);
+				setCreators(response.creators);
+				setPaginationData(response);
 			} catch (err: any) {
 				setError(err.message || "Failed to fetch creators");
 			} finally {
@@ -24,6 +38,19 @@ export const useCreators = () => {
 			}
 		};
 		loadCreators();
+	}, []);
+
+	// Fetch genres on mount
+	useEffect(() => {
+		const loadGenres = async () => {
+			try {
+				const genreList = await api.creatorAPI.getGenres();
+				setGenres(genreList);
+			} catch (err: any) {
+				console.error("Failed to fetch genres:", err);
+			}
+		};
+		loadGenres();
 	}, []);
 
 	const createCreator = async (creatorData: CreateCreatorData) => {
@@ -72,14 +99,13 @@ export const useCreators = () => {
 		}
 	};
 
-	const fetchCreators = async (genre?: string) => {
+	const fetchCreators = async (page: number = 1, limit: number = 10, genre?: string) => {
 		setLoading(true);
 		setError(null);
 		try {
-			const response = genre
-				? await api.creatorAPI.getByGenre(genre)
-				: await api.creatorAPI.getAll();
-			setCreators(response);
+			const response = await api.creatorAPI.getAll(page, limit, genre);
+			setCreators(response.creators);
+			setPaginationData(response);
 			return response;
 		} catch (err: any) {
 			setError(err.message || "Failed to fetch creators");
@@ -119,6 +145,8 @@ export const useCreators = () => {
 
 	return {
 		creators,
+		paginationData,
+		genres,
 		createCreator,
 		updateCreator,
 		deleteCreator,

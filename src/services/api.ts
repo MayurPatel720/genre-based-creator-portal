@@ -63,15 +63,26 @@ export interface CreateCreatorData {
 
 export type UpdateCreatorData = Partial<CreateCreatorData>;
 
+interface PaginatedResponse {
+	creators: Creator[];
+	totalPages: number;
+	currentPage: number;
+}
+
 export const creatorAPI = {
-	// Get all creators
-	getAll: async (): Promise<Creator[]> => {
-		const response = await api.get("/creators");
-		// Handle the new response format that includes pagination
-		if (response.data.creators) {
-			return response.data.creators;
+	// Get all creators with pagination
+	getAll: async (page: number = 1, limit: number = 10, genre?: string): Promise<PaginatedResponse> => {
+		let url = `/creators?page=${page}&limit=${limit}`;
+		if (genre && genre !== "all") {
+			url += `&genre=${encodeURIComponent(genre)}`;
 		}
-		// Fallback for old format
+		const response = await api.get(url);
+		return response.data;
+	},
+
+	// Get unique genres
+	getGenres: async (): Promise<string[]> => {
+		const response = await api.get("/creators/genres");
 		return response.data;
 	},
 
@@ -158,15 +169,10 @@ export const creatorAPI = {
 		await api.delete(`/creators/${id}`);
 	},
 
-	// Get creators by genre
+	// Get creators by genre (deprecated - use getAll with genre parameter)
 	getByGenre: async (genre: string): Promise<Creator[]> => {
 		const response = await api.get(`/creators?genre=${genre}`);
-		// Handle the new response format that includes pagination
-		if (response.data.creators) {
-			return response.data.creators;
-		}
-		// Fallback for old format
-		return response.data;
+		return response.data.creators || response.data;
 	},
 
 	// Get creator's Instagram Reels

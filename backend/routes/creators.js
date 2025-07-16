@@ -4,6 +4,17 @@ const cloudinary = require('../config/cloudinary');
 
 const router = express.Router();
 
+// GET /api/creators/genres - Get all unique genres
+router.get('/genres', async (req, res) => {
+  try {
+    const genres = await Creator.distinct('genre');
+    res.json(genres.filter(Boolean).sort());
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    res.status(500).json({ error: 'Failed to fetch genres' });
+  }
+});
+
 // GET /api/creators - Get all creators with pagination and filtering
 router.get('/', async (req, res) => {
   try {
