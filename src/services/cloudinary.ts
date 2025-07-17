@@ -1,4 +1,6 @@
 
+import api from './api';
+
 // Cloudinary service for image uploads
 export interface CloudinaryUploadResult {
   public_id: string;
@@ -9,17 +11,18 @@ export interface CloudinaryUploadResult {
 export const cloudinaryService = {
   uploadImage: async (file: File): Promise<CloudinaryUploadResult> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('image', file);
     
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+    const response = await api.post('/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     
-    if (!response.ok) {
-      throw new Error('Upload failed');
-    }
-    
-    return response.json();
+    return {
+      public_id: response.data.public_id,
+      secure_url: response.data.url,
+      url: response.data.url
+    };
   }
 };
