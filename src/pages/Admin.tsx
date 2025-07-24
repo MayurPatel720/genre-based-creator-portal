@@ -1,10 +1,12 @@
 
 import { useState } from "react";
-import { Plus, Users, TrendingUp, Eye, Upload, Download } from "lucide-react";
+import { Plus, Users, TrendingUp, Upload, Download, LogOut } from "lucide-react";
 import CreatorForm from "../components/admin/CreatorForm";
 import CreatorList from "../components/admin/CreatorList";
 import CSVImport from "../components/admin/CSVImport";
+import AdminLogin from "../components/AdminLogin";
 import { useCreators } from "../hooks/useCreators";
+import { useAuth } from "../hooks/useAuth";
 import { Creator } from "../types/Creator";
 import { Button } from "../components/ui/button";
 import {
@@ -21,7 +23,13 @@ const Admin = () => {
 	const [activeTab, setActiveTab] = useState<"list" | "form" | "import">("list");
 	const [editingCreator, setEditingCreator] = useState<Creator | null>(null);
 	const { creators, loading, error } = useCreators();
+	const { isAuthenticated, login, logout } = useAuth();
 	const { toast } = useToast();
+
+	// If not authenticated, show login form
+	if (!isAuthenticated) {
+		return <AdminLogin onLogin={login} />;
+	}
 
 	const handleEdit = (creator: Creator) => {
 		setEditingCreator(creator);
@@ -79,11 +87,21 @@ const Admin = () => {
 		<div className="min-h-screen bg-gray-50 font-poppins">
 			<div className="container mx-auto px-4 py-8">
 				{/* Header */}
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-gray-900 mb-2 font-anton">
-						Admin Dashboard
-					</h1>
-					<p className="text-gray-600">Manage creator profiles and content</p>
+				<div className="mb-8 flex justify-between items-center">
+					<div>
+						<h1 className="text-3xl font-bold text-gray-900 mb-2 font-anton">
+							Admin Dashboard
+						</h1>
+						<p className="text-gray-600">Manage creator profiles and content</p>
+					</div>
+					<Button
+						variant="outline"
+						onClick={logout}
+						className="flex items-center gap-2"
+					>
+						<LogOut size={16} />
+						Logout
+					</Button>
 				</div>
 
 				{/* Error Display */}
@@ -126,7 +144,7 @@ const Admin = () => {
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="text-sm font-medium">Total Views</CardTitle>
-							<Eye className="h-4 w-4 text-muted-foreground" />
+							<TrendingUp className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold">

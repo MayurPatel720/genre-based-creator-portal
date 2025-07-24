@@ -7,11 +7,12 @@ import {
 	MapPin,
 	Users,
 	Eye,
-	TrendingUp,
 	Play,
 	Image as ImageIcon,
 	MessageCircle,
 	FileText,
+	IndianRupee,
+	TrendingUp,
 } from "lucide-react";
 import MediaViewer from "./MediaViewer";
 import {
@@ -19,6 +20,7 @@ import {
 	trackCreatorContact,
 	trackMediaView,
 } from "../utils/analytics";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CreatorModalProps {
 	creator: Creator;
@@ -27,7 +29,7 @@ interface CreatorModalProps {
 
 const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 	const [selectedMedia, setSelectedMedia] = useState<any>(null);
-
+	const isMobile = useIsMobile();
 	// Track creator view when modal opens
 	useEffect(() => {
 		trackCreatorView(creator.name, creator.genre);
@@ -93,11 +95,19 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 					{/* Header with Banner Image */}
 					<div className="relative">
 						<div className="h-48 bg-gradient-to-br from-brand-aureolin/20 via-brand-orange/20 to-brand-purple/20 rounded-t-2xl overflow-hidden">
-							<img
-								src="/lovable-uploads/27249619-0749-4ac7-be51-296f36f7b496.png"
-								alt="Banner"
-								className="w-full h-full object-cover "
-							/>
+							{isMobile ? (
+								<img
+									src="/lovable-uploads/ismobile.png"
+									alt="Banner"
+									className="w-full h-full object-cover "
+								/>
+							) : (
+								<img
+									src="/lovable-uploads/27249619-0749-4ac7-be51-296f36f7b496.png"
+									alt="Banner"
+									className="w-full h-full object-cover "
+								/>
+							)}
 						</div>
 						<button
 							onClick={onClose}
@@ -163,7 +173,7 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 							</div>
 						</div>
 
-						{/* Quick Stats */}
+						{/* Quick Stats - Fixed spacing and alignment */}
 						<div className="grid grid-cols-3 gap-2 mb-6">
 							<div className="bg-gradient-to-br from-brand-aureolin/10 to-brand-aureolin/20 pt-4 pb-4 rounded-xl text-center">
 								<div className="flex items-center justify-center mb-2">
@@ -251,16 +261,15 @@ const CreatorModal: React.FC<CreatorModalProps> = ({ creator, onClose }) => {
 								{creator.details?.bio || "No bio available"}
 							</p>
 						</div>
-						{/* Media Kit Button - Positioned to avoid conflict with WhatsApp button */}
 						{creator.mediaKit && (
-							<div className="fixed bottom-10 md:bottom-6 right-6 z-50">
+							<div className="mb-2">
 								<button
 									onClick={handleVisitMediaKit}
-									className="group bg-brand-purple hover:bg-brand-purple/80 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+									className="group bg-brand-purple hover:bg-brand-purple/80 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2 w-full justify-center"
 									title="Visit Media Kit"
 								>
 									<FileText size={18} />
-									<span className="hidden lg:inline group-hover:inline-block transition-all duration-300 whitespace-nowrap">
+									<span className="lg:inline group-hover:inline-block transition-all duration-300 whitespace-nowrap">
 										Visit Media Kit
 									</span>
 								</button>

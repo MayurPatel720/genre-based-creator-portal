@@ -16,7 +16,7 @@ export const mockCreators: Creator[] = [
       bio: "AI researcher and content creator sharing insights about machine learning and artificial intelligence.",
       analytics: {
         followers: 250000,
-        totalViews: 5200000,
+        totalViews: 5000000,
         averageViews: 45000
       },
       reels: [

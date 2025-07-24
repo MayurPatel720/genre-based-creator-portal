@@ -45,8 +45,10 @@ app.get("/api/health", (req, res) => {
 	res.json({
 		status: "healthy",
 		timestamp,
-		uptime: `${Math.floor(uptime / 60)} minutes ${Math.floor(uptime % 60)} seconds`,
-		message: "Server is alive and running"
+		uptime: `${Math.floor(uptime / 60)} minutes ${Math.floor(
+			uptime % 60
+		)} seconds`,
+		message: "Server is alive and running",
 	});
 });
 
@@ -78,17 +80,22 @@ const startServer = async () => {
 		const PORT = process.env.PORT || 3000;
 		app.listen(PORT, () => {
 			console.log(`🚀 Server is running on port ${PORT}`);
-			
+
 			// ✅ Keep-alive mechanism for Render deployment
 			const keepAlive = async () => {
 				try {
-					const serverUrl = process.env.RENDER_URL || `http://localhost:${PORT}`;
+					const serverUrl =
+						process.env.RENDER_URL || `http://localhost:${PORT}`;
 					const response = await axios.get(`${serverUrl}/api/health`, {
 						timeout: 30000,
-						headers: { 'User-Agent': 'KeepAlive-Bot' }
+						headers: { "User-Agent": "KeepAlive-Bot" },
 					});
-					console.log(`✅ Keep-alive ping successful at ${new Date().toLocaleString()}`);
-					console.log(`📊 Server status: ${response.data.status}, Uptime: ${response.data.uptime}`);
+					console.log(
+						`✅ Keep-alive ping successful at ${new Date().toLocaleString()}`
+					);
+					console.log(
+						`📊 Server status: ${response.data.status}, Uptime: ${response.data.uptime}`
+					);
 				} catch (error) {
 					console.error(`❌ Keep-alive ping failed:`, error.message);
 					// Retry logic - try again in 1 minute if failed
@@ -97,8 +104,10 @@ const startServer = async () => {
 			};
 
 			// Only run keep-alive in production (Render) or when RENDER_URL is set
-			if (process.env.NODE_ENV === 'production' || process.env.RENDER_URL) {
-				console.log("🔄 Keep-alive mechanism activated for production deployment");
+			if (process.env.NODE_ENV === "production" || process.env.RENDER_URL) {
+				console.log(
+					"🔄 Keep-alive mechanism activated for production deployment"
+				);
 				// Initial ping after 1 minute
 				setTimeout(keepAlive, 60000);
 				// Then ping every 5 minutes
