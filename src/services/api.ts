@@ -63,9 +63,33 @@ export interface CreateCreatorData {
 export type UpdateCreatorData = Partial<CreateCreatorData>;
 
 export const creatorAPI = {
-	// Get all creators
+	// Get all creators (public - only approved)
 	getAll: async (): Promise<Creator[]> => {
 		const response = await api.get("/creators");
+		return response.data;
+	},
+
+	// Get all creators for admin (includes unapproved)
+	getAllForAdmin: async (): Promise<Creator[]> => {
+		const response = await api.get("/creators/admin/all");
+		return response.data;
+	},
+
+	// Get pending creators
+	getPending: async (): Promise<Creator[]> => {
+		const response = await api.get("/creators/pending");
+		return response.data;
+	},
+
+	// Approve creator
+	approve: async (id: string): Promise<Creator> => {
+		const response = await api.patch(`/creators/${id}/approve`);
+		return response.data;
+	},
+
+	// Reject creator
+	reject: async (id: string): Promise<Creator> => {
+		const response = await api.patch(`/creators/${id}/reject`);
 		return response.data;
 	},
 

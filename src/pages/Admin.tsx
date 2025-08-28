@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Users, TrendingUp, Upload, Download, LogOut } from "lucide-react";
 import CreatorForm from "../components/admin/CreatorForm";
@@ -18,9 +17,10 @@ import {
 } from "../components/ui/card";
 import { exportCreatorsToCSV } from "../services/csvExport";
 import { useToast } from "../hooks/use-toast";
+import CreatorApproval from "../components/admin/CreatorApproval";
 
 const Admin = () => {
-	const [activeTab, setActiveTab] = useState<"list" | "form" | "import">("list");
+	const [activeTab, setActiveTab] = useState<"list" | "form" | "import" | "approve">("list");
 	const [editingCreator, setEditingCreator] = useState<Creator | null>(null);
 	const { creators, loading, error } = useCreators();
 	const { isAuthenticated, login, logout } = useAuth();
@@ -170,6 +170,12 @@ const Admin = () => {
 						Add Creator
 					</Button>
 					<Button
+						variant={activeTab === "approve" ? "default" : "outline"}
+						onClick={() => setActiveTab("approve")}
+					>
+						Approve Creators
+					</Button>
+					<Button
 						variant={activeTab === "import" ? "default" : "outline"}
 						onClick={() => setActiveTab("import")}
 					>
@@ -199,6 +205,8 @@ const Admin = () => {
 								setEditingCreator(null);
 							}}
 						/>
+					) : activeTab === "approve" ? (
+						<CreatorApproval />
 					) : (
 						<div className="p-6">
 							<CSVImport />

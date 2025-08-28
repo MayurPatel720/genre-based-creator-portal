@@ -9,7 +9,7 @@ interface CreatorListProps {
 }
 
 const CreatorList: React.FC<CreatorListProps> = ({ onEdit }) => {
-	const { creators, deleteCreator, loading, error } = useCreators();
+	const { creators, deleteCreator, loading, error } = useCreators(true); // Use admin mode
 
 	const handleDelete = async (id: string) => {
 		if (window.confirm("Are you sure you want to delete this creator?")) {

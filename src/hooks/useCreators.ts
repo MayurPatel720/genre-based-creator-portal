@@ -4,7 +4,7 @@ import { CreateCreatorData, UpdateCreatorData } from "../services/api";
 import * as api from "../services/api";
 import { Creator } from "@/types/Creator";
 
-export const useCreators = () => {
+export const useCreators = (adminMode = false) => {
 	const [creators, setCreators] = useState<Creator[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -15,7 +15,9 @@ export const useCreators = () => {
 			setLoading(true);
 			setError(null);
 			try {
-				const response = await api.creatorAPI.getAll();
+				const response = adminMode 
+					? await api.creatorAPI.getAllForAdmin()
+					: await api.creatorAPI.getAll();
 				setCreators(response);
 			} catch (err: any) {
 				setError(err.message || "Failed to fetch creators");
@@ -24,7 +26,7 @@ export const useCreators = () => {
 			}
 		};
 		loadCreators();
-	}, []);
+	}, [adminMode]);
 
 	const createCreator = async (creatorData: CreateCreatorData) => {
 		setLoading(true);

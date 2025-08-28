@@ -11,6 +11,7 @@ export interface Creator {
 	location?: string;
 	phoneNumber?: string;
 	mediaKit?: string;
+	isApproved?: boolean;
 	details: {
 		pricing: any;
 		location: string;

@@ -82,6 +82,10 @@ const creatorSchema = new mongoose.Schema(
 				message: "Media kit must be a valid URL",
 			},
 		},
+		isApproved: {
+			type: Boolean,
+			default: false,
+		},
 		details: {
 			bio: {
 				type: String,
