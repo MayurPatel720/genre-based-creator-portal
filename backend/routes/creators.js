@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Creator = require("../models/Creator");
+const { handleCustomLocation } = require("../middleware/locationMiddleware");
 
 // Get all creators (for admin - includes unapproved)
 router.get("/admin/all", async (req, res) => {
@@ -97,20 +98,21 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-// Create new creator (will be unapproved by default)
-router.post("/", async (req, res) => {
+// Create new creator (will be unapproved by default) - with location middleware
+router.post("/", handleCustomLocation, async (req, res) => {
 	try {
 		const creator = new Creator(req.body);
 		const savedCreator = await creator.save();
+		console.log("✅ Creator created successfully:", savedCreator.name);
 		res.status(201).json(savedCreator);
 	} catch (error) {
 		console.error("Error creating creator:", error);
-		res.status(500).json({ message: "Failed to create creator" });
+		res.status(500).json({ message: "Failed to create creator", error: error.message });
 	}
 });
 
-// Update creator
-router.put("/:id", async (req, res) => {
+// Update creator - with location middleware
+router.put("/:id", handleCustomLocation, async (req, res) => {
 	try {
 		const creator = await Creator.findByIdAndUpdate(
 			req.params.id,
@@ -120,10 +122,11 @@ router.put("/:id", async (req, res) => {
 		if (!creator) {
 			return res.status(404).json({ message: "Creator not found" });
 		}
+		console.log("✅ Creator updated successfully:", creator.name);
 		res.json(creator);
 	} catch (error) {
 		console.error("Error updating creator:", error);
-		res.status(500).json({ message: "Failed to update creator" });
+		res.status(500).json({ message: "Failed to update creator", error: error.message });
 	}
 });
 
