@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Creator = require("../models/Creator");
+const { handleCustomLocation } = require("../middleware/locationMiddleware");
 
 // Get all creators (for admin - includes unapproved)
 router.get("/admin/all", async (req, res) => {
@@ -97,8 +98,8 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
-// Create new creator (will be unapproved by default)
-router.post("/", async (req, res) => {
+// Create new creator (will be unapproved by default) - with location handling
+router.post("/", handleCustomLocation, async (req, res) => {
 	try {
 		const creator = new Creator(req.body);
 		const savedCreator = await creator.save();
@@ -109,8 +110,8 @@ router.post("/", async (req, res) => {
 	}
 });
 
-// Update creator
-router.put("/:id", async (req, res) => {
+// Update creator - with location handling
+router.put("/:id", handleCustomLocation, async (req, res) => {
 	try {
 		const creator = await Creator.findByIdAndUpdate(
 			req.params.id,
