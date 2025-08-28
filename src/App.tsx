@@ -8,7 +8,7 @@ import NotFound from "./pages/NotFound";
 import { Toaster } from "./components/ui/toaster";
 import { initGA } from "./utils/analytics";
 import "./App.css";
-import AB from "./components/AB";
+import CreatorEliteForm from "./components/CreatorForm";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -36,7 +36,7 @@ function App() {
 						<Route path="/admin-access" element={<AdminRoute />} />
 						<Route path="/admin" element={<Admin />} />
 						<Route path="*" element={<NotFound />} />
-						<Route path="/ass" element={<AB />} />
+						<Route path="/Form" element={<CreatorEliteForm />} />
 					</Routes>
 					<Toaster />
 				</div>
