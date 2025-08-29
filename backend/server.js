@@ -1,3 +1,4 @@
+
 require("dotenv").config({ path: "./.env" });
 
 const express = require("express");
@@ -23,7 +24,7 @@ const corsOptions = {
 			callback(new Error("Not allowed by CORS"));
 		}
 	},
-	methods: ["GET", "POST", "PUT", "DELETE"],
+	methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 	allowedHeaders: ["Content-Type", "Authorization"],
 	credentials: true,
 	optionsSuccessStatus: 200,
