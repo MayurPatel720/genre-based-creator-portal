@@ -70,7 +70,7 @@ router.patch("/:id/reject", async (req, res) => {
 	}
 });
 
-// Get all approved creators (for public website)
+// Get all approved creators (for public website) - sorted by name ascending
 router.get("/", async (req, res) => {
 	try {
 		const { genre } = req.query;
@@ -80,7 +80,7 @@ router.get("/", async (req, res) => {
 			query.genre = genre;
 		}
 		
-		const creators = await Creator.find(query).sort({ createdAt: -1 });
+		const creators = await Creator.find(query).sort({ name: 1 });
 		console.log(`Found ${creators.length} approved creators${genre ? ` for genre: ${genre}` : ''}`);
 		
 		// Log the query being used for debugging
