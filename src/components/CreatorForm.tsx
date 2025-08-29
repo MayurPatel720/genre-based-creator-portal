@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { creatorAPI } from "@/services/api";
 import React, { useMemo, useState, ChangeEvent, FormEvent } from "react";
 
 // Type definitions
@@ -181,10 +183,52 @@ export default function CreatorForm(): JSX.Element {
 		return Math.round((filledFields / totalFields) * 100);
 	}, [form]);
 
-	const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
 		e.preventDefault();
-		console.log("Creator Profile Payload:", form);
-		alert("Creator profile saved successfully! Check console for data.");
+
+		// Allowed platforms for API
+		const allowedPlatforms = [
+			"Other",
+			"Instagram",
+			"YouTube",
+			"TikTok",
+			"Twitter",
+		] as const;
+		const platformValue = allowedPlatforms.includes(form.platform as any)
+			? (form.platform as (typeof allowedPlatforms)[number])
+			: "Other";
+
+		// Transform flat form → API payload
+		const payload = {
+			name: form.name,
+			genre: form.genre,
+			avatar: form.avatar,
+			platform: platformValue,
+			socialLink: form.socialLink,
+			location: form.location || "Other",
+			phoneNumber: form.phone,
+			mediaKit: form.mediaKit,
+			details: {
+				location: form.location || "Other",
+				bio: form.bio,
+				analytics: {
+					followers: Number(form.followers) || 0,
+					totalViews: Number(form.totalViews) || 0,
+					averageViews: Number(form.avgViews) || 0,
+				},
+				reels: [], // if you don’t collect reels now, send empty
+			},
+		};
+
+		try {
+			const res = await creatorAPI.create(payload);
+			console.log("✅ Creator created:", res);
+			alert("Creator profile saved successfully!");
+			handleReset(); // clear form
+		} catch (err) {
+			console.error("❌ Error creating creator:", err);
+			alert("Failed to save creator profile.");
+		}
 	};
 
 	const handleReset = (): void => {
