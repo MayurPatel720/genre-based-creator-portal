@@ -8,6 +8,7 @@ const { handleCustomLocation } = require("../middleware/locationMiddleware");
 router.get("/admin/all", async (req, res) => {
 	try {
 		const creators = await Creator.find().sort({ createdAt: -1 });
+		console.log(`Found ${creators.length} total creators for admin`);
 		res.json(creators);
 	} catch (error) {
 		console.error("Error fetching all creators:", error);
@@ -19,6 +20,7 @@ router.get("/admin/all", async (req, res) => {
 router.get("/pending", async (req, res) => {
 	try {
 		const creators = await Creator.find({ isApproved: false }).sort({ createdAt: -1 });
+		console.log(`Found ${creators.length} pending creators`);
 		res.json(creators);
 	} catch (error) {
 		console.error("Error fetching pending creators:", error);
@@ -39,6 +41,7 @@ router.patch("/:id/approve", async (req, res) => {
 			return res.status(404).json({ message: "Creator not found" });
 		}
 		
+		console.log(`✅ Creator approved: ${creator.name}`);
 		res.json(creator);
 	} catch (error) {
 		console.error("Error approving creator:", error);
@@ -59,6 +62,7 @@ router.patch("/:id/reject", async (req, res) => {
 			return res.status(404).json({ message: "Creator not found" });
 		}
 		
+		console.log(`❌ Creator rejected: ${creator.name}`);
 		res.json(creator);
 	} catch (error) {
 		console.error("Error rejecting creator:", error);
@@ -77,6 +81,11 @@ router.get("/", async (req, res) => {
 		}
 		
 		const creators = await Creator.find(query).sort({ createdAt: -1 });
+		console.log(`Found ${creators.length} approved creators${genre ? ` for genre: ${genre}` : ''}`);
+		
+		// Log the query being used for debugging
+		console.log('Query used:', JSON.stringify(query));
+		
 		res.json(creators);
 	} catch (error) {
 		console.error("Error fetching creators:", error);
@@ -137,6 +146,7 @@ router.delete("/:id", async (req, res) => {
 		if (!creator) {
 			return res.status(404).json({ message: "Creator not found" });
 		}
+		console.log("🗑️ Creator deleted successfully:", creator.name);
 		res.json({ message: "Creator deleted successfully" });
 	} catch (error) {
 		console.error("Error deleting creator:", error);

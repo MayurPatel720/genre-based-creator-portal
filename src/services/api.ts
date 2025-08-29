@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import { Creator } from "../types/Creator";
 
@@ -24,7 +25,10 @@ api.interceptors.request.use((config) => {
 
 // Add response interceptor for better error handling
 api.interceptors.response.use(
-	(response) => response,
+	(response) => {
+		console.log("API Response received:", response.data?.length || 'N/A', 'items');
+		return response;
+	},
 	(error) => {
 		console.error("API Error:", error);
 		if (error.code === "ERR_NETWORK") {
@@ -65,30 +69,38 @@ export type UpdateCreatorData = Partial<CreateCreatorData>;
 export const creatorAPI = {
 	// Get all creators (public - only approved)
 	getAll: async (): Promise<Creator[]> => {
+		console.log("Fetching all approved creators...");
 		const response = await api.get("/creators");
+		console.log("Received creators:", response.data);
 		return response.data;
 	},
 
 	// Get all creators for admin (includes unapproved)
 	getAllForAdmin: async (): Promise<Creator[]> => {
+		console.log("Fetching all creators for admin...");
 		const response = await api.get("/creators/admin/all");
+		console.log("Received admin creators:", response.data);
 		return response.data;
 	},
 
 	// Get pending creators
 	getPending: async (): Promise<Creator[]> => {
+		console.log("Fetching pending creators...");
 		const response = await api.get("/creators/pending");
+		console.log("Received pending creators:", response.data);
 		return response.data;
 	},
 
 	// Approve creator
 	approve: async (id: string): Promise<Creator> => {
+		console.log("Approving creator:", id);
 		const response = await api.patch(`/creators/${id}/approve`);
 		return response.data;
 	},
 
 	// Reject creator
 	reject: async (id: string): Promise<Creator> => {
+		console.log("Rejecting creator:", id);
 		const response = await api.patch(`/creators/${id}/reject`);
 		return response.data;
 	},
@@ -121,6 +133,7 @@ export const creatorAPI = {
 				reels: data.details.reels,
 			},
 		};
+		console.log("Creating creator:", creatorData);
 		const response = await api.post("/creators", creatorData);
 		return response.data;
 	},
@@ -178,7 +191,9 @@ export const creatorAPI = {
 
 	// Get creators by genre
 	getByGenre: async (genre: string): Promise<Creator[]> => {
+		console.log("Fetching creators by genre:", genre);
 		const response = await api.get(`/creators?genre=${genre}`);
+		console.log("Received genre creators:", response.data);
 		return response.data;
 	},
 
