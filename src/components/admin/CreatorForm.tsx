@@ -1,6 +1,8 @@
 
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -12,206 +14,291 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../ui/select";
-import { toast } from "sonner";
-import { API_BASE_URL } from "../../services/api";
-import LocationInput from "./LocationInput";
+import { useCreators } from "../../hooks/useCreators";
+import { useToast } from "../../hooks/use-toast";
+import { Creator } from "../../types/Creator";
 
 interface CreatorFormProps {
+	creator?: Creator | null;
 	onSuccess: () => void;
 	onCancel: () => void;
 }
 
-interface CreatorFormData {
-	name: string;
-	genre: string;
-	avatar: string;
-	platform: string;
-	socialLink: string;
-	location: string;
-	phoneNumber: string;
-	mediaKit: string;
-	details: {
-		bio: string;
-		analytics: {
-			followers: number;
-			totalViews: number;
-			averageViews: number;
-		};
-		reels: string[];
-	};
-}
+const creatorSchema = z.object({
+	name: z.string().min(1, "Name is required"),
+	genre: z.string().min(1, "Genre is required"),
+	avatar: z.string().url("Avatar must be a valid URL"),
+	platform: z.enum(["Instagram", "YouTube", "TikTok", "Twitter", "Other"]),
+	socialLink: z.string().url("Social link must be a valid URL"),
+	location: z.string().min(1, "Location is required"),
+	phoneNumber: z.string().optional(),
+	mediaKit: z.string().optional(),
+	bio: z.string().min(1, "Bio is required"),
+	followers: z.coerce.number().min(0, "Followers must be a positive number"),
+	totalViews: z.coerce.number().min(0, "Total views must be a positive number"),
+	averageViews: z.coerce.number().optional(),
+});
 
-const CreatorForm: React.FC<CreatorFormProps> = ({ onSuccess, onCancel }) => {
-	const queryClient = useQueryClient();
-	
-	const [formData, setFormData] = useState<CreatorFormData>({
-		name: "",
-		genre: "",
-		avatar: "",
-		platform: "Instagram",
-		socialLink: "",
-		location: "",
-		phoneNumber: "",
-		mediaKit: "",
-		details: {
+type CreatorFormData = z.infer<typeof creatorSchema>;
+
+const predefinedGenres = [
+	"Fashion",
+	"Beauty",
+	"Travel",
+	"Food",
+	"Fitness",
+	"Technology",
+	"Gaming",
+	"Lifestyle",
+	"Comedy",
+	"Education",
+	"Music",
+	"Dance",
+	"Art",
+	"Business",
+	"Health",
+];
+
+const predefinedLocations = [
+	"Mumbai",
+	"Delhi",
+	"Bangalore",
+	"Chennai",
+	"Kolkata",
+	"Hyderabad",
+	"Pune",
+	"Ahmedabad",
+	"Jaipur",
+	"Surat",
+];
+
+const CreatorForm: React.FC<CreatorFormProps> = ({
+	creator,
+	onSuccess,
+	onCancel,
+}) => {
+	const [customGenre, setCustomGenre] = useState("");
+	const [customLocation, setCustomLocation] = useState("");
+	const [showCustomGenre, setShowCustomGenre] = useState(false);
+	const [showCustomLocation, setShowCustomLocation] = useState(false);
+
+	const { createCreator, updateCreator, loading } = useCreators();
+	const { toast } = useToast();
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		setValue,
+		watch,
+		reset,
+	} = useForm<CreatorFormData>({
+		resolver: zodResolver(creatorSchema),
+		defaultValues: {
+			name: "",
+			genre: "",
+			avatar: "",
+			platform: "Instagram",
+			socialLink: "",
+			location: "",
+			phoneNumber: "",
+			mediaKit: "",
 			bio: "",
-			analytics: {
-				followers: 0,
-				totalViews: 0,
-				averageViews: 0,
-			},
-			reels: [],
+			followers: 0,
+			totalViews: 0,
+			averageViews: 0,
 		},
 	});
 
-	const [errors, setErrors] = useState<Record<string, string>>({});
+	const selectedGenre = watch("genre");
+	const selectedLocation = watch("location");
 
-	// Fetch distinct genres from existing creators
-	const { data: genres = [] } = useQuery({
-		queryKey: ["distinct-genres"],
-		queryFn: async () => {
-			const response = await fetch(`${API_BASE_URL}/creators`);
-			if (!response.ok) throw new Error("Failed to fetch creators");
-			const creators = await response.json();
-			const uniqueGenres = [...new Set(creators.map((creator: any) => creator.genre))];
-			return uniqueGenres.filter(Boolean).sort();
-		},
-	});
+	useEffect(() => {
+		if (creator) {
+			const formData = {
+				name: creator.name,
+				genre: creator.genre,
+				avatar: creator.avatar,
+				platform: creator.platform as "Instagram" | "YouTube" | "TikTok" | "Twitter" | "Other",
+				socialLink: creator.socialLink,
+				location: creator.location || creator.details.location,
+				phoneNumber: creator.phoneNumber || "",
+				mediaKit: creator.mediaKit || "",
+				bio: creator.details.bio,
+				followers: creator.details.analytics.followers,
+				totalViews: creator.details.analytics.totalViews,
+				averageViews: creator.details.analytics.averageViews || 0,
+			};
+			
+			reset(formData);
 
-	// Create creator mutation
-	const createCreatorMutation = useMutation({
-		mutationFn: async (data: CreatorFormData) => {
-			const response = await fetch(`${API_BASE_URL}/creators`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(data),
-			});
-			if (!response.ok) {
-				throw new Error("Failed to create creator");
+			// Check if genre is custom
+			if (!predefinedGenres.includes(creator.genre)) {
+				setShowCustomGenre(true);
+				setCustomGenre(creator.genre);
 			}
-			return response.json();
-		},
-		onSuccess: () => {
-			toast.success("Creator created successfully!");
-			queryClient.invalidateQueries({ queryKey: ["creators"] });
-			queryClient.invalidateQueries({ queryKey: ["creators-admin"] });
-			onSuccess();
-		},
-		onError: (error: Error) => {
-			toast.error(`Failed to create creator: ${error.message}`);
-		},
-	});
 
-	const handleInputChange = (field: string, value: any) => {
-		if (field.includes(".")) {
-			const [parent, child, grandchild] = field.split(".");
-			setFormData((prev) => ({
-				...prev,
-				[parent]: {
-					...prev[parent as keyof CreatorFormData],
-					[child]: grandchild 
-						? {
-							...(prev[parent as keyof CreatorFormData] as any)[child],
-							[grandchild]: value,
-						}
-						: value,
+			// Check if location is custom
+			const location = creator.location || creator.details.location;
+			if (!predefinedLocations.includes(location)) {
+				setShowCustomLocation(true);
+				setCustomLocation(location);
+			}
+		}
+	}, [creator, reset]);
+
+	const onSubmit = async (data: CreatorFormData) => {
+		try {
+			const finalGenre = showCustomGenre ? customGenre : data.genre;
+			const finalLocation = showCustomLocation ? customLocation : data.location;
+
+			const creatorData = {
+				name: data.name,
+				genre: finalGenre,
+				avatar: data.avatar,
+				platform: data.platform,
+				socialLink: data.socialLink,
+				location: finalLocation,
+				phoneNumber: data.phoneNumber,
+				mediaKit: data.mediaKit,
+				details: {
+					bio: data.bio,
+					location: finalLocation,
+					analytics: {
+						followers: data.followers,
+						totalViews: data.totalViews,
+						averageViews: data.averageViews,
+					},
+					reels: [],
 				},
-			}));
+			};
+
+			if (creator && creator._id) {
+				await updateCreator(creator._id, creatorData);
+				toast({
+					title: "Success!",
+					description: "Creator updated successfully.",
+				});
+			} else {
+				await createCreator(creatorData);
+				toast({
+					title: "Success!",
+					description: "Creator created successfully.",
+				});
+			}
+
+			onSuccess();
+		} catch (error) {
+			console.error("Error saving creator:", error);
+			toast({
+				title: "Error",
+				description: "Failed to save creator. Please try again.",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const handleGenreChange = (value: string) => {
+		if (value === "custom") {
+			setShowCustomGenre(true);
+			setValue("genre", "");
 		} else {
-			setFormData((prev) => ({ ...prev, [field]: value }));
-		}
-		
-		// Clear error when user starts typing
-		if (errors[field]) {
-			setErrors((prev) => ({ ...prev, [field]: "" }));
+			setShowCustomGenre(false);
+			setValue("genre", value);
 		}
 	};
 
-	const validateForm = (): boolean => {
-		const newErrors: Record<string, string> = {};
-
-		if (!formData.name.trim()) newErrors.name = "Name is required";
-		if (!formData.genre.trim()) newErrors.genre = "Genre is required";
-		if (!formData.avatar.trim()) newErrors.avatar = "Avatar URL is required";
-		if (!formData.socialLink.trim()) newErrors.socialLink = "Social link is required";
-		if (!formData.location.trim()) newErrors.location = "Location is required";
-		if (!formData.details.bio.trim()) newErrors["details.bio"] = "Bio is required";
-		if (formData.details.analytics.followers < 0) newErrors["details.analytics.followers"] = "Followers must be positive";
-		if (formData.details.analytics.totalViews < 0) newErrors["details.analytics.totalViews"] = "Total views must be positive";
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		
-		if (!validateForm()) {
-			toast.error("Please fix the form errors");
-			return;
+	const handleLocationChange = (value: string) => {
+		if (value === "custom") {
+			setShowCustomLocation(true);
+			setValue("location", "");
+		} else {
+			setShowCustomLocation(false);
+			setValue("location", value);
 		}
-
-		createCreatorMutation.mutate(formData);
 	};
 
 	return (
-		<div className="space-y-6">
-			<form onSubmit={handleSubmit} className="space-y-4">
-				<div className="grid grid-cols-2 gap-4">
-					<div>
+		<div className="p-6">
+			<h2 className="text-2xl font-bold mb-6">
+				{creator ? "Edit Creator" : "Add New Creator"}
+			</h2>
+
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="space-y-2">
 						<Label htmlFor="name">Name *</Label>
 						<Input
 							id="name"
-							value={formData.name}
-							onChange={(e) => handleInputChange("name", e.target.value)}
-							className={errors.name ? "border-red-500" : ""}
+							{...register("name")}
+							placeholder="Creator name"
 						/>
-						{errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+						{errors.name && (
+							<p className="text-sm text-red-600">{errors.name.message}</p>
+						)}
 					</div>
 
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="genre">Genre *</Label>
-						<Select
-							value={formData.genre}
-							onValueChange={(value) => handleInputChange("genre", value)}
-						>
-							<SelectTrigger className={errors.genre ? "border-red-500" : ""}>
-								<SelectValue placeholder="Select or enter genre" />
-							</SelectTrigger>
-							<SelectContent>
-								{genres.map((genre: string) => (
-									<SelectItem key={genre} value={genre}>
-										{genre}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						{errors.genre && <p className="text-red-500 text-xs mt-1">{errors.genre}</p>}
+						{showCustomGenre ? (
+							<div className="flex gap-2">
+								<Input
+									value={customGenre}
+									onChange={(e) => {
+										setCustomGenre(e.target.value);
+										setValue("genre", e.target.value);
+									}}
+									placeholder="Enter custom genre"
+								/>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={() => {
+										setShowCustomGenre(false);
+										setCustomGenre("");
+										setValue("genre", "");
+									}}
+								>
+									Cancel
+								</Button>
+							</div>
+						) : (
+							<Select value={selectedGenre} onValueChange={handleGenreChange}>
+								<SelectTrigger>
+									<SelectValue placeholder="Select genre" />
+								</SelectTrigger>
+								<SelectContent>
+									{predefinedGenres.map((genre) => (
+										<SelectItem key={genre} value={genre}>
+											{genre}
+										</SelectItem>
+									))}
+									<SelectItem value="custom">Other (Custom)</SelectItem>
+								</SelectContent>
+							</Select>
+						)}
+						{errors.genre && (
+							<p className="text-sm text-red-600">{errors.genre.message}</p>
+						)}
 					</div>
-				</div>
 
-				<div>
-					<Label htmlFor="avatar">Avatar URL *</Label>
-					<Input
-						id="avatar"
-						value={formData.avatar}
-						onChange={(e) => handleInputChange("avatar", e.target.value)}
-						className={errors.avatar ? "border-red-500" : ""}
-					/>
-					{errors.avatar && <p className="text-red-500 text-xs mt-1">{errors.avatar}</p>}
-				</div>
+					<div className="space-y-2">
+						<Label htmlFor="avatar">Avatar URL *</Label>
+						<Input
+							id="avatar"
+							{...register("avatar")}
+							placeholder="https://example.com/avatar.jpg"
+						/>
+						{errors.avatar && (
+							<p className="text-sm text-red-600">{errors.avatar.message}</p>
+						)}
+					</div>
 
-				<div className="grid grid-cols-2 gap-4">
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="platform">Platform *</Label>
-						<Select
-							value={formData.platform}
-							onValueChange={(value) => handleInputChange("platform", value)}
-						>
+						<Select onValueChange={(value) => setValue("platform", value as any)}>
 							<SelectTrigger>
-								<SelectValue />
+								<SelectValue placeholder="Select platform" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="Instagram">Instagram</SelectItem>
@@ -223,98 +310,136 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ onSuccess, onCancel }) => {
 						</Select>
 					</div>
 
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="socialLink">Social Link *</Label>
 						<Input
 							id="socialLink"
-							value={formData.socialLink}
-							onChange={(e) => handleInputChange("socialLink", e.target.value)}
-							className={errors.socialLink ? "border-red-500" : ""}
+							{...register("socialLink")}
+							placeholder="https://instagram.com/username"
 						/>
-						{errors.socialLink && <p className="text-red-500 text-xs mt-1">{errors.socialLink}</p>}
+						{errors.socialLink && (
+							<p className="text-sm text-red-600">{errors.socialLink.message}</p>
+						)}
 					</div>
-				</div>
 
-				<LocationInput
-					value={formData.location}
-					onChange={(value) => handleInputChange("location", value)}
-					error={errors.location}
-				/>
+					<div className="space-y-2">
+						<Label htmlFor="location">Location *</Label>
+						{showCustomLocation ? (
+							<div className="flex gap-2">
+								<Input
+									value={customLocation}
+									onChange={(e) => {
+										setCustomLocation(e.target.value);
+										setValue("location", e.target.value);
+									}}
+									placeholder="Enter custom location"
+								/>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={() => {
+										setShowCustomLocation(false);
+										setCustomLocation("");
+										setValue("location", "");
+									}}
+								>
+									Cancel
+								</Button>
+							</div>
+						) : (
+							<Select value={selectedLocation} onValueChange={handleLocationChange}>
+								<SelectTrigger>
+									<SelectValue placeholder="Select location" />
+								</SelectTrigger>
+								<SelectContent>
+									{predefinedLocations.map((location) => (
+										<SelectItem key={location} value={location}>
+											{location}
+										</SelectItem>
+									))}
+									<SelectItem value="custom">Other (Custom)</SelectItem>
+								</SelectContent>
+							</Select>
+						)}
+						{errors.location && (
+							<p className="text-sm text-red-600">{errors.location.message}</p>
+						)}
+					</div>
 
-				<div className="grid grid-cols-2 gap-4">
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="phoneNumber">Phone Number</Label>
 						<Input
 							id="phoneNumber"
-							value={formData.phoneNumber}
-							onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+							{...register("phoneNumber")}
+							placeholder="+91 9876543210"
 						/>
 					</div>
 
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="mediaKit">Media Kit URL</Label>
 						<Input
 							id="mediaKit"
-							value={formData.mediaKit}
-							onChange={(e) => handleInputChange("mediaKit", e.target.value)}
+							{...register("mediaKit")}
+							placeholder="https://example.com/mediakit.pdf"
 						/>
 					</div>
-				</div>
 
-				<div>
-					<Label htmlFor="bio">Bio *</Label>
-					<Textarea
-						id="bio"
-						value={formData.details.bio}
-						onChange={(e) => handleInputChange("details.bio", e.target.value)}
-						className={errors["details.bio"] ? "border-red-500" : ""}
-						rows={3}
-					/>
-					{errors["details.bio"] && <p className="text-red-500 text-xs mt-1">{errors["details.bio"]}</p>}
-				</div>
-
-				<div className="grid grid-cols-3 gap-4">
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="followers">Followers *</Label>
 						<Input
 							id="followers"
 							type="number"
-							value={formData.details.analytics.followers}
-							onChange={(e) => handleInputChange("details.analytics.followers", parseInt(e.target.value) || 0)}
-							className={errors["details.analytics.followers"] ? "border-red-500" : ""}
+							{...register("followers")}
+							placeholder="10000"
 						/>
-						{errors["details.analytics.followers"] && <p className="text-red-500 text-xs mt-1">{errors["details.analytics.followers"]}</p>}
+						{errors.followers && (
+							<p className="text-sm text-red-600">{errors.followers.message}</p>
+						)}
 					</div>
 
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="totalViews">Total Views *</Label>
 						<Input
 							id="totalViews"
 							type="number"
-							value={formData.details.analytics.totalViews}
-							onChange={(e) => handleInputChange("details.analytics.totalViews", parseInt(e.target.value) || 0)}
-							className={errors["details.analytics.totalViews"] ? "border-red-500" : ""}
+							{...register("totalViews")}
+							placeholder="1000000"
 						/>
-						{errors["details.analytics.totalViews"] && <p className="text-red-500 text-xs mt-1">{errors["details.analytics.totalViews"]}</p>}
+						{errors.totalViews && (
+							<p className="text-sm text-red-600">{errors.totalViews.message}</p>
+						)}
 					</div>
 
-					<div>
+					<div className="space-y-2">
 						<Label htmlFor="averageViews">Average Views</Label>
 						<Input
 							id="averageViews"
 							type="number"
-							value={formData.details.analytics.averageViews}
-							onChange={(e) => handleInputChange("details.analytics.averageViews", parseInt(e.target.value) || 0)}
+							{...register("averageViews")}
+							placeholder="50000"
 						/>
 					</div>
 				</div>
 
-				<div className="flex justify-end space-x-2 pt-4">
+				<div className="space-y-2">
+					<Label htmlFor="bio">Bio *</Label>
+					<Textarea
+						id="bio"
+						{...register("bio")}
+						placeholder="Tell us about yourself..."
+						rows={4}
+					/>
+					{errors.bio && (
+						<p className="text-sm text-red-600">{errors.bio.message}</p>
+					)}
+				</div>
+
+				<div className="flex gap-4">
+					<Button type="submit" disabled={loading}>
+						{loading ? "Saving..." : creator ? "Update Creator" : "Create Creator"}
+					</Button>
 					<Button type="button" variant="outline" onClick={onCancel}>
 						Cancel
-					</Button>
-					<Button type="submit" disabled={createCreatorMutation.isPending}>
-						{createCreatorMutation.isPending ? "Creating..." : "Create Creator"}
 					</Button>
 				</div>
 			</form>
